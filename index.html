@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 
@@ -103,20 +103,25 @@
             <div id="playerContainer"></div>
             
             <div class="rating-inside">
-                <h4>De 1 a 5, o quanto você avalia este filme?</h4>
-                <div class="stars-wrapper">
-                    <input id="star5" name="rating" type="radio" value="5"><label for="star5">★</label>
-                    <input id="star4" name="rating" type="radio" value="4"><label for="star4">★</label>
-                    <input id="star3" name="rating" type="radio" value="3"><label for="star3">★</label>
-                    <input id="star2" name="rating" type="radio" value="2"><label for="star2">★</label>
-                    <input id="star1" name="rating" type="radio" value="1"><label for="star1">★</label>
+                <h4 id="ratingTitle">O que achou deste título?</h4>
+                <div class="rating-container">
+                    <div class="stars-wrapper">
+                        <input id="star5" name="rating" type="radio" value="5"><label for="star5">★</label>
+                        <input id="star4" name="rating" type="radio" value="4"><label for="star4">★</label>
+                        <input id="star3" name="rating" type="radio" value="3"><label for="star3">★</label>
+                        <input id="star2" name="rating" type="radio" value="2"><label for="star2">★</label>
+                        <input id="star1" name="rating" type="radio" value="1"><label for="star1">★</label>
+                    </div>
+                    <div class="stars-numbers">
+                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                    </div>
                 </div>
                 <p id="ratingMsg"></p>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=8"></script>
+    <script src="script.js?v=10"></script>
 
     <script type='module'>
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -136,7 +141,6 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // ATUALIZA VIEWS NAS CAPAS
         onValue(ref(database, 'views'), (s) => {
             const d = s.val() || {};
             document.querySelectorAll('.view-count').forEach(el => {
@@ -148,7 +152,6 @@
             });
         });
 
-        // ATUALIZA MÉDIA DE ESTRELAS NAS CAPAS
         onValue(ref(database, 'ratings'), (s) => {
             const d = s.val() || {};
             document.querySelectorAll('.star-count').forEach(el => {
@@ -162,10 +165,8 @@
             });
         });
 
-        // FUNÇÃO PARA SOMAR VIEW
         window.adicionarViewNoFirebase = (id) => runTransaction(ref(database, 'views/' + id), (v) => (v || 0) + 1);
 
-        // LOGICA DE VOTAR (1 A 5)
         document.querySelectorAll('input[name="rating"]').forEach(star => {
             star.addEventListener('change', function() {
                 const points = parseInt(this.value);
@@ -181,7 +182,7 @@
                     current.count += 1;
                     return current;
                 }).then(() => { 
-                    msg.innerText = "⭐ Obrigado por avaliar!"; 
+                    msg.innerText = "⭐ Nota " + points + " enviada! Obrigado."; 
                     document.querySelectorAll('input[name="rating"]').forEach(s => s.disabled = true); 
                 });
             });
