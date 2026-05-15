@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -81,17 +81,19 @@
         <section id="series" class="catalog-section">
             <h2>Séries Populares</h2>
             <div class="grid-catalog">
-                <div class="card" onclick="abrirPlayerSerie('85552', '1', '1')">
-                    <img src="https://image.tmdb.org/t/p/w500/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg" alt="Euphoria">
-                    <h3>Euphoria</h3>
-                    <div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div>
-                </div>
-                <div class="card" onclick="abrirPlayerSerie('1396', '1', '1')">
-                    <img src="https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg" alt="Breaking Bad">
-                    <h3>Breaking Bad</h3>
-                    <div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div>
-                </div>
+                <div class="card" onclick="abrirPlayerSerie('85552', '1', '1')"><img src="https://image.tmdb.org/t/p/w500/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg" alt="Euphoria"><h3>Euphoria</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('1396', '1', '1')"><img src="https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg" alt="Breaking Bad"><h3>Breaking Bad</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
             </div>
+        </section>
+
+        <section id="contato" class="contact-section">
+            <h2>Contato</h2>
+            <p>Dúvidas ou sugestões?</p>
+            <form>
+                <input type="email" placeholder="Seu E-mail">
+                <textarea placeholder="Sua Mensagem"></textarea>
+                <button type="button" class="btn-primary">Enviar</button>
+            </form>
         </section>
     </main>
 
@@ -101,7 +103,7 @@
             <div id="playerContainer"></div>
             
             <div class="rating-inside">
-                <h4>O que achou deste título?</h4>
+                <h4>De 1 a 5, o quanto você avalia este filme?</h4>
                 <div class="stars-wrapper">
                     <input id="star5" name="rating" type="radio" value="5"><label for="star5">★</label>
                     <input id="star4" name="rating" type="radio" value="4"><label for="star4">★</label>
@@ -114,7 +116,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=8"></script>
 
     <script type='module'>
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -134,62 +136,52 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // ATUALIZA VIEWS NAS CAPAS
         onValue(ref(database, 'views'), (s) => {
             const d = s.val() || {};
             document.querySelectorAll('.view-count').forEach(el => {
                 const card = el.closest('.card');
                 if(card) {
-                    const rawClick = card.getAttribute('onclick');
-                    if(rawClick) {
-                        const idMatch = rawClick.match(/'([^']+)'/);
-                        if(idMatch) {
-                            const path = idMatch[1];
-                            el.innerText = d[path] || 0;
-                        }
-                    }
+                    const id = card.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    el.innerText = d[id] || 0;
                 }
             });
         });
 
-        document.querySelectorAll('.star-count').forEach(el => {
-            const card = el.closest('.card');
-            if(card) {
-                const rawClick = card.getAttribute('onclick');
-                if(rawClick) {
-                    const idMatch = rawClick.match(/'([^']+)'/);
-                    if(idMatch) {
-                        const path = idMatch[1];
-                        onValue(ref(database, 'ratings/' + path), (s) => {
-                            const data = s.val() || { totalPoints: 0, count: 0 };
-                            const avg = data.count > 0 ? (data.totalPoints / data.count).toFixed(1) : "0.0";
-                            el.innerHTML = avg; 
-                        });
-                    }
+        // ATUALIZA MÉDIA DE ESTRELAS NAS CAPAS
+        onValue(ref(database, 'ratings'), (s) => {
+            const d = s.val() || {};
+            document.querySelectorAll('.star-count').forEach(el => {
+                const card = el.closest('.card');
+                if(card) {
+                    const id = card.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    const data = d[id] || { totalPoints: 0, count: 0 };
+                    const avg = data.count > 0 ? (data.totalPoints / data.count).toFixed(1) : "0.0";
+                    el.innerText = avg;
                 }
-            }
+            });
         });
 
-        window.adicionarViewNoFirebase = function(id) {
-             runTransaction(ref(database, 'views/' + id), (v) => (v || 0) + 1);
-        }
+        // FUNÇÃO PARA SOMAR VIEW
+        window.adicionarViewNoFirebase = (id) => runTransaction(ref(database, 'views/' + id), (v) => (v || 0) + 1);
 
-        // LÓGICA DE SALVAR AVALIAÇÃO
+        // LOGICA DE VOTAR (1 A 5)
         document.querySelectorAll('input[name="rating"]').forEach(star => {
             star.addEventListener('change', function() {
                 const points = parseInt(this.value);
                 const msg = document.getElementById('ratingMsg');
-                const pathId = window.filmeAbertoID; 
-                if(!pathId) return;
-
-                msg.innerText = "Salvando voto...";
+                const id = window.filmeAbertoID; 
                 
-                runTransaction(ref(database, 'ratings/' + pathId), (current) => {
+                if(!id) return;
+                msg.innerText = "Enviando nota...";
+                
+                runTransaction(ref(database, 'ratings/' + id), (current) => {
                     if (!current) current = { totalPoints: 0, count: 0 };
                     current.totalPoints += points; 
                     current.count += 1;
                     return current;
                 }).then(() => { 
-                    msg.innerText = "⭐ Avaliado com sucesso!"; 
+                    msg.innerText = "⭐ Obrigado por avaliar!"; 
                     document.querySelectorAll('input[name="rating"]').forEach(s => s.disabled = true); 
                 });
             });
