@@ -1,0 +1,264 @@
+/* =========================================
+   VARIÁVEIS DE CORES E CONFIGURAÇÕES GERAIS
+   ========================================= */
+:root {
+    /* Cores padrão (Dark Mode) solicitadas no prompt */
+    --bg-color: #040D12;
+    --text-color: #f3f3f3;
+    --accent-color: #C63C51;
+    --card-bg: rgba(255, 255, 255, 0.05);
+}
+
+/* Classe aplicada ao body quando o botão Light Mode é clicado */
+.light-mode {
+    --bg-color: #f3f3f3;
+    --text-color: #040D12;
+    --accent-color: #C63C51;
+    --card-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* Reset básico e tipografia */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Habilitando a rolagem suave (smooth scroll) para o menu */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300; /* Light */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, .logo {
+    font-weight: 700; /* Bold */
+}
+
+/* =========================================
+   CABEÇALHO E NAVEGAÇÃO
+   ========================================= */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background-color: rgba(4, 13, 18, 0.9); /* Fundo semi-transparente */
+    position: fixed; /* Fixa o menu no topo */
+    width: 100%;
+    z-index: 100; /* Garante que fique acima dos vídeos */
+}
+
+.logo {
+    font-size: 24px;
+    color: var(--accent-color);
+}
+
+.logo span {
+    color: var(--text-color);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--accent-color);
+}
+
+/* Botão de Tema */
+#themeToggle {
+    background: none;
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* =========================================
+   SEÇÕES E CATÁLOGO RESPONSIVO
+   ========================================= */
+section {
+    padding: 100px 50px 50px 50px; /* Padding superior alto para compensar o header fixo */
+    min-height: 100vh;
+}
+
+.hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(to bottom, rgba(4,13,18,0.3), var(--bg-color));
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+/* Grid para os filmes e séries adaptável a qualquer tela */
+.grid-catalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease; /* Animação suave ao passar o mouse */
+}
+
+.card:hover {
+    transform: scale(1.05); /* Efeito estilo Netflix ao focar no filme */
+}
+
+.card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.card h3 {
+    padding: 15px;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* Formulário de contato */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin-top: 20px;
+}
+
+form input, form textarea {
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* =========================================
+   TELA DE LOGIN E MODAL DE VÍDEO (Sobreposições)
+   ========================================= */
+.overlay, .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Fica acima de tudo */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.overlay.active, .modal.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.auth-box {
+    background-color: var(--bg-color);
+    padding: 40px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid var(--accent-color);
+}
+
+.auth-box input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.btn-primary, .btn-secondary, .btn-guest {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+}
+
+.btn-primary { background-color: var(--accent-color); color: white; }
+.btn-secondary { background-color: transparent; border: 1px solid var(--accent-color); color: var(--text-color); }
+.btn-guest { background-color: #555; color: white; margin-top: 20px; }
+
+/* Estrutura do Player de Vídeo */
+.modal-content {
+    width: 90%;
+    max-width: 900px;
+    background-color: #000;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+    z-index: 10;
+    background-color: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+/* =========================================
+   RESPONSIVIDADE (Celulares e Tablets)
+   ========================================= */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        padding: 15px;
+    }
+    nav ul {
+        margin-top: 15px;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    section {
+        padding: 150px 20px 50px 20px; /* Ajuste para o menu maior em telas pequenas */
+    }
+}
