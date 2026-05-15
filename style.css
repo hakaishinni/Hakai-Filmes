@@ -38,123 +38,72 @@ nav a:hover { color: var(--accent-color); }
 
 #themeToggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
-/* --- HERO SECTION --- */
+/* --- HERO & PESQUISA --- */
 .hero-section {
-    padding: 120px 5% 20px 5%;
+    padding: 100px 5% 20px 5%;
     text-align: center;
 }
-.hero-content h1 { font-size: 2.5rem; margin-bottom: 10px; }
+.hero-content h1 { font-size: 2.2rem; margin-bottom: 10px; }
 
-section { padding: 30px 5%; }
+.search-container {
+    position: relative;
+    max-width: 450px;
+    margin: 20px auto 0 auto;
+    width: 90%;
+}
+#searchInput {
+    width: 100%;
+    padding: 12px 45px 12px 20px;
+    border-radius: 25px;
+    border: 2px solid var(--accent-color);
+    background: var(--card-bg);
+    color: #fff;
+    outline: none;
+}
+.search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
+
+section { padding: 20px 5%; }
 h2 { margin-bottom: 20px; border-left: 4px solid var(--accent-color); padding-left: 10px; }
 
-/* --- GRID E CARDS --- */
 .grid-catalog {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 15px;
 }
 
-.card {
-    background-color: var(--card-bg); border-radius: 8px; overflow: hidden;
-    cursor: pointer; transition: 0.3s;
-}
-.card:hover { transform: translateY(-5px); }
+.card { background-color: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; cursor: pointer; }
 .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-.card h3 { padding: 10px 10px 5px 10px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card h3 { padding: 10px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* CONTADORES NAS CAPAS (VIEWS E MÉDIA) */
-.card-meta {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 10px 10px 10px;
-    font-size: 12px;
-    color: #888;
-}
+.card-meta { display: flex; justify-content: space-between; padding: 0 10px 10px 10px; font-size: 12px; color: #888; }
 .star-count { color: #ffcc00; font-weight: bold; }
 
-/* --- FORMULÁRIO DE CONTATO --- */
-form { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin-top: 20px; }
-form input, form textarea {
-    width: 100%; padding: 15px; border: none; border-radius: 5px;
-    background-color: var(--card-bg); color: var(--text-color); font-family: 'Poppins', sans-serif;
-}
-form textarea { resize: vertical; min-height: 100px; }
-
-/* --- MODAL E PLAYER --- */
+/* --- MODAL & AVALIAÇÃO --- */
 .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:2000; overflow-y: auto; }
 .modal.active { display: flex; }
 .modal-content { width: 95%; max-width: 800px; position: relative; margin: 20px 0; }
-.close-btn { position: absolute; top: -35px; right: 0; color: #fff; cursor: pointer; font-weight: bold; }
+.close-btn { position: absolute; top: -35px; right: 0; color: #fff; cursor: pointer; }
 
-/* --- SISTEMA DE AVALIAÇÃO (DENTRO DO MODAL) --- */
-.rating-inside {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    text-align: center;
-    border-radius: 0 0 10px 10px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.rating-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 10px 0;
-}
-
-.stars-wrapper {
-    display: flex;
-    flex-direction: row-reverse; /* Essencial para o efeito de pintura da esquerda p/ direita */
-    gap: 15px;
-}
-
+.rating-inside { background: rgba(255,255,255,0.05); padding: 15px; text-align: center; border-radius: 0 0 10px 10px; }
+.rating-container { display: flex; flex-direction: column; align-items: center; margin: 10px 0; }
+.stars-wrapper { display: flex; flex-direction: row-reverse; gap: 15px; }
 .stars-wrapper input { display: none; }
+.stars-wrapper label { font-size: 35px; color: #333; cursor: pointer; }
+.stars-wrapper input:checked ~ label, .stars-wrapper label:hover, .stars-wrapper label:hover ~ label { color: #ffcc00; }
 
-.stars-wrapper label {
-    font-size: 35px;
-    color: #333;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-/* Efeito de acender as estrelas */
-.stars-wrapper input:checked ~ label,
-.stars-wrapper label:hover,
-.stars-wrapper label:hover ~ label {
-    color: #ffcc00;
-    text-shadow: 0 0 10px #ffcc00;
-}
-
-/* Alinhamento dos números 1 a 5 */
-.stars-numbers {
-    display: flex;
-    justify-content: center;
-    gap: 34px; 
-    margin-top: 5px;
-    color: #888;
-    font-size: 14px;
-    font-weight: bold;
-    width: 250px;
-}
-
+.stars-numbers { display: flex; justify-content: center; gap: 34px; margin-top: 5px; color: #888; font-size: 14px; width: 250px; }
 .stars-numbers span { width: 20px; text-align: center; }
 
 #ratingMsg { font-size: 14px; color: var(--accent-color); margin-top: 5px; font-weight: bold; }
 
-/* --- LOGIN E BOTÕES --- */
-.overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:3000; }
+.overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:3000; }
 .overlay.active { display: flex; }
 .auth-box { background: var(--bg-color); padding: 30px; border-radius: 10px; text-align: center; width: 90%; max-width: 350px; border: 1px solid var(--accent-color); }
-.auth-box input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; background: var(--card-bg); color: #fff; }
 
-.btn-primary { background: var(--accent-color); color: #fff; border: none; padding: 12px 20px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: 700; margin-top: 5px; }
-.btn-secondary { background: transparent; color: var(--text-color); border: 1px solid var(--accent-color); padding: 12px 20px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: 700; margin-top: 10px; }
-.btn-guest { background: #333; color: #fff; border: none; padding: 12px 20px; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+.btn-primary { background: var(--accent-color); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: 700; margin-top: 5px; }
+.btn-guest { background: #333; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 10px; }
 
-/* --- RESPONSIVIDADE --- */
 @media (max-width: 600px) {
     .grid-catalog { grid-template-columns: repeat(2, 1fr); }
-    .hero-content h1 { font-size: 1.8rem; }
-    header { padding: 10px 5%; }
+    .hero-content h1 { font-size: 1.6rem; }
 }
