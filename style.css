@@ -43,11 +43,14 @@ nav a:hover { color: var(--accent-color); }
     padding: 8px 15px; border-radius: 5px; cursor: pointer; font-family: 'Poppins', sans-serif;
 }
 
-section { padding: 100px 50px 50px 50px; min-height: 100vh; }
+/* === AJUSTE DO ESPAÇAMENTO FEITO AQUI === */
+section { padding: 40px 50px; } 
 
 .hero-section {
     display: flex; align-items: center; justify-content: center; text-align: center;
     background: linear-gradient(to bottom, rgba(4,13,18,0.3), var(--bg-color));
+    padding-top: 120px; /* Dá espaço para o menu não cobrir o texto */
+    padding-bottom: 10px; /* Deixa o texto bem perto dos filmes */
 }
 
 .hero-content h1 { font-size: 3rem; margin-bottom: 15px; }
@@ -56,7 +59,7 @@ section { padding: 100px 50px 50px 50px; min-height: 100vh; }
 .grid-catalog {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px; margin-top: 30px;
+    gap: 15px; margin-top: 20px;
 }
 
 .card {
@@ -109,7 +112,10 @@ form input, form textarea {
 @media (max-width: 768px) {
     header { flex-direction: column; padding: 15px; }
     nav ul { margin-top: 15px; gap: 10px; flex-wrap: wrap; justify-content: center; }
-    section { padding: 150px 15px 50px 15px; }
+    
+    /* AJUSTE DOS ESPAÇOS NO CELULAR AQUI */
+    .hero-section { padding-top: 140px; padding-bottom: 0px; }
+    section { padding: 20px 15px; }
     
     .grid-catalog { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .card h3 { font-size: 13px; padding: 10px; }
