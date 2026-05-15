@@ -20,7 +20,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     transition: background-color 0.3s ease;
-    overflow-x: hidden; /* Evita que a página inteira role pro lado sem querer */
+    overflow-x: hidden;
 }
 
 header {
@@ -28,6 +28,7 @@ header {
     padding: 10px 5%;
     background-color: rgba(4, 13, 18, 0.95);
     position: fixed; width: 100%; z-index: 100;
+    top: 0;
 }
 
 .logo { font-size: 24px; font-weight: 700; color: var(--accent-color); }
@@ -39,9 +40,16 @@ nav a:hover { color: var(--accent-color); }
 
 #themeToggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px; border-radius: 5px; cursor: pointer; font-size: 12px; }
 
+/* ========================================================
+   CORREÇÃO DO CORTE: O padding principal vai no MAIN agora 
+   ======================================================== */
+main {
+    padding-top: 90px; /* Compensa o tamanho do menu no PC */
+}
+
 /* HERO & PESQUISA */
 .hero-section {
-    padding: 100px 5% 20px 5%;
+    padding: 0 5% 20px 5%; /* Tirei o espaço gigante que ficava aqui */
     text-align: center;
 }
 .hero-content h1 { font-size: 1.8rem; margin-bottom: 5px; }
@@ -66,23 +74,18 @@ nav a:hover { color: var(--accent-color); }
 section { padding: 20px 5% 30px 5%; } 
 h2 { margin-bottom: 15px; border-left: 4px solid var(--accent-color); padding-left: 10px; font-size: 1.3rem; }
 
-/* ==========================================
-   A MÁGICA DO CARROSSEL ESTILO NETFLIX
-   ========================================== */
+/* CARROSSEL STYLE NETFLIX */
 .grid-catalog {
-    display: flex; /* Coloca tudo em linha reta */
-    overflow-x: auto; /* Ativa a rolagem lateral */
+    display: flex;
+    overflow-x: auto;
     gap: 15px;
     padding-bottom: 15px;
-    scroll-snap-type: x mandatory; /* Faz o card "encaixar" certinho na tela ao soltar o dedo */
-    -webkit-overflow-scrolling: touch; /* Deixa o deslizar ultra suave em celulares */
-    
-    /* Esconde a barra de rolagem (fica mais limpo) */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none; 
     scrollbar-width: none; 
 }
 
-/* Esconde a barra no Chrome e Safari */
 .grid-catalog::-webkit-scrollbar {
     display: none;
 }
@@ -93,17 +96,15 @@ h2 { margin-bottom: 15px; border-left: 4px solid var(--accent-color); padding-le
     overflow: hidden; 
     cursor: pointer; 
     transition: transform 0.2s; 
-    
-    /* Largura fixa no PC para os cards não esmagarem */
     flex: 0 0 160px; 
-    scroll-snap-align: start; /* Onde o encaixe acontece */
+    scroll-snap-align: start;
 }
 
 .card:hover { transform: translateY(-3px); }
 .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
 .card h3 { padding: 8px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* VISUALIZAÇÕES */
+/* VISUALIZAÇÕES E AVALIAÇÕES */
 .card-meta { display: flex; justify-content: space-between; padding: 0 10px 10px 10px; font-size: 12px; color: #ddd; font-weight: 600; }
 .star-count { color: #ffcc00; font-weight: bold; }
 .view-count { color: #fff; } 
@@ -114,7 +115,7 @@ h2 { margin-bottom: 15px; border-left: 4px solid var(--accent-color); padding-le
 .contact-section textarea { height: 100px; resize: none; }
 #contactStatus { margin-top: 10px; font-size: 14px; color: var(--accent-color); text-align: center; font-weight: bold;}
 
-/* MODAL */
+/* MODAL / PLAYER */
 .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:2000; overflow-y: auto; }
 .modal.active { display: flex; }
 .modal-content { width: 95%; max-width: 800px; position: relative; margin: 20px 0;}
@@ -138,10 +139,10 @@ h2 { margin-bottom: 15px; border-left: 4px solid var(--accent-color); padding-le
 @media (max-width: 600px) {
     header { flex-direction: column; gap: 10px; padding: 15px 5%; }
     nav ul { gap: 10px; flex-wrap: wrap; justify-content: center; }
-    .hero-section { padding: 130px 5% 20px 5%; }
     
-    .card {
-        /* O truque psicológico do carrossel: Mostrar 42% faz caber 2 capas inteiras e 1 'pedacinho' da 3ª */
-        flex: 0 0 42%; 
-    }
+    /* COMPENSA O MENU DE CELULAR QUE É MAIS ALTO */
+    main { padding-top: 150px; }
+    .hero-section { padding: 0 5% 20px 5%; }
+    
+    .card { flex: 0 0 42%; }
 }
