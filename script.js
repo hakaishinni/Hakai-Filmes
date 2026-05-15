@@ -60,16 +60,26 @@ function toggleTheme() {
 const modal = document.getElementById('videoModal');
 const container = document.getElementById('playerContainer');
 
-// Função para abrir um filme (LINK CORRIGIDO PARA O ORIGINAL)
+// Função para abrir um filme
 function abrirPlayer(idFilme) {
     modal.classList.add('active'); 
     container.innerHTML = `<iframe src="https://myembed.biz/filme/${idFilme}" width="100%" height="500" frameborder="0" allowfullscreen></iframe>`;
+    
+    // INJETADO: SOMA +1 VIEW NO FIREBASE AO ABRIR
+    if(window.adicionarViewNoFirebase) {
+        window.adicionarViewNoFirebase(idFilme);
+    }
 }
 
-// Função para abrir uma série (LINK CORRIGIDO PARA O ORIGINAL)
+// Função para abrir uma série
 function abrirPlayerSerie(idSerie, temporada, episodio) {
     modal.classList.add('active'); 
     container.innerHTML = `<iframe src="https://myembed.biz/serie/${idSerie}/${temporada}/${episodio}" width="100%" height="500" frameborder="0" allowfullscreen></iframe>`;
+    
+    // INJETADO: SOMA +1 VIEW NO FIREBASE AO ABRIR
+    if(window.adicionarViewNoFirebase) {
+        window.adicionarViewNoFirebase(idSerie);
+    }
 }
 
 // Função para fechar o player
