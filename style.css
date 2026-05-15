@@ -20,6 +20,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     transition: background-color 0.3s ease;
+    overflow-x: hidden; /* Evita que a página inteira role pro lado sem querer */
 }
 
 header {
@@ -62,21 +63,47 @@ nav a:hover { color: var(--accent-color); }
 }
 .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
 
-section { padding: 30px 5%; }
-h2 { margin-bottom: 20px; border-left: 4px solid var(--accent-color); padding-left: 10px; font-size: 1.3rem; }
+section { padding: 20px 5% 30px 5%; } 
+h2 { margin-bottom: 15px; border-left: 4px solid var(--accent-color); padding-left: 10px; font-size: 1.3rem; }
 
+/* ==========================================
+   A MÁGICA DO CARROSSEL ESTILO NETFLIX
+   ========================================== */
 .grid-catalog {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex; /* Coloca tudo em linha reta */
+    overflow-x: auto; /* Ativa a rolagem lateral */
     gap: 15px;
+    padding-bottom: 15px;
+    scroll-snap-type: x mandatory; /* Faz o card "encaixar" certinho na tela ao soltar o dedo */
+    -webkit-overflow-scrolling: touch; /* Deixa o deslizar ultra suave em celulares */
+    
+    /* Esconde a barra de rolagem (fica mais limpo) */
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
 }
 
-.card { background-color: var(--card-bg); border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
+/* Esconde a barra no Chrome e Safari */
+.grid-catalog::-webkit-scrollbar {
+    display: none;
+}
+
+.card { 
+    background-color: var(--card-bg); 
+    border-radius: 8px; 
+    overflow: hidden; 
+    cursor: pointer; 
+    transition: transform 0.2s; 
+    
+    /* Largura fixa no PC para os cards não esmagarem */
+    flex: 0 0 160px; 
+    scroll-snap-align: start; /* Onde o encaixe acontece */
+}
+
 .card:hover { transform: translateY(-3px); }
 .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
 .card h3 { padding: 8px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* VISUALIZAÇÃO MAIS CLARA E EM DESTAQUE */
+/* VISUALIZAÇÕES */
 .card-meta { display: flex; justify-content: space-between; padding: 0 10px 10px 10px; font-size: 12px; color: #ddd; font-weight: 600; }
 .star-count { color: #ffcc00; font-weight: bold; }
 .view-count { color: #fff; } 
@@ -100,16 +127,21 @@ h2 { margin-bottom: 20px; border-left: 4px solid var(--accent-color); padding-le
 .stars-wrapper input:checked ~ label, .stars-wrapper label:hover, .stars-wrapper label:hover ~ label { color: #ffcc00; text-shadow: 0 0 10px #ffcc00;}
 .stars-numbers { display: flex; justify-content: center; gap: 28px; color: #888; font-size: 12px; font-weight: bold;}
 
-/* LOGIN */
+/* LOGIN OVERLAY */
 .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:3000; }
 .overlay.active { display: flex; }
 .auth-box { background: var(--bg-color); padding: 25px; border-radius: 10px; text-align: center; width: 90%; max-width: 320px; border: 1px solid var(--accent-color); }
 .btn-primary { background: var(--accent-color); color: #fff; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: 700; }
 .btn-guest { background: #333; color: #fff; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 10px; }
 
-/* RESPONSIVO PARA CELULAR (Para a aba Animes caber direitinho) */
+/* RESPONSIVO PARA O POCO C75 (E CELULARES EM GERAL) */
 @media (max-width: 600px) {
     header { flex-direction: column; gap: 10px; padding: 15px 5%; }
     nav ul { gap: 10px; flex-wrap: wrap; justify-content: center; }
     .hero-section { padding: 130px 5% 20px 5%; }
+    
+    .card {
+        /* O truque psicológico do carrossel: Mostrar 42% faz caber 2 capas inteiras e 1 'pedacinho' da 3ª */
+        flex: 0 0 42%; 
+    }
 }
