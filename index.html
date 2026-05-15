@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -93,32 +93,33 @@
                 </div>
             </div>
         </section>
-
-        <section id="contato" class="contact-section">
-            <h2>Contato</h2>
-            <p>Dúvidas ou sugestões?</p>
-            <form>
-                <input type="email" placeholder="Seu E-mail">
-                <textarea placeholder="Sua Mensagem"></textarea>
-                <button type="button" class="btn-primary">Enviar</button>
-            </form>
-        </section>
     </main>
 
     <div id="videoModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="fecharPlayer()">&times; Fechar</span>
             <div id="playerContainer"></div>
+            
+            <div class="rating-inside">
+                <h4>O que achou deste título?</h4>
+                <div class="stars-wrapper">
+                    <input id="star5" name="rating" type="radio" value="5"><label for="star5">★</label>
+                    <input id="star4" name="rating" type="radio" value="4"><label for="star4">★</label>
+                    <input id="star3" name="rating" type="radio" value="3"><label for="star3">★</label>
+                    <input id="star2" name="rating" type="radio" value="2"><label for="star2">★</label>
+                    <input id="star1" name="rating" type="radio" value="1"><label for="star1">★</label>
+                </div>
+                <p id="ratingMsg"></p>
+            </div>
         </div>
     </div>
 
-    <script src="script.js?v=6"></script>
+    <script src="script.js?v=7"></script>
 
     <script type='module'>
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
         import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
-        // CONFIGURAÇÃO DO SEU NOVO FIREBASE (HK-FILMES-DB)
         const firebaseConfig = {
           apiKey: "AIzaSyDCNF3pZ3g20UkNDTUYq-X9zkyKA3El1TM",
           authDomain: "hk-filmes-db.firebaseapp.com",
@@ -171,6 +172,28 @@
         window.adicionarViewNoFirebase = function(id) {
              runTransaction(ref(database, 'views/' + id), (v) => (v || 0) + 1);
         }
+
+        // LÓGICA DE SALVAR AVALIAÇÃO
+        document.querySelectorAll('input[name="rating"]').forEach(star => {
+            star.addEventListener('change', function() {
+                const points = parseInt(this.value);
+                const msg = document.getElementById('ratingMsg');
+                const pathId = window.filmeAbertoID; 
+                if(!pathId) return;
+
+                msg.innerText = "Salvando voto...";
+                
+                runTransaction(ref(database, 'ratings/' + pathId), (current) => {
+                    if (!current) current = { totalPoints: 0, count: 0 };
+                    current.totalPoints += points; 
+                    current.count += 1;
+                    return current;
+                }).then(() => { 
+                    msg.innerText = "⭐ Avaliado com sucesso!"; 
+                    document.querySelectorAll('input[name="rating"]').forEach(s => s.disabled = true); 
+                });
+            });
+        });
     </script>
 </body>
 </html>
