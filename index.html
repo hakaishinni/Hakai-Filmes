@@ -1,3 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HK Filmes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=17">
+</head>
+<body>
+
+    <div id="authOverlay" class="overlay active">
+        <div class="auth-box">
+            <h2>Bem-vindo</h2>
+            <p>Faça login ou entre como convidado para assistir.</p>
+            <input type="text" placeholder="Usuário ou E-mail">
+            <input type="password" placeholder="Senha">
+            <button class="btn-primary">Entrar</button>
+            <button class="btn-secondary">Cadastrar-se</button>
+            <button class="btn-guest" onclick="entrarComoConvidado()">Entrar como Convidado</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo">HK<span>Filmes</span></div>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="mudarAba('tudo')">Home</a></li>
+                <li><a href="#" onclick="mudarAba('filmes')">Filmes</a></li>
+                <li><a href="#" onclick="mudarAba('series')">Séries e Animes</a></li>
+                <li><a href="#contato" onclick="mudarAba('tudo')">Contato</a></li>
+            </ul>
+        </nav>
+        <button id="themeToggle" onclick="toggleTheme()">☀️ Light Mode</button>
+    </header>
+
+    <main>
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <h1>Assista aos melhores Filmes e Séries</h1>
+                <p>Tudo em um só lugar. Escolha e assista agora.</p>
+                
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Pesquisar filme, série ou anime..." onkeyup="filtrarCatalogo()">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="filmes" class="catalog-section">
+            <h2>Catálogo de Filmes</h2>
+            <div class="grid-catalog">
+                <div class="card" onclick="abrirPlayer('1620034')"><img src="https://image.tmdb.org/t/p/w500/udQ4UWZaaN5s46jVHTBmEkWVpst.jpg" alt="Marty: Life Is Short"><h3>Marty: Life Is Short</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1684240')"><img src="https://image.tmdb.org/t/p/w500/t3cxqW5ZlQnLO8rhzKbrW8uOgaI.jpg" alt="Untold UK: Jamie Vardy"><h3>Untold UK: Jamie Vardy</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1414413')"><img src="https://image.tmdb.org/t/p/w500/e5EKqk9V7N3w0WvYFhl6wSVrMp0.jpg" alt="Brothers Under Fire"><h3>Brothers Under Fire</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('855435')"><img src="https://image.tmdb.org/t/p/w500/uJWSi6QEr5LLOMZlVmOBX09a2Bj.jpg" alt="Faces da Morte"><h3>Faces da Morte</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1439930')"><img src="https://image.tmdb.org/t/p/w500/ppRmgI2MbEOADvKKvlNoRJHPXOT.jpg" alt="O Justiceiro"><h3>O Justiceiro</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('437815')"><img src="https://image.tmdb.org/t/p/w500/9GqCYJ2lT8SDXubRyz2Aju0uJvm.jpg" alt="A Estrada"><h3>A Estrada</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('23127')"><img src="https://image.tmdb.org/t/p/w500/mCN5KBXrhc4BuVkeEF3R8t4xrBx.jpg" alt="El Superbeasto"><h3>El Superbeasto</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('296406')"><img src="https://image.tmdb.org/t/p/w500/eb0fkrd6hZAWZYZFJ6idbxL9kF5.jpg" alt="Romance de Formação"><h3>Romance de Formação</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('268686')"><img src="https://image.tmdb.org/t/p/w500/5t5tVHsT8jOWSe9TOvAk1rIA6zR.jpg" alt="O Beijo"><h3>O Beijo</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('420280')"><img src="https://image.tmdb.org/t/p/w500/bUoiVBlCb5yUV2L0n3GcbFEx3gN.jpg" alt="Capoeira"><h3>Capoeira</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('158945')"><img src="https://image.tmdb.org/t/p/w500/l3RBpvVYvZLO6fgZQNtohQIo7Ig.jpg" alt="Eles Voltam"><h3>Eles Voltam</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1455079')"><img src="https://image.tmdb.org/t/p/w500/i21UWr8sC65vN0Q8EY7H6PjTpv5.jpg" alt="Eu & Você na Toscana"><h3>Eu & Você na Toscana</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1339149')"><img src="https://image.tmdb.org/t/p/w500/c2ZtLl1EATKymqUlmNYFdI817tn.jpg" alt="12 Horas de Fúria"><h3>12 Horas de Fúria</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1691102')"><img src="https://image.tmdb.org/t/p/w500/6XtysHKS8IMjrnJlw1KziAP8ruC.jpg" alt="O Fim da Cracolândia"><h3>O Fim da Cracolândia</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1330021')"><img src="https://image.tmdb.org/t/p/w500/iMJaRPY4xx4lScIaIWd67yWJuqc.jpg" alt="Criaturas Brilhantes"><h3>Criaturas Brilhantes</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1317448')"><img src="https://image.tmdb.org/t/p/w500/d2aVcAMi5tZPLPBc7ZSVQ0rN2cr.jpg" alt="Da Toscana, com Amor"><h3>Da Toscana, com Amor</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1282440')"><img src="https://image.tmdb.org/t/p/w500/tZJBXGNyDanSne6a2TLRU45Uhwu.jpg" alt="Happy Patel"><h3>Happy Patel</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1630423')"><img src="https://image.tmdb.org/t/p/w500/9ZfPvLEx1xcuTkfAtrVyIbA5Vaw.jpg" alt="Meu Querido Assassino"><h3>Meu Querido Assassino</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1461254')"><img src="https://image.tmdb.org/t/p/w500/bOl0rJ86WWxVYlQlGttHhHuYiPQ.jpg" alt="Salmokji"><h3>Salmokji</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1390300')"><img src="https://image.tmdb.org/t/p/w500/d4kOKdPBXPJxhnwkFC9u9IhrzOX.jpg" alt="Over Your Dead Body"><h3>Over Your Dead Body</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1130948')"><img src="https://image.tmdb.org/t/p/w500/rEn0kHtZAjb44R2Jv0FUBLdFPsY.jpg" alt="Rosebush Pruning"><h3>Rosebush Pruning</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1259983')"><img src="https://image.tmdb.org/t/p/w500/oy9SBxmzL6pG5Lckh9o2Wa1IWBr.jpg" alt="Gourou"><h3>Gourou</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1014601')"><img src="https://image.tmdb.org/t/p/w500/eGPrd0tOYLToHpLFZ78X4rITnE1.jpg" alt="A Árvore Sangrenta"><h3>A Árvore Sangrenta</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1301421')"><img src="https://image.tmdb.org/t/p/w500/7YdOgL8l5OfreoovmVocVKdIG2O.jpg" alt="Sheep Detectives"><h3>Sheep Detectives</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1290792')"><img src="https://image.tmdb.org/t/p/w500/ybO8oLgpXRhaPmHI6C2FUpxSRrK.jpg" alt="Chocolate Spoon"><h3>Chocolate Spoon</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1127384')"><img src="https://image.tmdb.org/t/p/w500/2cikvQU83ecoZncnjOmAAATr3Sp.jpg" alt="Deep Water"><h3>Deep Water</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('1469164')"><img src="https://image.tmdb.org/t/p/w500/8I2wgTs7Oo995dGfKj852NZa8Py.jpg" alt="Casa Grande"><h3>Casa Grande</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('425532')"><img src="https://image.tmdb.org/t/p/w500/u8CwMaEYTKxnBSgYHuNO2P2mOag.jpg" alt="Mamonas Assassinas"><h3>Mamonas Assassinas</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('791389')"><img src="https://image.tmdb.org/t/p/w500/wDv6FKwBDgbCYtBJr3FVQuQ35zG.jpg" alt="Torquato"><h3>Torquato</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayer('284065')"><img src="https://image.tmdb.org/t/p/w500/6c1V0nSmeHt2p8vSMW3mrkBNx8h.jpg" alt="Cinema Brasileiro"><h3>Cinema Brasileiro</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+            </div>
+        </section>
+
+        <section id="series" class="catalog-section">
+            <h2>Séries e Animes</h2>
+            <div class="grid-catalog">
+                <div class="card" onclick="abrirPlayerSerie('76479')"><img src="https://image.tmdb.org/t/p/w500/in1R2dDc421JxsoRWaIIAqVI2KE.jpg" alt="The Boys"><h3>The Boys</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('37854')"><img src="https://image.tmdb.org/t/p/w500/9ltisibeD4gzqjM1AzmQwCdyirQ.jpg" alt="One Piece"><h3>One Piece</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('1396')"><img src="https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg" alt="Breaking Bad"><h3>Breaking Bad</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('85552')"><img src="https://image.tmdb.org/t/p/w500/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg" alt="Euphoria"><h3>Euphoria</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                
+                <div class="card" onclick="abrirPlayerSerie('1434')"><img src="https://image.tmdb.org/t/p/w500/j28XGzAhvJNGWEHbYrzvREw7kKd.jpg" alt="Family Guy"><h3>Family Guy</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('95479')"><img src="https://image.tmdb.org/t/p/w500/8R1mMSC1gX1cg5ed7ns49JOEqw3.jpg" alt="Jujutsu Kaisen"><h3>Jujutsu Kaisen</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('1433')"><img src="https://image.tmdb.org/t/p/w500/eb9sH2am9IUSQ8GhXTNAVoujk8W.jpg" alt="American Dad!"><h3>American Dad!</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('86031')"><img src="https://image.tmdb.org/t/p/w500/n3oKFShhqVvc8f5kNCYEjTnaXV2.jpg" alt="Dr. STONE"><h3>Dr. STONE</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('196950')"><img src="https://image.tmdb.org/t/p/w500/78m1Tv3suHmUryTI9VNPwKLKjHZ.jpg" alt="Solo Leveling"><h3>Solo Leveling</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('63926')"><img src="https://image.tmdb.org/t/p/w500/dT10AxJIXVvRwFAew4tt2RhzJrD.jpg" alt="One Punch Man"><h3>One Punch Man</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('65930')"><img src="https://image.tmdb.org/t/p/w500/cfESQ8y8oNAeLuRbs7NkW7Qjwhy.jpg" alt="My Hero Academia"><h3>My Hero Academia</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('204832')"><img src="https://image.tmdb.org/t/p/w500/yORTvQOQTZzZ9JRIpRH4QaIaQBm.jpg" alt="MASHLE"><h3>MASHLE</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('46260')"><img src="https://image.tmdb.org/t/p/w500/9ptbVZpKNy5NY9D4zq4KGiYWRQY.jpg" alt="Naruto Shippuden"><h3>Naruto Shippuden</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('31910')"><img src="https://image.tmdb.org/t/p/w500/nRJmByfK9XdtOY73VArcN8KpKVs.jpg" alt="Naruto"><h3>Naruto</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('43168')"><img src="https://image.tmdb.org/t/p/w500/2OTMpFejspg3fYnRbiuVuLsZtaq.jpg" alt="Rock Lee & His Ninja Pals"><h3>Rock Lee & His Ninja Pals</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('70881')"><img src="https://image.tmdb.org/t/p/w500/e0B6i48kxdRkMcK4tR4YNfXGWOc.jpg" alt="Boruto: Naruto Next Gen"><h3>Boruto: Naruto Next Gen</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('30984')"><img src="https://image.tmdb.org/t/p/w500/5iVUUnE2tgBPypACYNobCKHagfV.jpg" alt="Bleach"><h3>Bleach</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('12971')"><img src="https://image.tmdb.org/t/p/w500/yfyToia25GnvjY7FPAGaCm3lKRc.jpg" alt="Dragon Ball Z"><h3>Dragon Ball Z</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('236994')"><img src="https://image.tmdb.org/t/p/w500/qlLJvJO8rsltmnWWbKgT13hP90I.jpg" alt="Dragon Ball DAIMA"><h3>Dragon Ball DAIMA</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('62715')"><img src="https://image.tmdb.org/t/p/w500/cQDCIp92rTzTnd8mjb1syLhrAqy.jpg" alt="Dragon Ball Super"><h3>Dragon Ball Super</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+                <div class="card" onclick="abrirPlayerSerie('61709')"><img src="https://image.tmdb.org/t/p/w500/uAZmpZY9oCRgJ06f342sagwdjYL.jpg" alt="Dragon Ball Z Kai"><h3>Dragon Ball Z Kai</h3><div class="card-meta"><span>⭐ <span class="star-count">0.0</span></span><span>👁️ <span class="view-count">0</span></span></div></div>
+            </div>
+        </section>
+
+        <section id="contato" class="contact-section">
+            <h2>Contato & Apoio</h2>
+            <p>O HK Filmes é gratuito! Se você curte o site, ajude a manter o projeto no ar pagando um cafezinho para o desenvolvedor ☕</p>
+            
+            <div class="pix-box" style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px dashed var(--accent-color); margin-bottom: 20px; text-align: center;">
+                <h4 style="color: var(--accent-color); margin-bottom: 5px;">Apoie com qualquer valor via PIX:</h4>
+                <p style="font-size: 14px; font-weight: bold;">Sua Chave: <span>sua-chave-pix-aqui@gmail.com</span></p>
+                <p style="font-size: 12px; color: #888; margin-top: 5px;">(Nome do Recebedor: Seu Nome)</p>
+            </div>
+
+            <form id="contactForm">
+                <input type="email" id="contactEmail" placeholder="Seu E-mail" required>
+                <textarea id="contactMessage" placeholder="Sua Mensagem ou Sugestão de Filme" required></textarea>
+                <button type="button" class="btn-primary" onclick="enviarMensagem()">Enviar Mensagem</button>
+            </form>
+            <p id="contactStatus"></p>
+        </section>
+    </main>
+
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="fecharPlayer()">&times; Fechar</span>
+            <div id="playerContainer"></div>
+            <div class="rating-inside">
+                <h4 id="ratingTitle">O que achou deste título?</h4>
+                <div class="rating-container">
+                    <div class="stars-wrapper">
+                        <input id="star5" name="rating" type="radio" value="5"><label for="star5">★</label>
+                        <input id="star4" name="rating" type="radio" value="4"><label for="star4">★</label>
+                        <input id="star3" name="rating" type="radio" value="3"><label for="star3">★</label>
+                        <input id="star2" name="rating" type="radio" value="2"><label for="star2">★</label>
+                        <input id="star1" name="rating" type="radio" value="1"><label for="star1">★</label>
                     </div>
                     <div class="stars-numbers"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
                 </div>
@@ -6,7 +151,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=16"></script>
+    <script src="script.js?v=17"></script>
 
     <script type='module'>
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -26,6 +171,7 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // SINCRONIZA VIEWS
         onValue(ref(database, 'views'), (s) => {
             const d = s.val() || {};
             document.querySelectorAll('.view-count').forEach(el => {
@@ -37,6 +183,7 @@
             });
         });
 
+        // SINCRONIZA RATINGS
         onValue(ref(database, 'ratings'), (s) => {
             const d = s.val() || {};
             document.querySelectorAll('.star-count').forEach(el => {
@@ -52,6 +199,7 @@
 
         window.adicionarViewNoFirebase = (id) => runTransaction(ref(database, 'views/' + id), (v) => (v || 0) + 1);
 
+        // VOTAÇÃO
         document.querySelectorAll('input[name="rating"]').forEach(star => {
             star.addEventListener('change', function() {
                 const points = parseInt(this.value);
@@ -69,6 +217,7 @@
             });
         });
 
+        // ENVIO DE MENSAGEM
         window.enviarMensagem = function() {
             const email = document.getElementById('contactEmail').value;
             const message = document.getElementById('contactMessage').value;
