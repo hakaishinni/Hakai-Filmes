@@ -1,4 +1,9 @@
 // ==========================================
+// VARIÁVEIS GLOBAIS
+// ==========================================
+let filmeAbertoID = null; // Guarda o ID do filme para a avaliação
+
+// ==========================================
 // SISTEMA DE ABAS (NAVEGAÇÃO)
 // ==========================================
 function mudarAba(aba) {
@@ -24,7 +29,6 @@ function mudarAba(aba) {
         secContato.style.display = 'none';
     }
     
-    // Rola a tela suavemente para o topo ao trocar de aba
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -62,10 +66,16 @@ const container = document.getElementById('playerContainer');
 
 // Função para abrir um filme
 function abrirPlayer(idFilme) {
+    window.filmeAbertoID = idFilme; // "Anota" o ID para o Firebase
     modal.classList.add('active'); 
-    container.innerHTML = `<iframe src="https://myembed.biz/filme/${idFilme}" width="100%" height="500" frameborder="0" allowfullscreen></iframe>`;
     
-    // INJETADO: SOMA +1 VIEW NO FIREBASE AO ABRIR
+    // Altura ajustada para 350 para as estrelas aparecerem embaixo no celular
+    container.innerHTML = `<iframe src="https://myembed.biz/filme/${idFilme}" width="100%" height="350" frameborder="0" allowfullscreen></iframe>`;
+    
+    // Reseta o visual da avaliação para o próximo filme
+    document.getElementById('ratingMsg').innerText = "";
+    resetarEstrelas();
+
     if(window.adicionarViewNoFirebase) {
         window.adicionarViewNoFirebase(idFilme);
     }
@@ -73,17 +83,29 @@ function abrirPlayer(idFilme) {
 
 // Função para abrir uma série
 function abrirPlayerSerie(idSerie, temporada, episodio) {
+    window.filmeAbertoID = idSerie; // "Anota" o ID
     modal.classList.add('active'); 
-    container.innerHTML = `<iframe src="https://myembed.biz/serie/${idSerie}/${temporada}/${episodio}" width="100%" height="500" frameborder="0" allowfullscreen></iframe>`;
+    container.innerHTML = `<iframe src="https://myembed.biz/serie/${idSerie}/${temporada}/${episodio}" width="100%" height="350" frameborder="0" allowfullscreen></iframe>`;
     
-    // INJETADO: SOMA +1 VIEW NO FIREBASE AO ABRIR
+    document.getElementById('ratingMsg').innerText = "";
+    resetarEstrelas();
+
     if(window.adicionarViewNoFirebase) {
         window.adicionarViewNoFirebase(idSerie);
     }
+}
+
+// Função para limpar a seleção de estrelas anterior
+function resetarEstrelas() {
+    document.querySelectorAll('input[name="rating"]').forEach(s => {
+        s.checked = false;
+        s.disabled = false;
+    });
 }
 
 // Função para fechar o player
 function fecharPlayer() {
     modal.classList.remove('active'); 
     container.innerHTML = ''; 
+    window.filmeAbertoID = null; // Limpa o ID ao fechar
 }
