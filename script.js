@@ -1,11 +1,10 @@
 let filmeAbertoID = null;
 
-// NAVEGAÇÃO
 function mudarAba(aba) {
     const secHome = document.getElementById('home');
     const secFilmes = document.getElementById('filmes');
     const secSeries = document.getElementById('series');
-    const secContato = document.querySelector('.contact-section');
+    const secContato = document.getElementById('contato');
 
     if (aba === 'tudo') {
         secHome.style.display = 'block'; secFilmes.style.display = 'block'; secSeries.style.display = 'block'; secContato.style.display = 'block';
@@ -17,7 +16,6 @@ function mudarAba(aba) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// PESQUISA REAL
 function filtrarCatalogo() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase();
@@ -25,18 +23,8 @@ function filtrarCatalogo() {
     
     cards.forEach(card => {
         const title = card.querySelector('h3').innerText.toLowerCase();
-        if (title.includes(filter)) {
-            card.style.display = ""; // Mostra
-        } else {
-            card.style.display = "none"; // Esconde
-        }
+        card.style.display = title.includes(filter) ? "" : "none";
     });
-
-    // Ao pesquisar, garante que as seções de catálogo apareçam
-    if (filter !== "") {
-        document.getElementById('filmes').style.display = "block";
-        document.getElementById('series').style.display = "block";
-    }
 }
 
 function entrarComoConvidado() {
@@ -53,9 +41,8 @@ function toggleTheme() {
 function abrirPlayer(idFilme) {
     window.filmeAbertoID = idFilme;
     document.getElementById('videoModal').classList.add('active'); 
-    document.getElementById('playerContainer').innerHTML = `<iframe src="https://myembed.biz/filme/${idFilme}" width="100%" height="350" frameborder="0" allowfullscreen></iframe>`;
-    document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalias este filme?";
-    document.getElementById('ratingMsg').innerText = "";
+    document.getElementById('playerContainer').innerHTML = `<iframe src="https://myembed.biz/filme/${idFilme}" width="100%" height="300" frameborder="0" allowfullscreen></iframe>`;
+    document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalia este filme?";
     resetarEstrelas();
     if(window.adicionarViewNoFirebase) window.adicionarViewNoFirebase(idFilme);
 }
@@ -63,14 +50,24 @@ function abrirPlayer(idFilme) {
 function abrirPlayerSerie(idSerie, temporada, episodio) {
     window.filmeAbertoID = idSerie;
     document.getElementById('videoModal').classList.add('active'); 
-    document.getElementById('playerContainer').innerHTML = `<iframe src="https://myembed.biz/serie/${idSerie}/${temporada}/${episodio}" width="100%" height="350" frameborder="0" allowfullscreen></iframe>`;
-    document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalias esta série/anime?";
-    document.getElementById('ratingMsg').innerText = "";
+    document.getElementById('playerContainer').innerHTML = `<iframe src="https://myembed.biz/serie/${idSerie}/${temporada}/${episodio}" width="100%" height="300" frameborder="0" allowfullscreen></iframe>`;
+    document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalia esta série/anime?";
     resetarEstrelas();
     if(window.adicionarViewNoFirebase) window.adicionarViewNoFirebase(idSerie);
 }
 
+// NOVA FUNÇÃO DE TESTE: Link puro sem informar temporada e episódio
+function abrirPlayerGeral(id) {
+    window.filmeAbertoID = id;
+    document.getElementById('videoModal').classList.add('active'); 
+    document.getElementById('playerContainer').innerHTML = `<iframe src="https://myembed.biz/serie/${id}" width="100%" height="300" frameborder="0" allowfullscreen></iframe>`;
+    document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalia este título?";
+    resetarEstrelas();
+    if(window.adicionarViewNoFirebase) window.adicionarViewNoFirebase(id);
+}
+
 function resetarEstrelas() {
+    document.getElementById('ratingMsg').innerText = "";
     document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; });
 }
 
