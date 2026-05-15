@@ -1,4 +1,34 @@
 // ==========================================
+// SISTEMA DE ABAS (NAVEGAÇÃO)
+// ==========================================
+function mudarAba(aba) {
+    const secHome = document.getElementById('home');
+    const secFilmes = document.getElementById('filmes');
+    const secSeries = document.getElementById('series');
+    const secContato = document.getElementById('contato');
+
+    if (aba === 'tudo') {
+        secHome.style.display = 'flex';
+        secFilmes.style.display = 'block';
+        secSeries.style.display = 'block';
+        secContato.style.display = 'block';
+    } else if (aba === 'filmes') {
+        secHome.style.display = 'none';
+        secFilmes.style.display = 'block';
+        secSeries.style.display = 'none';
+        secContato.style.display = 'none';
+    } else if (aba === 'series') {
+        secHome.style.display = 'none';
+        secFilmes.style.display = 'none';
+        secSeries.style.display = 'block';
+        secContato.style.display = 'none';
+    }
+    
+    // Rola a tela suavemente para o topo ao trocar de aba
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==========================================
 // LÓGICA DE LOGIN / CONVIDADO
 // ==========================================
 
@@ -40,18 +70,18 @@ function toggleTheme() {
 const modal = document.getElementById('videoModal');
 const container = document.getElementById('playerContainer');
 
-// Função para abrir um filme (Usa a API myembed.biz discutida anteriormente)
+// Função para abrir um filme 
 function abrirPlayer(idFilme) {
     modal.classList.add('active'); // Mostra o modal
     // Injeta o iframe dinamicamente baseado no ID passado
-    container.innerHTML = `<iframe src="https://myembed.biz/filme/${idFilme}" width="100%" height="500" frameborder="0" allowfullscreen></iframe>`;
+    container.innerHTML = `<iframe src="https://embed.myembed.biz/movie/${idFilme}" width="100%" height="500" frameborder="0" allowfullscreen></iframe>`;
 }
 
 // Função para abrir uma série (Especificando ID, Temporada e Episódio)
 function abrirPlayerSerie(idSerie, temporada, episodio) {
     modal.classList.add('active'); // Mostra o modal
     // Injeta o iframe da série
-    container.innerHTML = `<iframe src="https://myembed.biz/serie/${idSerie}/${temporada}/${episodio}" width="100%" height="500" frameborder="0" allowfullscreen></iframe>`;
+    container.innerHTML = `<iframe src="https://embed.myembed.biz/tv/${idSerie}/${temporada}/${episodio}" width="100%" height="500" frameborder="0" allowfullscreen></iframe>`;
 }
 
 // Função para fechar o player
