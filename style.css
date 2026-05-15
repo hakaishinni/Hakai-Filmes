@@ -1,122 +1,115 @@
-:root {
-    --bg-color: #040D12;
-    --text-color: #f3f3f3;
-    --accent-color: #C63C51;
-    --card-bg: rgba(255, 255, 255, 0.05);
-}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HK Filmes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-.light-mode {
-    --bg-color: #f3f3f3;
-    --text-color: #040D12;
-    --accent-color: #C63C51;
-    --card-bg: rgba(0, 0, 0, 0.1);
-}
+    <div id="authOverlay" class="overlay active">
+        <div class="auth-box">
+            <h2>Bem-vindo</h2>
+            <p>Faça login para continuar ou entre como convidado.</p>
+            <input type="text" placeholder="Usuário ou E-mail">
+            <input type="password" placeholder="Senha">
+            <button class="btn-primary">Entrar</button>
+            <button class="btn-secondary">Cadastrar-se</button>
+            <button class="btn-guest" onclick="entrarComoConvidado()">Entrar como Convidado</button>
+        </div>
+    </div>
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+    <header>
+        <div class="logo">HK<span>Filmes</span></div>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="mudarAba('tudo')">Home</a></li>
+                <li><a href="#" onclick="mudarAba('filmes')">Filmes</a></li>
+                <li><a href="#" onclick="mudarAba('series')">Séries</a></li>
+                <li><a href="#contato" onclick="mudarAba('tudo')">Contato</a></li>
+            </ul>
+        </nav>
+        <button id="themeToggle" onclick="toggleTheme()">☀️ Light Mode</button>
+    </header>
 
-body {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 300;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
+    <main>
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <h1>Assista aos melhores Filmes e Séries</h1>
+                <p>Tudo em um só lugar. Escolha e assista agora.</p>
+            </div>
+        </section>
 
-h1, h2, h3, .logo { font-weight: 700; }
+        <section id="filmes" class="catalog-section">
+            <h2>Catálogo de Filmes</h2>
+            <div class="grid-catalog">
+                <div class="card" onclick="abrirPlayer('1620034')"><img src="https://media.themoviedb.org/t/p/w500/udQ4UWZaaN5s46jVHTBmEkWVpst.jpg" alt="Marty: Life Is Short"><h3>Marty: Life Is Short</h3></div>
+                <div class="card" onclick="abrirPlayer('1684240')"><img src="https://media.themoviedb.org/t/p/w500/t3cxqW5ZlQnLO8rhzKbrW8uOgaI.jpg" alt="Untold UK: Jamie Vardy"><h3>Untold UK: Jamie Vardy</h3></div>
+                <div class="card" onclick="abrirPlayer('1414413')"><img src="https://media.themoviedb.org/t/p/w500/e5EKqk9V7N3w0WvYFhl6wSVrMp0.jpg" alt="Brothers Under Fire"><h3>Brothers Under Fire</h3></div>
+                <div class="card" onclick="abrirPlayer('855435')"><img src="https://media.themoviedb.org/t/p/w500/uJWSi6QEr5LLOMZlVmOBX09a2Bj.jpg" alt="Faces da Morte"><h3>Faces da Morte</h3></div>
+                <div class="card" onclick="abrirPlayer('1439930')"><img src="https://media.themoviedb.org/t/p/w500/ppRmgI2MbEOADvKKvlNoRJHPXOT.jpg" alt="O Justiceiro"><h3>O Justiceiro</h3></div>
+                <div class="card" onclick="abrirPlayer('437815')"><img src="https://media.themoviedb.org/t/p/w500/9GqCYJ2lT8SDXubRyz2Aju0uJvm.jpg" alt="A Estrada"><h3>A Estrada</h3></div>
+                <div class="card" onclick="abrirPlayer('23127')"><img src="https://media.themoviedb.org/t/p/w500/mCN5KBXrhc4BuVkeEF3R8t4xrBx.jpg" alt="El Superbeasto"><h3>El Superbeasto</h3></div>
+                <div class="card" onclick="abrirPlayer('296406')"><img src="https://media.themoviedb.org/t/p/w500/eb0fkrd6hZAWZYZFJ6idbxL9kF5.jpg" alt="Romance de Formação"><h3>Romance de Formação</h3></div>
+                <div class="card" onclick="abrirPlayer('268686')"><img src="https://media.themoviedb.org/t/p/w500/5t5tVHsT8jOWSe9TOvAk1rIA6zR.jpg" alt="O Beijo"><h3>O Beijo</h3></div>
+                <div class="card" onclick="abrirPlayer('420280')"><img src="https://media.themoviedb.org/t/p/w500/bUoiVBlCb5yUV2L0n3GcbFEx3gN.jpg" alt="Capoeira"><h3>Capoeira</h3></div>
+                <div class="card" onclick="abrirPlayer('158945')"><img src="https://media.themoviedb.org/t/p/w500/l3RBpvVYvZLO6fgZQNtohQIo7Ig.jpg" alt="Eles Voltam"><h3>Eles Voltam</h3></div>
+                <div class="card" onclick="abrirPlayer('1455079')"><img src="https://media.themoviedb.org/t/p/w500/i21UWr8sC65vN0Q8EY7H6PjTpv5.jpg" alt="Eu & Você na Toscana"><h3>Eu & Você na Toscana</h3></div>
+                <div class="card" onclick="abrirPlayer('1339149')"><img src="https://media.themoviedb.org/t/p/w500/c2ZtLl1EATKymqUlmNYFdI817tn.jpg" alt="12 Horas de Fúria"><h3>12 Horas de Fúria</h3></div>
+                <div class="card" onclick="abrirPlayer('1691102')"><img src="https://media.themoviedb.org/t/p/w500/6XtysHKS8IMjrnJlw1KziAP8ruC.jpg" alt="O Fim da Cracolândia"><h3>O Fim da Cracolândia</h3></div>
+                <div class="card" onclick="abrirPlayer('1330021')"><img src="https://media.themoviedb.org/t/p/w500/iMJaRPY4xx4lScIaIWd67yWJuqc.jpg" alt="Criaturas Brilhantes"><h3>Criaturas Brilhantes</h3></div>
+                <div class="card" onclick="abrirPlayer('1317448')"><img src="https://media.themoviedb.org/t/p/w500/d2aVcAMi5tZPLPBc7ZSVQ0rN2cr.jpg" alt="Da Toscana, com Amor"><h3>Da Toscana, com Amor</h3></div>
+                <div class="card" onclick="abrirPlayer('1282440')"><img src="https://media.themoviedb.org/t/p/w500/tZJBXGNyDanSne6a2TLRU45Uhwu.jpg" alt="Happy Patel"><h3>Happy Patel</h3></div>
+                <div class="card" onclick="abrirPlayer('1630423')"><img src="https://media.themoviedb.org/t/p/w500/9ZfPvLEx1xcuTkfAtrVyIbA5Vaw.jpg" alt="Meu Querido Assassino"><h3>Meu Querido Assassino</h3></div>
+                <div class="card" onclick="abrirPlayer('1461254')"><img src="https://media.themoviedb.org/t/p/w500/bOl0rJ86WWxVYlQlGttHhHuYiPQ.jpg" alt="Salmokji"><h3>Salmokji</h3></div>
+                <div class="card" onclick="abrirPlayer('1390300')"><img src="https://media.themoviedb.org/t/p/w500/d4kOKdPBXPJxhnwkFC9u9IhrzOX.jpg" alt="Over Your Dead Body"><h3>Over Your Dead Body</h3></div>
+                <div class="card" onclick="abrirPlayer('1130948')"><img src="https://media.themoviedb.org/t/p/w500/rEn0kHtZAjb44R2Jv0FUBLdFPsY.jpg" alt="Rosebush Pruning"><h3>Rosebush Pruning</h3></div>
+                <div class="card" onclick="abrirPlayer('1259983')"><img src="https://media.themoviedb.org/t/p/w500/oy9SBxmzL6pG5Lckh9o2Wa1IWBr.jpg" alt="Gourou"><h3>Gourou</h3></div>
+                <div class="card" onclick="abrirPlayer('1014601')"><img src="https://media.themoviedb.org/t/p/w500/eGPrd0tOYLToHpLFZ78X4rITnE1.jpg" alt="A Árvore Sangrenta"><h3>A Árvore Sangrenta</h3></div>
+                <div class="card" onclick="abrirPlayer('1301421')"><img src="https://media.themoviedb.org/t/p/w500/7YdOgL8l5OfreoovmVocVKdIG2O.jpg" alt="Sheep Detectives"><h3>Sheep Detectives</h3></div>
+                <div class="card" onclick="abrirPlayer('1290792')"><img src="https://media.themoviedb.org/t/p/w500/ybO8oLgpXRhaPmHI6C2FUpxSRrK.jpg" alt="Chocolate Spoon"><h3>Chocolate Spoon</h3></div>
+                <div class="card" onclick="abrirPlayer('1127384')"><img src="https://media.themoviedb.org/t/p/w500/2cikvQU83ecoZncnjOmAAATr3Sp.jpg" alt="Deep Water"><h3>Deep Water</h3></div>
+                <div class="card" onclick="abrirPlayer('1469164')"><img src="https://media.themoviedb.org/t/p/w500/8I2wgTs7Oo995dGfKj852NZa8Py.jpg" alt="Casa Grande"><h3>Casa Grande</h3></div>
+                <div class="card" onclick="abrirPlayer('425532')"><img src="https://media.themoviedb.org/t/p/w500/u8CwMaEYTKxnBSgYHuNO2P2mOag.jpg" alt="Mamonas Assassinas"><h3>Mamonas Assassinas</h3></div>
+                <div class="card" onclick="abrirPlayer('791389')"><img src="https://media.themoviedb.org/t/p/w500/wDv6FKwBDgbCYtBJr3FVQuQ35zG.jpg" alt="Torquato"><h3>Torquato</h3></div>
+                <div class="card" onclick="abrirPlayer('284065')"><img src="https://media.themoviedb.org/t/p/w500/6c1V0nSmeHt2p8vSMW3mrkBNx8h.jpg" alt="Cinema Brasileiro"><h3>Cinema Brasileiro</h3></div>
+            </div>
+        </section>
 
-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 20px 50px;
-    background-color: rgba(4, 13, 18, 0.9);
-    position: fixed; width: 100%; z-index: 100;
-}
+        <section id="series" class="catalog-section">
+            <h2>Séries Populares</h2>
+            <div class="grid-catalog">
+                <div class="card" onclick="abrirPlayerSerie('85552', '1', '1')">
+                    <img src="https://media.themoviedb.org/t/p/w500/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg" alt="Euphoria">
+                    <h3>Euphoria</h3>
+                </div>
+                <div class="card" onclick="abrirPlayerSerie('1396', '1', '1')">
+                    <img src="https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg" alt="Breaking Bad">
+                    <h3>Breaking Bad</h3>
+                </div>
+            </div>
+        </section>
 
-.logo { font-size: 24px; color: var(--accent-color); }
-.logo span { color: var(--text-color); }
-nav ul { list-style: none; display: flex; gap: 20px; }
-nav a { text-decoration: none; color: var(--text-color); font-size: 16px; transition: color 0.3s; }
-nav a:hover { color: var(--accent-color); }
+        <section id="contato" class="contact-section">
+            <h2>Contato</h2>
+            <p>Dúvidas ou sugestões?</p>
+            <form>
+                <input type="email" placeholder="Seu E-mail">
+                <textarea placeholder="Sua Mensagem"></textarea>
+                <button type="button" class="btn-primary">Enviar</button>
+            </form>
+        </section>
+    </main>
 
-#themeToggle {
-    background: none; border: 1px solid var(--text-color); color: var(--text-color);
-    padding: 8px 15px; border-radius: 5px; cursor: pointer; font-family: 'Poppins', sans-serif;
-}
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="fecharPlayer()">&times; Fechar</span>
+            <div id="playerContainer"></div>
+        </div>
+    </div>
 
-/* === AJUSTE DO ESPAÇAMENTO FEITO AQUI === */
-section { padding: 40px 50px; } 
-
-.hero-section {
-    display: flex; align-items: center; justify-content: center; text-align: center;
-    background: linear-gradient(to bottom, rgba(4,13,18,0.3), var(--bg-color));
-    padding-top: 120px; /* Dá espaço para o menu não cobrir o texto */
-    padding-bottom: 10px; /* Deixa o texto bem perto dos filmes */
-}
-
-.hero-content h1 { font-size: 3rem; margin-bottom: 15px; }
-
-/* === A GRADE DOS FILMES === */
-.grid-catalog {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px; margin-top: 20px;
-}
-
-.card {
-    background-color: var(--card-bg); border-radius: 8px; overflow: hidden;
-    cursor: pointer; transition: transform 0.3s ease;
-    display: flex; flex-direction: column;
-}
-
-.card:hover { transform: scale(1.05); }
-.card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
-.card h3 {
-    padding: 12px; font-size: 15px; text-align: left;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-form { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin-top: 20px; }
-form input, form textarea {
-    padding: 15px; border: none; border-radius: 5px;
-    background-color: var(--card-bg); color: var(--text-color); font-family: 'Poppins', sans-serif;
-}
-
-/* === TELA DE LOGIN E PLAYER === */
-.overlay, .modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.9); display: flex; justify-content: center; align-items: center;
-    z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
-}
-.overlay.active, .modal.active { visibility: visible; opacity: 1; }
-
-.auth-box {
-    background-color: var(--bg-color); padding: 40px; border-radius: 10px;
-    width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--accent-color);
-}
-.auth-box input {
-    width: 100%; padding: 12px; margin: 10px 0; border: none;
-    border-radius: 5px; background-color: var(--card-bg); color: var(--text-color);
-}
-.btn-primary, .btn-secondary, .btn-guest {
-    width: 100%; padding: 12px; margin-top: 10px; border: none;
-    border-radius: 5px; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 700;
-}
-.btn-primary { background-color: var(--accent-color); color: white; }
-.btn-secondary { background-color: transparent; border: 1px solid var(--accent-color); color: var(--text-color); }
-.btn-guest { background-color: #555; color: white; margin-top: 20px; }
-
-.modal-content { width: 90%; max-width: 900px; background-color: #000; position: relative; border-radius: 10px; overflow: hidden; }
-.close-btn { position: absolute; top: 10px; right: 15px; color: white; cursor: pointer; font-weight: bold; font-size: 18px; z-index: 10; background-color: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px; }
-
-/* === CELULAR === */
-@media (max-width: 768px) {
-    header { flex-direction: column; padding: 15px; }
-    nav ul { margin-top: 15px; gap: 10px; flex-wrap: wrap; justify-content: center; }
-    
-    /* AJUSTE DOS ESPAÇOS NO CELULAR AQUI */
-    .hero-section { padding-top: 140px; padding-bottom: 0px; }
-    section { padding: 20px 15px; }
-    
-    .grid-catalog { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .card h3 { font-size: 13px; padding: 10px; }
-}
+    <script src="script.js"></script>
+</body>
+</html>
