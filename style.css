@@ -38,7 +38,7 @@ nav a:hover { color: var(--accent-color); }
 
 #themeToggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
-/* --- HERO & PESQUISA --- */
+/* --- HERO & PESQUISA CORRIGIDA --- */
 .hero-section {
     padding: 100px 5% 20px 5%;
     text-align: center;
@@ -48,22 +48,32 @@ nav a:hover { color: var(--accent-color); }
 .search-container {
     position: relative;
     max-width: 450px;
-    margin: 20px auto 0 auto;
+    margin: 25px auto 0 auto;
     width: 90%;
 }
+
 #searchInput {
     width: 100%;
-    padding: 12px 45px 12px 20px;
-    border-radius: 25px;
+    padding: 15px 50px 15px 25px;
+    border-radius: 30px;
     border: 2px solid var(--accent-color);
     background: var(--card-bg);
     color: #fff;
+    font-size: 16px;
     outline: none;
+    display: block;
 }
-.search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
 
-section { padding: 20px 5%; }
-h2 { margin-bottom: 20px; border-left: 4px solid var(--accent-color); padding-left: 10px; }
+.search-icon { 
+    position: absolute; 
+    right: 20px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    font-size: 20px;
+}
+
+section { padding: 40px 5%; }
+h2 { margin-bottom: 25px; border-left: 4px solid var(--accent-color); padding-left: 15px; }
 
 .grid-catalog {
     display: grid;
@@ -78,29 +88,32 @@ h2 { margin-bottom: 20px; border-left: 4px solid var(--accent-color); padding-le
 .card-meta { display: flex; justify-content: space-between; padding: 0 10px 10px 10px; font-size: 12px; color: #888; }
 .star-count { color: #ffcc00; font-weight: bold; }
 
-/* --- MODAL & AVALIAÇÃO --- */
+/* --- CONTATO --- */
+.contact-section form { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: 0 auto; }
+.contact-section input, .contact-section textarea {
+    padding: 15px; border-radius: 8px; border: none; background: var(--card-bg); color: #fff;
+}
+.contact-section textarea { height: 120px; resize: none; }
+
+/* --- MODAL --- */
 .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:2000; overflow-y: auto; }
 .modal.active { display: flex; }
 .modal-content { width: 95%; max-width: 800px; position: relative; margin: 20px 0; }
 .close-btn { position: absolute; top: -35px; right: 0; color: #fff; cursor: pointer; }
 
-.rating-inside { background: rgba(255,255,255,0.05); padding: 15px; text-align: center; border-radius: 0 0 10px 10px; }
+.rating-inside { background: rgba(255,255,255,0.05); padding: 20px; text-align: center; border-radius: 0 0 10px 10px; }
 .rating-container { display: flex; flex-direction: column; align-items: center; margin: 10px 0; }
 .stars-wrapper { display: flex; flex-direction: row-reverse; gap: 15px; }
 .stars-wrapper input { display: none; }
 .stars-wrapper label { font-size: 35px; color: #333; cursor: pointer; }
 .stars-wrapper input:checked ~ label, .stars-wrapper label:hover, .stars-wrapper label:hover ~ label { color: #ffcc00; }
-
-.stars-numbers { display: flex; justify-content: center; gap: 34px; margin-top: 5px; color: #888; font-size: 14px; width: 250px; }
-.stars-numbers span { width: 20px; text-align: center; }
-
-#ratingMsg { font-size: 14px; color: var(--accent-color); margin-top: 5px; font-weight: bold; }
+.stars-numbers { display: flex; justify-content: center; gap: 34px; margin-top: 5px; color: #888; width: 250px; }
 
 .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:3000; }
 .overlay.active { display: flex; }
 .auth-box { background: var(--bg-color); padding: 30px; border-radius: 10px; text-align: center; width: 90%; max-width: 350px; border: 1px solid var(--accent-color); }
 
-.btn-primary { background: var(--accent-color); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: 700; margin-top: 5px; }
+.btn-primary { background: var(--accent-color); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: 700; }
 .btn-guest { background: #333; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 10px; }
 
 @media (max-width: 600px) {
