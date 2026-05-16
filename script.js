@@ -37,8 +37,11 @@ function filtrarCatalogo() {
 
 function entrarComoConvidado() {
     let auth = document.getElementById('authOverlay');
-    if(auth) auth.classList.remove('active');
-    document.body.style.overflow = 'auto'; 
+    if(auth) {
+        auth.style.display = 'none'; // Essa linha é a marreta que força a tela a sumir!
+        auth.classList.remove('active');
+    }
+    document.body.style.overflow = 'auto'; // Devolve a rolagem da página
 }
 
 function toggleTheme() {
