@@ -40,6 +40,9 @@ function entrarComoConvidado() {
         auth.classList.remove('active');
     }
     document.body.style.overflow = 'auto'; 
+    
+    // SALVA A ESCOLHA NA MEMÓRIA DO NAVEGADOR!
+    localStorage.setItem('hkFilmes_acessoLiberado', 'true');
 }
 
 function registrarView(id) {
@@ -167,4 +170,16 @@ document.addEventListener('change', function(e) {
     }
 });
 
-window.addEventListener('DOMContentLoaded', carregarCatalogoDinamicamente);
+// AQUI ESTÁ A MÁGICA: Ao carregar a página, verifica se a pessoa já tinha entrado
+window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('hkFilmes_acessoLiberado') === 'true') {
+        let auth = document.getElementById('authOverlay');
+        if(auth) {
+            auth.style.display = 'none';
+            auth.classList.remove('active');
+        }
+        document.body.style.overflow = 'auto'; 
+    }
+    
+    carregarCatalogoDinamicamente();
+});
