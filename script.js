@@ -16,22 +16,31 @@ function mudarAba(aba) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// === CORREÇÃO DA PESQUISA APLICADA AQUI ===
 function filtrarCatalogo() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase();
     const cards = document.querySelectorAll('.card');
     
     cards.forEach(card => {
-        const title = card.querySelector('h3').innerText.toLowerCase();
-        card.style.display = title.includes(filter) ? "" : "none";
+        // Adicionada uma trava de segurança para só pesquisar se o título já carregou
+        const titleEl = card.querySelector('h3');
+        if (titleEl) {
+            const title = titleEl.innerText.toLowerCase();
+            card.style.display = title.includes(filter) ? "" : "none";
+        }
     });
 
     if (filter !== "") {
         document.getElementById('filmes').style.display = "block";
         document.getElementById('series').style.display = "block";
         document.getElementById('animes').style.display = "block";
+    } else {
+        // Se o usuário apagar o texto, volta para a aba principal normal
+        mudarAba('tudo');
     }
 }
+// ==========================================
 
 function entrarComoConvidado() {
     let auth = document.getElementById('authOverlay');
@@ -172,6 +181,14 @@ document.addEventListener('change', function(e) {
 
 // AQUI ESTÁ A MÁGICA: Ao carregar a página, verifica se a pessoa já tinha entrado
 window.addEventListener('DOMContentLoaded', () => {
+    
+    // === GATILHO DA PESQUISA DINÂMICA ===
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', filtrarCatalogo);
+    }
+    // ====================================
+
     if (localStorage.getItem('hkFilmes_acessoLiberado') === 'true') {
         let auth = document.getElementById('authOverlay');
         if(auth) {
