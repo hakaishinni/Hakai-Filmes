@@ -7,7 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=21">
 </head>
-<body style="overflow: hidden;"> <div id="authOverlay" class="active" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+<body style="overflow: hidden;">
+
+    <div id="authOverlay" class="active" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;">
         <div style="background: #111; padding: 40px; border-radius: 10px; text-align: center; border: 1px solid #333; max-width: 400px; width: 90%;">
             <div class="logo" style="font-size: 2em; margin-bottom: 10px;">HK<span style="color: #e50914;">Filmes</span></div>
             <p style="margin-bottom: 20px; color: #aaa;">Faça login ou continue para explorar o catálogo.</p>
@@ -35,7 +37,6 @@
                 <li><a style="cursor:pointer;" onclick="mudarAba('tudo')">Contato</a></li>
             </ul>
         </nav>
-        <button id="themeToggle">☀️ Light</button>
     </header>
 
     <main>
@@ -66,7 +67,7 @@
             <h2>Apoie o Projeto</h2>
             
             <div class="pix-box" style="background: rgba(229, 9, 20, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 1px solid #e50914;">
-                <p style="margin-bottom: 10px;">Ajude a manter o projeto gratuito e no ar!</p>
+                <p style="margin-bottom: 10px;">Gostou do site? Pague um cafézinho para o desenvolvedor e ajude a manter o projeto no ar!</p>
                 <p style="color: #e50914; font-weight: bold; font-size: 1.1em;">Chave Pix:</p>
                 <p style="user-select: all; background: #111; padding: 10px; border-radius: 5px; margin-top: 5px; word-break: break-all; color: #fff;">ba714471-1484-4618-a070-4a991de0395d</p>
             </div>
@@ -88,17 +89,19 @@
             <div id="videoContainer" style="width:100%; aspect-ratio:16/9; background:#000;"></div>
             
             <div class="rating-inside">
-                <h3>Avalie este título:</h3>
+                <h3 id="ratingTitle">De 1 a 5, como avalia este filme?</h3> 
+                
                 <div class="stars-wrapper">
-                    <input type="radio" name="star" id="star5" value="5"><label for="star5">★</label>
-                    <input type="radio" name="star" id="star4" value="4"><label for="star4">★</label>
-                    <input type="radio" name="star" id="star3" value="3"><label for="star3">★</label>
-                    <input type="radio" name="star" id="star2" value="2"><label for="star2">★</label>
-                    <input type="radio" name="star" id="star1" value="1"><label for="star1">★</label>
+                    <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
+                    <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                    <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                    <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                    <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
                 </div>
                 <div class="stars-numbers">
                     <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                 </div>
+                <p id="ratingMsg" style="color: #e50914; margin-top: 10px; font-weight: bold; text-align: center;"></p>
             </div>
         </div>
     </div>
