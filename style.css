@@ -92,17 +92,17 @@ nav ul li a:hover {
     gap: 15px;
     padding: 10px 0 20px 0;
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* Liga a aceleração física do touch */
-    scrollbar-width: none; /* Oculta barra no Firefox */
+    -webkit-overflow-scrolling: touch; 
+    scrollbar-width: none; 
 }
 
 .grid-catalog::-webkit-scrollbar {
-    display: none; /* Oculta barra no Android/Chrome */
+    display: none; 
 }
 
 /* CARDS CONFIG */
 .card {
-    flex: 0 0 auto; /* Impede os cards de encolherem, mantendo a fila reta */
+    flex: 0 0 auto; 
     width: 140px;
     background: #111;
     border-radius: 8px;
@@ -165,22 +165,25 @@ nav ul li a:hover {
     display: flex;
 }
 
-/* INTERFACE REVOLUÇÃO NETFLIX */
+/* =========================================================
+   INTERFACE REVOLUÇÃO NETFLIX - 100% TELA CHEIA MOBILE
+   ========================================================= */
 .modal-content.netflix-style {
     background: #141414;
-    width: 95%;
-    max-width: 650px;
-    border-radius: 12px;
-    border: 1px solid #222;
+    width: 100%; /* Estica para 100% da tela */
+    height: 100%; /* Estica até o pé da tela */
+    max-width: none; /* Tira o limite que existia antes */
+    max-height: 100vh;
+    border-radius: 0; /* Tira as bordas redondas para encostar nos cantos */
+    border: none;
     overflow-y: auto;
-    max-height: 90vh;
     position: relative;
-    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    padding-top: env(safe-area-inset-top); /* Protege contra a câmera do celular */
 }
 
 .close-btn {
     position: absolute;
-    top: 15px;
+    top: 20px;
     right: 15px;
     color: #fff;
     font-size: 0.8em;
@@ -188,7 +191,7 @@ nav ul li a:hover {
     cursor: pointer;
     z-index: 100;
     background: rgba(0,0,0,0.7);
-    padding: 6px 12px;
+    padding: 8px 15px;
     border-radius: 20px;
     border: 1px solid #444;
 }
@@ -196,9 +199,10 @@ nav ul li a:hover {
 /* BACKDROP 16:9 DENTRO DO MODAL */
 .modal-backdrop {
     width: 100%;
-    height: 240px;
+    height: 40vh; /* Aumentado para dar mais impacto visual no topo */
+    min-height: 250px;
     background-size: cover;
-    background-position: center;
+    background-position: center top;
     position: relative;
     display: flex;
     align-items: flex-end;
@@ -216,15 +220,16 @@ nav ul li a:hover {
 }
 
 #modalTitle {
-    font-size: 1.8em;
+    font-size: 2em;
     font-weight: 700;
     color: #fff;
     z-index: 2;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    margin-bottom: -10px;
 }
 
 .modal-info {
-    padding: 20px;
+    padding: 25px 20px;
 }
 
 .meta-row {
@@ -233,7 +238,7 @@ nav ul li a:hover {
     align-items: center;
     font-size: 0.9em;
     color: #aaa;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .meta-item.age-rating {
@@ -256,14 +261,16 @@ nav ul li a:hover {
     background: #ffffff;
     color: #000000;
     border: none;
-    padding: 10px 25px;
-    font-size: 1em;
+    padding: 12px 25px;
+    font-size: 1.1em;
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    flex: 1; /* Faz o botão esticar */
     transition: background 0.2s;
 }
 
@@ -275,22 +282,24 @@ nav ul li a:hover {
     background: rgba(255,255,255,0.15);
     color: #ffffff;
     border: 1px solid rgba(255,255,255,0.3);
-    padding: 10px 20px;
-    font-size: 1em;
+    padding: 12px 20px;
+    font-size: 1.1em;
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    flex: 1; /* Faz o botão esticar igual o outro */
 }
 
 /* GATILHO VISUAL: FAKE PROGRESS BAR */
 .continue-watching-container {
     background: #1e1e1e;
-    padding: 12px;
+    padding: 15px;
     border-radius: 6px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     font-size: 0.85em;
     color: #bbb;
 }
@@ -300,21 +309,21 @@ nav ul li a:hover {
     height: 4px;
     background: #444;
     border-radius: 2px;
-    margin-top: 6px;
+    margin-top: 8px;
     overflow: hidden;
 }
 
 .fake-progress-fill {
-    width: 65%; /* Simulação de progresso assistido */
+    width: 65%; 
     height: 100%;
     background: #e50914;
 }
 
 .modal-overview {
-    font-size: 0.9em;
-    line-height: 1.5;
+    font-size: 0.95em;
+    line-height: 1.6;
     color: #ccc;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
     text-align: justify;
 }
 
@@ -323,27 +332,29 @@ nav ul li a:hover {
     background: #222;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 15px;
     width: 100%;
     text-align: left;
     font-weight: bold;
     cursor: pointer;
     border-bottom: 1px solid #333;
+    font-size: 1em;
 }
 
 /* SISTEMA ESTRELAS */
 .rating-inside {
     border-top: 1px solid #222;
-    padding-top: 15px;
+    padding-top: 20px;
+    margin-bottom: 20px;
 }
 
 .stars-wrapper {
     display: flex;
     flex-direction: row-reverse;
     justify-content: center;
-    gap: 5px;
-    font-size: 1.8em;
-    margin-top: 5px;
+    gap: 8px;
+    font-size: 2em;
+    margin-top: 10px;
 }
 
 .stars-wrapper input { display: none; }
@@ -355,7 +366,8 @@ nav ul li a:hover {
 .stars-numbers {
     display: flex;
     justify-content: center;
-    gap: 18px;
-    font-size: 0.75em;
+    gap: 22px;
+    font-size: 0.8em;
     color: #666;
+    margin-top: 5px;
 }
