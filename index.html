@@ -6,7 +6,7 @@
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=25">
+    <link rel="stylesheet" href="style.css?v=28">
 </head>
 <body style="overflow: hidden;">
 
@@ -47,6 +47,11 @@
             </div>
         </section>
 
+        <section id="tendencias" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+            <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">🔥 Em Alta Hoje</h2>
+            <div id="carrossel-tendencias" class="grid-catalog"></div>
+        </section>
+
         <section id="filmes" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Catálogo de Filmes</h2>
             <div id="carrossel-filmes" class="grid-catalog"></div>
@@ -79,7 +84,9 @@
             <div id="detailsView">
                 <div id="modalBackdrop" class="modal-backdrop">
                     <div class="backdrop-gradient"></div>
-                    <h1 id="modalTitle">Carregando...</h1>
+                    <div id="modalTitleContainer" style="z-index: 2; width: 100%;">
+                        <h1 id="modalTitle">Carregando...</h1>
+                    </div>
                 </div>
                 
                 <div class="modal-info">
@@ -89,25 +96,28 @@
                         <span id="modalDuration" class="meta-item">-- Temp.</span>
                     </div>
 
-                    <p id="modalGenres" style="color: #999; font-size: 0.85em; margin-bottom: 20px; font-weight: 600;">Carregando gêneros...</p>
+                    <p id="modalGenres" style="color: #999; font-size: 0.85em; margin-bottom: 20px; font-weight: 600;"></p>
+                    <p id="modalTagline" style="color: #fff; font-style: italic; margin-bottom: 15px; font-size: 0.9em;"></p>
                     
-                    <div class="action-buttons">
+                    <div class="action-buttons" style="flex-wrap: wrap;">
                         <button class="btn-netflix-play" onclick="darPlayNoVideo()"><i class="fa-solid fa-play"></i> Assistir</button>
+                        <button id="btnTrailer" class="btn-netflix-secondary" style="display: none;"><i class="fa-solid fa-film"></i> Trailer</button>
                         <button class="btn-netflix-secondary"><i class="fa-solid fa-plus"></i> Minha Lista</button>
                     </div>
 
-                    <div class="continue-watching-container">
-                        <p><i class="fa-solid fa-rotate-left"></i> Parou no episódio anterior</p>
-                        <div class="fake-progress-bar"><div class="fake-progress-fill"></div></div>
-                    </div>
-
-                    <p id="modalOverview" class="modal-overview">Buscando sinopse oficial no banco de dados do TMDB...</p>
+                    <p id="modalOverview" class="modal-overview">Buscando sinopse oficial...</p>
                     
                     <div class="cast-crew-container">
-                        <p><span class="cast-label">Estrelando:</span> <span id="modalCast">Carregando...</span></p>
-                        <p><span class="cast-label">Direção/Criação:</span> <span id="modalCreator">Carregando...</span></p>
+                        <p class="cast-label">Elenco Principal:</p>
+                        <div id="modalCastGrid" class="cast-grid"></div>
+                        <p style="margin-top: 15px;"><span class="cast-label">Direção/Criação:</span> <span id="modalCreator">Carregando...</span></p>
                     </div>
                     
+                    <div class="similar-section" style="margin-top: 30px; border-top: 1px solid #222; padding-top: 20px;">
+                        <h3 style="font-size: 1.1em; margin-bottom: 15px; color: #fff;">Títulos Semelhantes</h3>
+                        <div id="modalSimilarGrid" class="similar-grid"></div>
+                    </div>
+
                     <div class="rating-inside">
                         <h3 id="ratingTitle">De 1 a 5, como avalia este título?</h3> 
                         <div class="stars-wrapper">
@@ -124,8 +134,13 @@
             </div>
 
             <div id="videoView" style="display: none; width: 100%; height: 100%; flex-direction: column;">
-                <button class="back-to-details" onclick="voltarParaDetalhes()"><i class="fa-solid fa-arrow-left"></i> Voltar para os Detalhes</button>
+                <button class="back-to-details" onclick="voltarParaDetalhes()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
                 <div id="videoContainer" style="width:100%; flex: 1; background:#000;"></div>
+            </div>
+            
+            <div id="trailerView" style="display: none; width: 100%; height: 100%; flex-direction: column;">
+                <button class="back-to-details" onclick="voltarParaDetalhes()"><i class="fa-solid fa-arrow-left"></i> Fechar Trailer</button>
+                <div id="trailerContainer" style="width:100%; flex: 1; background:#000;"></div>
             </div>
         </div>
     </div>
