@@ -1,148 +1,266 @@
-:root {
-    --bg-color: #040D12;
-    --text-color: #f3f3f3;
-    --accent-color: #C63C51;
-    --card-bg: rgba(255, 255, 255, 0.05);
+/* RESET BÁSICO */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
-
-.light-mode {
-    --bg-color: #f3f3f3;
-    --text-color: #040D12;
-    --accent-color: #C63C51;
-    --card-bg: rgba(0, 0, 0, 0.1);
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color 0.3s ease;
+    background-color: #08080a; /* Fundo escuro total estilo cinema */
+    color: #ffffff;
     overflow-x: hidden;
 }
 
+/* CABEÇALHO / MENU FIXO */
 header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 5%;
-    background-color: rgba(4, 13, 18, 0.95);
-    position: fixed; width: 100%; z-index: 100;
+    display: flex;
+    justify-content: space-between; /* Espalha a logo e o menu */
+    align-items: center;
+    padding: 20px 5%;
+    background: rgba(8, 8, 10, 0.95);
+    position: sticky;
     top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #222;
 }
 
-.logo { font-size: 24px; font-weight: 700; color: var(--accent-color); }
-.logo span { color: var(--text-color); }
-
-nav ul { list-style: none; display: flex; gap: 15px; }
-nav a { text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 14px; transition: 0.3s; }
-nav a:hover { color: var(--accent-color); }
-
-#themeToggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-
-/* ========================================================
-   CORREÇÃO DO CORTE: O padding principal vai no MAIN agora 
-   ======================================================== */
-main {
-    padding-top: 90px; /* Compensa o tamanho do menu no PC */
+.logo {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #fff;
 }
 
-/* HERO & PESQUISA */
-.hero-section {
-    padding: 0 5% 20px 5%; /* Tirei o espaço gigante que ficava aqui */
-    text-align: center;
+.logo span {
+    color: #e50914; /* Vermelho HK Filmes */
 }
-.hero-content h1 { font-size: 1.8rem; margin-bottom: 5px; }
 
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap; /* Evita que o menu quebre em telas pequenas */
+    justify-content: center;
+}
+
+nav ul li a {
+    color: #ccc;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: color 0.3s;
+}
+
+nav ul li a:hover {
+    color: #e50914;
+}
+
+/* HERO E BARRA DE PESQUISA */
 .search-container {
     position: relative;
-    max-width: 400px;
-    margin: 20px auto 0 auto;
+    max-width: 600px;
+    margin: 0 auto;
     width: 90%;
 }
-#searchInput {
+
+.search-container input {
     width: 100%;
-    padding: 12px 45px 12px 20px;
-    border-radius: 25px;
-    border: 2px solid var(--accent-color);
-    background: var(--card-bg);
-    color: var(--text-color);
+    padding: 12px 20px;
+    border-radius: 30px;
+    border: 1px solid #333;
+    background: #111;
+    color: #fff;
+    font-size: 1em;
     outline: none;
+    transition: border-color 0.3s;
 }
-.search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
 
-section { padding: 20px 5% 30px 5%; } 
-h2 { margin-bottom: 15px; border-left: 4px solid var(--accent-color); padding-left: 10px; font-size: 1.3rem; }
+.search-container input:focus {
+    border-color: #e50914;
+}
 
-/* CARROSSEL STYLE NETFLIX */
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2em;
+    pointer-events: none;
+}
+
+/* =========================================================
+   A MÁGICA DO CARROSSEL: DESLIZE SUAVE E SEM BARRA FEIA
+   ========================================================= */
 .grid-catalog {
     display: flex;
-    overflow-x: auto;
+    overflow-x: auto; /* Permite arrastar para o lado */
     gap: 15px;
-    padding-bottom: 15px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    -ms-overflow-style: none; 
+    padding: 10px 0 20px 0;
+    
+    /* Aceleração de hardware para o dedo deslizar liso no Android/iOS */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; 
+    
+    /* Esconde a barra de rolagem no Firefox */
     scrollbar-width: none; 
 }
 
+/* Esconde a barra de rolagem no Chrome/Safari/Edge */
 .grid-catalog::-webkit-scrollbar {
+    display: none; 
+}
+
+/* CARDS DOS FILMES E SÉRIES */
+.card {
+    flex: 0 0 auto; /* Impede os cards de encolherem, mantendo a fila reta */
+    width: 140px;   /* Largura ideal do poster */
+    background: #111;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover {
+    transform: scale(1.05); /* Efeito de dar um pulinho ao clicar/passar o mouse */
+    border-color: #e50914;
+}
+
+.card img {
+    width: 100%;
+    height: 210px; /* Mantém a proporção do cartaz padrão */
+    object-fit: cover;
+}
+
+.card h3 {
+    font-size: 0.85em;
+    padding: 10px 10px 5px 10px;
+    white-space: nowrap; /* Não deixa o texto quebrar de linha */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Coloca "..." se o título for gigante */
+    color: #fff;
+}
+
+.card-meta {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px 10px 10px;
+    font-size: 0.8em;
+    color: #aaa;
+}
+
+.card-meta .star-count {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+/* TELA DE LOGIN OVERLAY */
+#authOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 9999;
+    display: none; /* Só aparece quando o JS chama a classe active */
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#authOverlay.active {
+    display: flex;
+}
+
+/* MODAL DO PLAYER DE VÍDEO */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #111;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.2);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #fff;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.close-btn:hover {
+    background: #e50914;
+}
+
+/* SISTEMA DE ESTRELAS DENTRO DO PLAYER */
+.rating-inside {
+    padding: 15px;
+    text-align: center;
+    background: #08080a;
+}
+
+.stars-wrapper {
+    display: flex;
+    flex-direction: row-reverse; /* Inverte a ordem para a lógica do CSS funcionar */
+    justify-content: center;
+    gap: 5px;
+    font-size: 2em;
+}
+
+.stars-wrapper input {
     display: none;
 }
 
-.card { 
-    background-color: var(--card-bg); 
-    border-radius: 8px; 
-    overflow: hidden; 
-    cursor: pointer; 
-    transition: transform 0.2s; 
-    flex: 0 0 160px; 
-    scroll-snap-align: start;
+.stars-wrapper label {
+    color: #444;
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
-.card:hover { transform: translateY(-3px); }
-.card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-.card h3 { padding: 8px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Mágica para acender as estrelas até onde você passou o mouse/clicou */
+.stars-wrapper input:checked ~ label,
+.stars-wrapper label:hover,
+.stars-wrapper label:hover ~ label {
+    color: #ffc107;
+}
 
-/* VISUALIZAÇÕES E AVALIAÇÕES */
-.card-meta { display: flex; justify-content: space-between; padding: 0 10px 10px 10px; font-size: 12px; color: #ddd; font-weight: 600; }
-.star-count { color: #ffcc00; font-weight: bold; }
-.view-count { color: #fff; } 
-
-/* CONTATO E APOIO */
-.contact-section form { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: 0 auto; }
-.contact-section input, .contact-section textarea { padding: 12px; border-radius: 5px; border: none; background: var(--card-bg); color: var(--text-color); font-family: 'Poppins', sans-serif;}
-.contact-section textarea { height: 100px; resize: none; }
-#contactStatus { margin-top: 10px; font-size: 14px; color: var(--accent-color); text-align: center; font-weight: bold;}
-
-/* MODAL / PLAYER */
-.modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:2000; overflow-y: auto; }
-.modal.active { display: flex; }
-.modal-content { width: 95%; max-width: 800px; position: relative; margin: 20px 0;}
-.close-btn { position: absolute; top: -35px; right: 0; color: #fff; cursor: pointer; font-weight: bold;}
-
-.rating-inside { background: rgba(255,255,255,0.05); padding: 15px; text-align: center; border-radius: 0 0 10px 10px; }
-.stars-wrapper { display: flex; flex-direction: row-reverse; justify-content: center; gap: 10px; margin: 10px 0; }
-.stars-wrapper input { display: none; }
-.stars-wrapper label { font-size: 30px; color: #333; cursor: pointer; transition: 0.2s;}
-.stars-wrapper input:checked ~ label, .stars-wrapper label:hover, .stars-wrapper label:hover ~ label { color: #ffcc00; text-shadow: 0 0 10px #ffcc00;}
-.stars-numbers { display: flex; justify-content: center; gap: 28px; color: #888; font-size: 12px; font-weight: bold;}
-
-/* LOGIN OVERLAY */
-.overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:3000; }
-.overlay.active { display: flex; }
-.auth-box { background: var(--bg-color); padding: 25px; border-radius: 10px; text-align: center; width: 90%; max-width: 320px; border: 1px solid var(--accent-color); }
-.btn-primary { background: var(--accent-color); color: #fff; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: 700; }
-.btn-guest { background: #333; color: #fff; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-
-/* RESPONSIVO PARA O POCO C75 (E CELULARES EM GERAL) */
-@media (max-width: 600px) {
-    header { flex-direction: column; gap: 10px; padding: 15px 5%; }
-    nav ul { gap: 10px; flex-wrap: wrap; justify-content: center; }
-    
-    /* COMPENSA O MENU DE CELULAR QUE É MAIS ALTO */
-    main { padding-top: 150px; }
-    .hero-section { padding: 0 5% 20px 5%; }
-    
-    .card { flex: 0 0 42%; }
+.stars-numbers {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 0.8em;
+    color: #aaa;
+    margin-top: 5px;
 }
