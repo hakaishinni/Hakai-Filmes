@@ -21,7 +21,6 @@ function filtrarCatalogo() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase();
     const cards = document.querySelectorAll('.card');
-    
     cards.forEach(card => {
         const titleEl = card.querySelector('h3');
         if (titleEl) {
@@ -29,22 +28,16 @@ function filtrarCatalogo() {
             card.style.display = title.includes(filter) ? "" : "none";
         }
     });
-
     if (filter !== "") {
         document.getElementById('filmes').style.display = "block";
         document.getElementById('series').style.display = "block";
         document.getElementById('animes').style.display = "block";
-    } else {
-        mudarAba('tudo');
-    }
+    } else { mudarAba('tudo'); }
 }
 
 function entrarComoConvidado() {
     let auth = document.getElementById('authOverlay');
-    if(auth) {
-        auth.style.display = 'none';
-        auth.classList.remove('active');
-    }
+    if(auth) { auth.style.display = 'none'; auth.classList.remove('active'); }
     document.body.style.overflow = 'auto'; 
     localStorage.setItem('hkFilmes_acessoLiberado', 'true');
 }
@@ -58,27 +51,24 @@ function registrarView(id) {
 }
 
 function abrirPlayer(idFilme) {
-    window.filmeAbertoID = idFilme;
-    window.tipoAberto = 'movie';
+    window.filmeAbertoID = idFilme; window.tipoAberto = 'movie';
     exibirTelaDetalhes(idFilme, 'movie');
 }
 
 function abrirPlayerSerie(idSerie) {
-    window.filmeAbertoID = idSerie;
-    window.tipoAberto = 'tv';
+    window.filmeAbertoID = idSerie; window.tipoAberto = 'tv';
     exibirTelaDetalhes(idSerie, 'tv');
 }
 
-// === MOTOR DA TELA DE DETALHES (AGORA COM IDADE AUTOMÁTICA) ===
+// === MOTOR TURBINADO: AGORA PUXA CRÉDITOS, GÊNEROS E TEMPO EXATO ===
 function exibirTelaDetalhes(id, tipo) {
     document.getElementById('videoView').style.display = 'none';
     document.getElementById('detailsView').style.display = 'block';
     document.getElementById('videoContainer').innerHTML = ''; 
-
     document.getElementById('playerModal').classList.add('active');
 
-    // MÁGICA AQUI: Pede o 'release_dates' (filmes) ou 'content_ratings' (séries) junto com os dados!
-    const extraData = tipo === 'movie' ? 'release_dates' : 'content_ratings';
+    // MÁGICA: Adicionado o "credits" no final do link!
+    const extraData = tipo === 'movie' ? 'release_dates,credits' : 'content_ratings,credits';
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR&append_to_response=${extraData}`;
     
     fetch(url)
@@ -92,9 +82,29 @@ function exibirTelaDetalhes(id, tipo) {
             document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível para este título.";
             document.getElementById('modalYear').innerText = ano;
             
-            // --- SISTEMA DE CLASSIFICAÇÃO DE IDADE (BRASIL) ---
-            let ageRating = 'SR'; 
+            // --- 1. GÊNEROS ---
+            const generos = dados.genres && dados.genres.length > 0 
+                ? dados.genres.map(g => g.name).join(' • ') 
+                : 'Categoria Desconhecida';
+            document.getElementById('modalGenres').innerText = generos;
+
+            // --- 2. ELENCO E CRIAÇÃO ---
+            const elenco = dados.credits && dados.credits.cast && dados.credits.cast.length > 0 
+                ? dados.credits.cast.slice(0, 4).map(a => a.name).join(', ') 
+                : 'Não informado';
+            document.getElementById('modalCast').innerText = elenco;
+
+            let criador = 'Não informado';
+            if (tipo === 'tv' && dados.created_by && dados.created_by.length > 0) {
+                criador = dados.created_by.map(c => c.name).join(', ');
+            } else if (tipo === 'movie' && dados.credits && dados.credits.crew) {
+                const diretor = dados.credits.crew.find(c => c.job === 'Director' || c.job === 'Diretor');
+                if (diretor) criador = diretor.name;
+            }
+            document.getElementById('modalCreator').innerText = criador;
             
+            // --- 3. SISTEMA DE CLASSIFICAÇÃO DE IDADE ---
+            let ageRating = 'SR'; 
             if (tipo === 'movie' && dados.release_dates) {
                 const brRelease = dados.release_dates.results.find(r => r.iso_3166_1 === 'BR');
                 if (brRelease && brRelease.release_dates.length > 0) {
@@ -103,86 +113,72 @@ function exibirTelaDetalhes(id, tipo) {
                 }
             } else if (tipo === 'tv' && dados.content_ratings) {
                 const brRating = dados.content_ratings.results.find(r => r.iso_3166_1 === 'BR');
-                if (brRating && brRating.rating) {
-                    ageRating = brRating.rating;
-                }
+                if (brRating && brRating.rating) ageRating = brRating.rating;
             }
 
-            // Traduzindo e Colorindo conforme a lei brasileira
-            let ageColor = '#555'; // Cinza (Padrão/SR)
-            let textColor = '#fff';
-            let borderStyle = 'none';
-
-            if (ageRating === 'L' || ageRating === 'Livre' || ageRating === '0') { 
-                ageRating = 'L'; ageColor = '#0c8b3e'; // Verde
-            } else if (ageRating === '10') { ageColor = '#0f7cc0'; // Azul
-            } else if (ageRating === '12') { ageColor = '#ffc107'; textColor = '#000'; // Amarelo com texto preto
-            } else if (ageRating === '14') { ageColor = '#e67822'; // Laranja
-            } else if (ageRating === '16') { ageColor = '#e50914'; // Vermelho
-            } else if (ageRating === '18') { ageColor = '#000000'; borderStyle = '1px solid #fff'; // Preto com borda branca
-            } else { ageRating = 'SR'; } // Sem Restrição/Desconhecido
+            let ageColor = '#555'; let textColor = '#fff'; let borderStyle = '1px solid transparent';
+            if (ageRating === 'L' || ageRating === 'Livre' || ageRating === '0') { ageRating = 'L'; ageColor = '#0c8b3e'; 
+            } else if (ageRating === '10') { ageColor = '#0f7cc0'; 
+            } else if (ageRating === '12') { ageColor = '#ffc107'; textColor = '#000'; 
+            } else if (ageRating === '14') { ageColor = '#e67822'; 
+            } else if (ageRating === '16') { ageColor = '#e50914'; 
+            } else if (ageRating === '18') { ageColor = '#000000'; borderStyle = '1px solid #fff'; 
+            } else { ageRating = 'SR'; borderStyle = '1px solid #888'; background = 'transparent'; color='#888';} 
 
             const ratingBadge = document.querySelector('.meta-item.age-rating');
-            ratingBadge.innerText = ageRating;
-            ratingBadge.style.backgroundColor = ageColor;
-            ratingBadge.style.color = textColor;
-            ratingBadge.style.border = borderStyle;
-            // ---------------------------------------------------
+            ratingBadge.innerText = ageRating; ratingBadge.style.backgroundColor = ageColor;
+            ratingBadge.style.color = textColor; ratingBadge.style.border = borderStyle;
 
+            // --- 4. DURAÇÃO CORRIGIDA ---
             if (tipo === 'tv') {
                 const temporadas = dados.number_of_seasons || '1';
-                document.getElementById('modalDuration').innerText = temporadas + (temporadas > 1 ? " Temporadas" : " Temporada");
+                let txtTempo = temporadas + (temporadas > 1 ? " Temporadas" : " Temporada");
+                
+                // Pega o tempo médio do episódio se existir
+                if (dados.episode_run_time && dados.episode_run_time.length > 0) {
+                    txtTempo += ` (${dados.episode_run_time[0]}m por ep.)`;
+                }
+                document.getElementById('modalDuration').innerText = txtTempo;
                 document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalia esta série/anime?";
             } else {
-                const tempo = dados.runtime ? `${Math.floor(dados.runtime / 60)}h ${dados.runtime % 60}m` : '---';
-                document.getElementById('modalDuration').innerText = tempo;
+                const runtime = dados.runtime;
+                if (runtime && runtime > 0) {
+                    document.getElementById('modalDuration').innerText = `${Math.floor(runtime / 60)}h ${runtime % 60}m`;
+                } else {
+                    document.getElementById('modalDuration').innerText = 'Duração Indisponível';
+                }
                 document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalia este filme?";
             }
 
             const backdropEl = document.getElementById('modalBackdrop');
-            if (backdrop) {
-                backdropEl.style.backgroundImage = `url('${backdrop}')`;
-            } else {
-                backdropEl.style.backgroundImage = 'none';
-            }
+            if (backdrop) { backdropEl.style.backgroundImage = `url('${backdrop}')`;
+            } else { backdropEl.style.backgroundImage = 'none'; }
         })
         .catch(erro => console.error("Erro ao puxar detalhes da API:", erro));
 
-    resetarEstrelas();
-    registrarView(id); 
+    resetarEstrelas(); registrarView(id); 
 }
 
 function darPlayNoVideo() {
-    const id = window.filmeAbertoID;
-    const tipo = window.tipoAberto;
-    if (!id) return;
-
+    const id = window.filmeAbertoID; const tipo = window.tipoAberto; if (!id) return;
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('videoView').style.display = 'block';
-
     let urlEmbed = tipo === 'tv' ? `https://myembed.biz/serie/${id}` : `https://myembed.biz/filme/${id}`;
     document.getElementById('videoContainer').innerHTML = `<iframe src="${urlEmbed}" width="100%" style="height: 100%; border:none;" allowfullscreen></iframe>`;
 }
 
 function voltarParaDetalhes() {
-    document.getElementById('videoView').style.display = 'none';
-    document.getElementById('detailsView').style.display = 'block';
+    document.getElementById('videoView').style.display = 'none'; document.getElementById('detailsView').style.display = 'block';
     document.getElementById('videoContainer').innerHTML = ''; 
 }
 
 function resetarEstrelas() {
-    const msgEl = document.getElementById('ratingMsg');
-    if(msgEl) msgEl.innerText = "";
-    
-    document.querySelectorAll('input[name="rating"]').forEach(s => { 
-        s.checked = false; 
-        s.disabled = false; 
-    });
+    const msgEl = document.getElementById('ratingMsg'); if(msgEl) msgEl.innerText = "";
+    document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; });
 }
 
 function fecharPlayer() {
-    document.getElementById('playerModal').classList.remove('active'); 
-    document.getElementById('videoContainer').innerHTML = ''; 
+    document.getElementById('playerModal').classList.remove('active'); document.getElementById('videoContainer').innerHTML = ''; 
 }
 
 const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
@@ -200,62 +196,26 @@ function carregarCatalogoDinamicamente() {
 
 function puxarDadosTMDB(id, containerId, tipo) {
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
-    
-    fetch(url)
-        .then(resposta => resposta.json())
-        .then(dados => {
+    fetch(url).then(resposta => resposta.json()).then(dados => {
             const titulo = dados.title || dados.name; 
             const poster = `https://image.tmdb.org/t/p/w500${dados.poster_path}`;
             const container = document.getElementById(containerId);
             const card = document.createElement('div');
             card.className = 'card';
-            
-            if (tipo === 'tv') {
-                card.setAttribute('onclick', `abrirPlayerSerie('${id}')`); 
-            } else {
-                card.setAttribute('onclick', `abrirPlayer('${id}')`); 
-            }
-            
-            card.innerHTML = `
-                <img src="${poster}" alt="${titulo}">
-                <h3>${titulo}</h3>
-                <div class="card-meta">
-                    <span>⭐ <span class="star-count" id="star-${id}">0.0</span></span>
-                    <span>👁️ <span class="view-count" id="view-${id}">0</span></span>
-                </div>
-            `;
-            
+            if (tipo === 'tv') { card.setAttribute('onclick', `abrirPlayerSerie('${id}')`); } else { card.setAttribute('onclick', `abrirPlayer('${id}')`); }
+            card.innerHTML = `<img src="${poster}" alt="${titulo}"><h3>${titulo}</h3><div class="card-meta"><span>⭐ <span class="star-count" id="star-${id}">0.0</span></span><span>👁️ <span class="view-count" id="view-${id}">0</span></span></div>`;
             if (container) container.appendChild(card);
             
-            database.ref('views/' + id).on('value', (snap) => {
-                if(snap.exists()) {
-                    let viewSpan = document.getElementById('view-' + id);
-                    if(viewSpan) viewSpan.innerText = snap.val();
-                }
-            });
-            
-            database.ref('ratings/' + id).on('value', (snap) => {
-                if(snap.exists()) {
-                    let total = 0, count = 0;
-                    snap.forEach(voto => { total += voto.val(); count++; });
-                    let media = (total / count).toFixed(1);
-                    let starSpan = document.getElementById('star-' + id);
-                    if(starSpan) starSpan.innerText = media;
-                }
-            });
-        })
-        .catch(erro => console.error(`Erro ao puxar dados do ID ${id}:`, erro));
+            database.ref('views/' + id).on('value', (snap) => { if(snap.exists()) { let viewSpan = document.getElementById('view-' + id); if(viewSpan) viewSpan.innerText = snap.val(); } });
+            database.ref('ratings/' + id).on('value', (snap) => { if(snap.exists()) { let total = 0, count = 0; snap.forEach(voto => { total += voto.val(); count++; }); let media = (total / count).toFixed(1); let starSpan = document.getElementById('star-' + id); if(starSpan) starSpan.innerText = media; } });
+        }).catch(erro => console.error(`Erro ao puxar dados do ID ${id}:`, erro));
 }
 
 document.addEventListener('change', function(e) {
     if(e.target.name === 'rating' && window.filmeAbertoID) {
-        let nota = parseInt(e.target.value);
-        let timestamp = new Date().getTime(); 
-        
-        database.ref('ratings/' + window.filmeAbertoID + '/' + timestamp).set(nota)
-            .then(() => {
-                const msgEl = document.getElementById('ratingMsg');
-                if(msgEl) msgEl.innerText = "Obrigado por avaliar!";
+        let nota = parseInt(e.target.value); let timestamp = new Date().getTime(); 
+        database.ref('ratings/' + window.filmeAbertoID + '/' + timestamp).set(nota).then(() => {
+                const msgEl = document.getElementById('ratingMsg'); if(msgEl) msgEl.innerText = "Obrigado por avaliar!";
                 document.querySelectorAll('input[name="rating"]').forEach(s => s.disabled = true);
             });
     }
@@ -263,18 +223,11 @@ document.addEventListener('change', function(e) {
 
 window.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', filtrarCatalogo);
-    }
-
+    if (searchInput) searchInput.addEventListener('input', filtrarCatalogo);
     if (localStorage.getItem('hkFilmes_acessoLiberado') === 'true') {
         let auth = document.getElementById('authOverlay');
-        if(auth) {
-            auth.style.display = 'none';
-            auth.classList.remove('active');
-        }
+        if(auth) { auth.style.display = 'none'; auth.classList.remove('active'); }
         document.body.style.overflow = 'auto'; 
     }
-    
     carregarCatalogoDinamicamente();
 });
