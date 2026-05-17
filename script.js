@@ -1,5 +1,5 @@
 let filmeAbertoID = null;
-let tipoAberto = null; // Guarda se o título aberto é 'movie' ou 'tv'
+let tipoAberto = null; 
 
 function mudarAba(aba) {
     const secHome = document.getElementById('home');
@@ -57,9 +57,6 @@ function registrarView(id) {
     });
 }
 
-/* =======================================================
-   MOTOres REESCRITOS: ABRE A TELA DE DETALHES PRIMEIRO
-   ======================================================= */
 function abrirPlayer(idFilme) {
     window.filmeAbertoID = idFilme;
     window.tipoAberto = 'movie';
@@ -72,16 +69,17 @@ function abrirPlayerSerie(idSerie) {
     exibirTelaDetalhes(idSerie, 'tv');
 }
 
+// === MOTOR DA TELA DE DETALHES (AGORA COM IDADE AUTOMÁTICA) ===
 function exibirTelaDetalhes(id, tipo) {
-    // Garante as vistas na posição correta: Mostra Detalhes, Esconde Player
     document.getElementById('videoView').style.display = 'none';
     document.getElementById('detailsView').style.display = 'block';
     document.getElementById('videoContainer').innerHTML = ''; 
 
     document.getElementById('playerModal').classList.add('active');
 
-    // Vai buscar os metadados e o Backdrop 16:9 no TMDB
-    const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
+    // MÁGICA AQUI: Pede o 'release_dates' (filmes) ou 'content_ratings' (séries) junto com os dados!
+    const extraData = tipo === 'movie' ? 'release_dates' : 'content_ratings';
+    const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR&append_to_response=${extraData}`;
     
     fetch(url)
         .then(res => res.json())
@@ -94,7 +92,43 @@ function exibirTelaDetalhes(id, tipo) {
             document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível para este título.";
             document.getElementById('modalYear').innerText = ano;
             
-            // Renderiza Duração ou número de temporadas de forma inteligente
+            // --- SISTEMA DE CLASSIFICAÇÃO DE IDADE (BRASIL) ---
+            let ageRating = 'SR'; 
+            
+            if (tipo === 'movie' && dados.release_dates) {
+                const brRelease = dados.release_dates.results.find(r => r.iso_3166_1 === 'BR');
+                if (brRelease && brRelease.release_dates.length > 0) {
+                    let cert = brRelease.release_dates.find(d => d.certification !== '');
+                    if (cert) ageRating = cert.certification;
+                }
+            } else if (tipo === 'tv' && dados.content_ratings) {
+                const brRating = dados.content_ratings.results.find(r => r.iso_3166_1 === 'BR');
+                if (brRating && brRating.rating) {
+                    ageRating = brRating.rating;
+                }
+            }
+
+            // Traduzindo e Colorindo conforme a lei brasileira
+            let ageColor = '#555'; // Cinza (Padrão/SR)
+            let textColor = '#fff';
+            let borderStyle = 'none';
+
+            if (ageRating === 'L' || ageRating === 'Livre' || ageRating === '0') { 
+                ageRating = 'L'; ageColor = '#0c8b3e'; // Verde
+            } else if (ageRating === '10') { ageColor = '#0f7cc0'; // Azul
+            } else if (ageRating === '12') { ageColor = '#ffc107'; textColor = '#000'; // Amarelo com texto preto
+            } else if (ageRating === '14') { ageColor = '#e67822'; // Laranja
+            } else if (ageRating === '16') { ageColor = '#e50914'; // Vermelho
+            } else if (ageRating === '18') { ageColor = '#000000'; borderStyle = '1px solid #fff'; // Preto com borda branca
+            } else { ageRating = 'SR'; } // Sem Restrição/Desconhecido
+
+            const ratingBadge = document.querySelector('.meta-item.age-rating');
+            ratingBadge.innerText = ageRating;
+            ratingBadge.style.backgroundColor = ageColor;
+            ratingBadge.style.color = textColor;
+            ratingBadge.style.border = borderStyle;
+            // ---------------------------------------------------
+
             if (tipo === 'tv') {
                 const temporadas = dados.number_of_seasons || '1';
                 document.getElementById('modalDuration').innerText = temporadas + (temporadas > 1 ? " Temporadas" : " Temporada");
@@ -105,7 +139,6 @@ function exibirTelaDetalhes(id, tipo) {
                 document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalia este filme?";
             }
 
-            // Aplica a imagem de fundo panorâmica
             const backdropEl = document.getElementById('modalBackdrop');
             if (backdrop) {
                 backdropEl.style.backgroundImage = `url('${backdrop}')`;
@@ -119,22 +152,18 @@ function exibirTelaDetalhes(id, tipo) {
     registrarView(id); 
 }
 
-// FUNÇÃO DO BOTÃO "ASSISTIR" DA NETFLIX (ABRE O PLAYER DE VERDADE)
 function darPlayNoVideo() {
     const id = window.filmeAbertoID;
     const tipo = window.tipoAberto;
     if (!id) return;
 
-    // Inverte as telas de visualização
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('videoView').style.display = 'block';
 
-    // Dispara o Iframe correto
     let urlEmbed = tipo === 'tv' ? `https://myembed.biz/serie/${id}` : `https://myembed.biz/filme/${id}`;
     document.getElementById('videoContainer').innerHTML = `<iframe src="${urlEmbed}" width="100%" style="height: 100%; border:none;" allowfullscreen></iframe>`;
 }
 
-// VOLTAR DO PLAYER DE VÍDEO PARA A TELA DE DETALHES
 function voltarParaDetalhes() {
     document.getElementById('videoView').style.display = 'none';
     document.getElementById('detailsView').style.display = 'block';
@@ -156,9 +185,6 @@ function fecharPlayer() {
     document.getElementById('videoContainer').innerHTML = ''; 
 }
 
-/* =======================================================
-   SISTEMA DE CATÁLOGO DINÂMICO AUTOMÁTICO (FIREBASE)
-   ======================================================= */
 const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
 
 function carregarCatalogoDinamicamente() {
@@ -201,7 +227,6 @@ function puxarDadosTMDB(id, containerId, tipo) {
             
             if (container) container.appendChild(card);
             
-            // Ouvintes Realtime
             database.ref('views/' + id).on('value', (snap) => {
                 if(snap.exists()) {
                     let viewSpan = document.getElementById('view-' + id);
