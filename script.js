@@ -1,4 +1,5 @@
 let filmeAbertoID = null;
+let tipoAberto = null; // Guarda se o título aberto é 'movie' ou 'tv'
 
 function mudarAba(aba) {
     const secHome = document.getElementById('home');
@@ -16,14 +17,12 @@ function mudarAba(aba) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// === CORREÇÃO DA PESQUISA APLICADA AQUI ===
 function filtrarCatalogo() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase();
     const cards = document.querySelectorAll('.card');
     
     cards.forEach(card => {
-        // Adicionada uma trava de segurança para só pesquisar se o título já carregou
         const titleEl = card.querySelector('h3');
         if (titleEl) {
             const title = titleEl.innerText.toLowerCase();
@@ -36,11 +35,9 @@ function filtrarCatalogo() {
         document.getElementById('series').style.display = "block";
         document.getElementById('animes').style.display = "block";
     } else {
-        // Se o usuário apagar o texto, volta para a aba principal normal
         mudarAba('tudo');
     }
 }
-// ==========================================
 
 function entrarComoConvidado() {
     let auth = document.getElementById('authOverlay');
@@ -49,8 +46,6 @@ function entrarComoConvidado() {
         auth.classList.remove('active');
     }
     document.body.style.overflow = 'auto'; 
-    
-    // SALVA A ESCOLHA NA MEMÓRIA DO NAVEGADOR!
     localStorage.setItem('hkFilmes_acessoLiberado', 'true');
 }
 
@@ -62,30 +57,88 @@ function registrarView(id) {
     });
 }
 
+/* =======================================================
+   MOTOres REESCRITOS: ABRE A TELA DE DETALHES PRIMEIRO
+   ======================================================= */
 function abrirPlayer(idFilme) {
     window.filmeAbertoID = idFilme;
-    document.getElementById('playerModal').classList.add('active'); 
-    
-    document.getElementById('videoContainer').innerHTML = `<iframe src="https://myembed.biz/filme/${idFilme}" width="100%" style="height: 400px;" frameborder="0" allowfullscreen></iframe>`;
-    
-    const titleEl = document.getElementById('ratingTitle');
-    if(titleEl) titleEl.innerText = "De 1 a 5, como avalia este filme?";
-    
-    resetarEstrelas();
-    registrarView(idFilme); 
+    window.tipoAberto = 'movie';
+    exibirTelaDetalhes(idFilme, 'movie');
 }
 
 function abrirPlayerSerie(idSerie) {
     window.filmeAbertoID = idSerie;
-    document.getElementById('playerModal').classList.add('active'); 
+    window.tipoAberto = 'tv';
+    exibirTelaDetalhes(idSerie, 'tv');
+}
+
+function exibirTelaDetalhes(id, tipo) {
+    // Garante as vistas na posição correta: Mostra Detalhes, Esconde Player
+    document.getElementById('videoView').style.display = 'none';
+    document.getElementById('detailsView').style.display = 'block';
+    document.getElementById('videoContainer').innerHTML = ''; 
+
+    document.getElementById('playerModal').classList.add('active');
+
+    // Vai buscar os metadados e o Backdrop 16:9 no TMDB
+    const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
     
-    document.getElementById('videoContainer').innerHTML = `<iframe src="https://myembed.biz/serie/${idSerie}" width="100%" style="height: 70vh; min-height: 500px;" frameborder="0" allowfullscreen></iframe>`;
-    
-    const titleEl = document.getElementById('ratingTitle');
-    if(titleEl) titleEl.innerText = "De 1 a 5, como avalia esta série/anime?";
-    
+    fetch(url)
+        .then(res => res.json())
+        .then(dados => {
+            const titulo = dados.title || dados.name; 
+            const backdrop = dados.backdrop_path ? `https://image.tmdb.org/t/p/w780${dados.backdrop_path}` : '';
+            const ano = (dados.release_date || dados.first_air_date || '----').split('-')[0];
+            
+            document.getElementById('modalTitle').innerText = titulo;
+            document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível para este título.";
+            document.getElementById('modalYear').innerText = ano;
+            
+            // Renderiza Duração ou número de temporadas de forma inteligente
+            if (tipo === 'tv') {
+                const temporadas = dados.number_of_seasons || '1';
+                document.getElementById('modalDuration').innerText = temporadas + (temporadas > 1 ? " Temporadas" : " Temporada");
+                document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalia esta série/anime?";
+            } else {
+                const tempo = dados.runtime ? `${Math.floor(dados.runtime / 60)}h ${dados.runtime % 60}m` : '---';
+                document.getElementById('modalDuration').innerText = tempo;
+                document.getElementById('ratingTitle').innerText = "De 1 a 5, como avalia este filme?";
+            }
+
+            // Aplica a imagem de fundo panorâmica
+            const backdropEl = document.getElementById('modalBackdrop');
+            if (backdrop) {
+                backdropEl.style.backgroundImage = `url('${backdrop}')`;
+            } else {
+                backdropEl.style.backgroundImage = 'none';
+            }
+        })
+        .catch(erro => console.error("Erro ao puxar detalhes da API:", erro));
+
     resetarEstrelas();
-    registrarView(idSerie); 
+    registrarView(id); 
+}
+
+// FUNÇÃO DO BOTÃO "ASSISTIR" DA NETFLIX (ABRE O PLAYER DE VERDADE)
+function darPlayNoVideo() {
+    const id = window.filmeAbertoID;
+    const tipo = window.tipoAberto;
+    if (!id) return;
+
+    // Inverte as telas de visualização
+    document.getElementById('detailsView').style.display = 'none';
+    document.getElementById('videoView').style.display = 'block';
+
+    // Dispara o Iframe correto
+    let urlEmbed = tipo === 'tv' ? `https://myembed.biz/serie/${id}` : `https://myembed.biz/filme/${id}`;
+    document.getElementById('videoContainer').innerHTML = `<iframe src="${urlEmbed}" width="100%" style="height: 100%; border:none;" allowfullscreen></iframe>`;
+}
+
+// VOLTAR DO PLAYER DE VÍDEO PARA A TELA DE DETALHES
+function voltarParaDetalhes() {
+    document.getElementById('videoView').style.display = 'none';
+    document.getElementById('detailsView').style.display = 'block';
+    document.getElementById('videoContainer').innerHTML = ''; 
 }
 
 function resetarEstrelas() {
@@ -103,6 +156,9 @@ function fecharPlayer() {
     document.getElementById('videoContainer').innerHTML = ''; 
 }
 
+/* =======================================================
+   SISTEMA DE CATÁLOGO DINÂMICO AUTOMÁTICO (FIREBASE)
+   ======================================================= */
 const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
 
 function carregarCatalogoDinamicamente() {
@@ -145,6 +201,7 @@ function puxarDadosTMDB(id, containerId, tipo) {
             
             if (container) container.appendChild(card);
             
+            // Ouvintes Realtime
             database.ref('views/' + id).on('value', (snap) => {
                 if(snap.exists()) {
                     let viewSpan = document.getElementById('view-' + id);
@@ -179,15 +236,11 @@ document.addEventListener('change', function(e) {
     }
 });
 
-// AQUI ESTÁ A MÁGICA: Ao carregar a página, verifica se a pessoa já tinha entrado
 window.addEventListener('DOMContentLoaded', () => {
-    
-    // === GATILHO DA PESQUISA DINÂMICA ===
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', filtrarCatalogo);
     }
-    // ====================================
 
     if (localStorage.getItem('hkFilmes_acessoLiberado') === 'true') {
         let auth = document.getElementById('authOverlay');
