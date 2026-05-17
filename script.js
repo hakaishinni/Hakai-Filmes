@@ -42,9 +42,6 @@ function registrarView(id) {
 function abrirPlayer(idFilme) { window.filmeAbertoID = idFilme; window.tipoAberto = 'movie'; exibirTelaDetalhes(idFilme, 'movie'); }
 function abrirPlayerSerie(idSerie) { window.filmeAbertoID = idSerie; window.tipoAberto = 'tv'; exibirTelaDetalhes(idSerie, 'tv'); }
 
-// ========================================================
-// MOTOR MEGA PREMIUM (LOGOS, ELENCO FOTO, TRAILER, SEMELHANTES)
-// ========================================================
 function exibirTelaDetalhes(id, tipo) {
     document.getElementById('videoView').style.display = 'none';
     document.getElementById('trailerView').style.display = 'none';
@@ -53,7 +50,6 @@ function exibirTelaDetalhes(id, tipo) {
     document.getElementById('trailerContainer').innerHTML = ''; 
     document.getElementById('playerModal').classList.add('active');
 
-    // MÁGICA: Pede TUDO de uma vez para o TMDB (images, videos, credits, recommendations)
     const extraData = tipo === 'movie' ? 'release_dates,credits,images,videos,recommendations' : 'content_ratings,credits,images,videos,recommendations';
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR&append_to_response=${extraData}&include_image_language=pt,en,null`;
     
@@ -62,14 +58,11 @@ function exibirTelaDetalhes(id, tipo) {
         const backdrop = dados.backdrop_path ? `https://image.tmdb.org/t/p/w780${dados.backdrop_path}` : '';
         const ano = (dados.release_date || dados.first_air_date || '----').split('-')[0];
         
-        // 1. BACKDROP
         const backdropEl = document.getElementById('modalBackdrop');
         backdropEl.style.backgroundImage = backdrop ? `url('${backdrop}')` : 'none';
 
-        // 2. LOGO EM PNG OU TEXTO
         const titleContainer = document.getElementById('modalTitleContainer');
         if (dados.images && dados.images.logos && dados.images.logos.length > 0) {
-            // Pega o primeiro logo disponível
             const logoPath = dados.images.logos[0].file_path;
             titleContainer.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${logoPath}" class="logo-img" alt="${titulo}">`;
         } else {
@@ -80,7 +73,6 @@ function exibirTelaDetalhes(id, tipo) {
         document.getElementById('modalYear').innerText = ano;
         document.getElementById('modalTagline').innerText = dados.tagline ? `"${dados.tagline}"` : '';
 
-        // 3. GÊNEROS E DURAÇÃO
         document.getElementById('modalGenres').innerText = dados.genres?.map(g => g.name).join(' • ') || 'Categoria Desconhecida';
         
         if (tipo === 'tv') {
@@ -94,7 +86,6 @@ function exibirTelaDetalhes(id, tipo) {
             document.getElementById('ratingTitle').innerText = "Avalie este filme";
         }
 
-        // 4. CLASSIFICAÇÃO BRASIL
         let ageRating = 'SR', ageColor = '#555', textColor = '#fff', borderStyle = '1px solid transparent';
         if (tipo === 'movie' && dados.release_dates) {
             const br = dados.release_dates.results.find(r => r.iso_3166_1 === 'BR');
@@ -114,11 +105,10 @@ function exibirTelaDetalhes(id, tipo) {
         const badge = document.querySelector('.meta-item.age-rating');
         badge.innerText = ageRating; badge.style.backgroundColor = ageColor; badge.style.color = textColor; badge.style.border = borderStyle;
 
-        // 5. FOTOS DO ELENCO (Cast Avatares)
         const castGrid = document.getElementById('modalCastGrid');
         castGrid.innerHTML = '';
         if (dados.credits && dados.credits.cast) {
-            const atores = dados.credits.cast.slice(0, 5); // Pega os 5 principais
+            const atores = dados.credits.cast.slice(0, 5);
             atores.forEach(ator => {
                 const foto = ator.profile_path ? `https://image.tmdb.org/t/p/w185${ator.profile_path}` : 'https://placehold.co/60x60/222/555?text=Foto';
                 castGrid.innerHTML += `
@@ -131,7 +121,6 @@ function exibirTelaDetalhes(id, tipo) {
         let criador = tipo === 'tv' ? dados.created_by?.map(c => c.name).join(', ') : dados.credits?.crew?.find(c => c.job === 'Director')?.name;
         document.getElementById('modalCreator').innerText = criador || 'Não informado';
 
-        // 6. TRAILER NO YOUTUBE
         const btnTrailer = document.getElementById('btnTrailer');
         urlTrailerGlobal = null;
         if (dados.videos && dados.videos.results) {
@@ -143,20 +132,23 @@ function exibirTelaDetalhes(id, tipo) {
             } else { btnTrailer.style.display = 'none'; }
         }
 
-        // 7. TÍTULOS SEMELHANTES
+        // TÍTULOS SEMELHANTES NOVO (Carrossel inteiro)
         const similarGrid = document.getElementById('modalSimilarGrid');
         similarGrid.innerHTML = '';
-        if (dados.recommendations && dados.recommendations.results) {
-            const similares = dados.recommendations.results.slice(0, 6); // Pega 6 semelhantes
+        if (dados.recommendations && dados.recommendations.results && dados.recommendations.results.length > 0) {
+            const similares = dados.recommendations.results.slice(0, 10); // Mostra 10 para poder deslizar
             similares.forEach(sim => {
                 if(sim.poster_path) {
                     const fnClique = tipo === 'tv' ? `abrirPlayerSerie('${sim.id}')` : `abrirPlayer('${sim.id}')`;
                     similarGrid.innerHTML += `
                         <div class="similar-card" onclick="${fnClique}">
-                            <img src="https://image.tmdb.org/t/p/w342${sim.poster_path}">
+                            <img src="https://image.tmdb.org/t/p/w342${sim.poster_path}" alt="Capa">
                         </div>`;
                 }
             });
+            document.getElementById('similarSection').style.display = 'block';
+        } else {
+            document.getElementById('similarSection').style.display = 'none';
         }
 
     }).catch(erro => console.error("Erro API:", erro));
@@ -164,7 +156,6 @@ function exibirTelaDetalhes(id, tipo) {
     resetarEstrelas(); registrarView(id); 
 }
 
-// LÓGICA DOS PLAYERS (FILME/SÉRIE E TRAILER)
 function darPlayNoVideo() {
     if (!window.filmeAbertoID) return;
     document.getElementById('detailsView').style.display = 'none';
@@ -198,9 +189,6 @@ function fecharPlayer() {
     document.getElementById('trailerContainer').innerHTML = ''; 
 }
 
-// ========================================================
-// CATÁLOGO: FIREBASE + TENDÊNCIAS TMDB AUTOMÁTICAS
-// ========================================================
 function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
         if (snapshot.exists()) {
@@ -213,7 +201,6 @@ function carregarCatalogoDinamicamente() {
 }
 
 function puxarTendenciasGerais() {
-    // Puxa os Top 10 filmes mais famosos da semana no mundo!
     fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&language=pt-BR`)
         .then(res => res.json()).then(dados => {
             const container = document.getElementById('carrossel-tendencias');
@@ -263,8 +250,6 @@ window.addEventListener('DOMContentLoaded', () => {
         if(auth) { auth.style.display = 'none'; auth.classList.remove('active'); }
         document.body.style.overflow = 'auto'; 
     }
-    
-    // Inicia os motores duplos de catálogo:
-    carregarCatalogoDinamicamente(); // Os que você coloca no Firebase
-    puxarTendenciasGerais(); // Os que o TMDB alimenta sozinho "Em Alta"
+    carregarCatalogoDinamicamente();
+    puxarTendenciasGerais();
 });
