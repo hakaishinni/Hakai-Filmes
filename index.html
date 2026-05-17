@@ -6,7 +6,7 @@
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=22">
+    <link rel="stylesheet" href="style.css?v=25">
 </head>
 <body style="overflow: hidden;">
 
@@ -14,15 +14,12 @@
         <div style="background: #111; padding: 40px; border-radius: 10px; text-align: center; border: 1px solid #333; max-width: 400px; width: 90%;">
             <div class="logo" style="font-size: 2em; margin-bottom: 10px;">HK<span style="color: #e50914;">Filmes</span></div>
             <p style="margin-bottom: 20px; color: #aaa;">Faça login ou continue para explorar o catálogo.</p>
-            
             <form onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 15px;">
                 <input type="email" placeholder="Seu E-mail" required style="padding: 12px; border-radius: 5px; border: none; background: #222; color: white;">
                 <input type="password" placeholder="Sua Senha" required style="padding: 12px; border-radius: 5px; border: none; background: #222; color: white;">
                 <button type="submit" class="btn-primary" style="padding: 12px; border-radius: 5px; background: #e50914; color: white; border: none; font-weight: bold; cursor: pointer;">Entrar</button>
             </form>
-            
             <p style="margin: 15px 0; color: #555;">ou</p>
-            
             <button onclick="entrarComoConvidado()" style="width: 100%; padding: 12px; border-radius: 5px; background: transparent; border: 1px solid #e50914; color: #e50914; font-weight: bold; cursor: pointer; transition: 0.3s;">Entrar como Convidado</button>
         </div>
     </div>
@@ -41,11 +38,9 @@
     </header>
 
     <main>
-        
         <section id="home" class="hero-section" style="text-align: center; padding-top: 30px;">
             <h1 style="font-size: 1.5em; margin-bottom: 5px;">Assista aos melhores Filmes, Séries e Animes</h1>
             <p style="color: #aaa; margin-bottom: 20px; font-size: 0.9em;">Tudo em um só lugar. Escolha e assista agora.</p>
-            
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Pesquisar título...">
                 <span class="search-icon">🔍</span>
@@ -69,21 +64,12 @@
 
         <section id="contato" class="contact-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Contato & Apoio</h2>
-            <p style="margin-bottom: 20px; font-size: 0.9em; color: #ccc;">O HK Filmes é gratuito! Se você curte o site, ajude a manter o projeto no ar pagando um cafézinho para o desenvolvedor ☕</p>
-            
+            <p style="margin-bottom: 20px; font-size: 0.9em; color: #ccc;">O HK Filmes é gratuito! Se curte o site, ajude a manter no ar pagando um cafézinho ☕</p>
             <div class="pix-box" style="background: rgba(229, 9, 20, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 30px; text-align: center; border: 1px solid #e50914;">
                 <p style="color: #e50914; font-weight: bold; margin-bottom: 5px;">Apoie com qualquer valor via PIX:</p>
                 <p style="font-weight: bold; color: #fff;">Chave: ba714471-1484-4618-a070-4a991de0395d</p>
             </div>
-
-            <form id="contactForm" style="display: flex; flex-direction: column; gap: 15px;">
-                <input type="text" placeholder="Seu Nome" required style="padding: 12px; border-radius: 5px; border: none; background: #222; color: white;">
-                <textarea placeholder="Deixe sua mensagem..." required style="padding: 12px; border-radius: 5px; border: none; background: #222; color: white; min-height: 100px; resize: vertical;"></textarea>
-                <button type="submit" class="btn-primary" style="padding: 12px; border-radius: 5px; background: #e50914; color: white; border: none; font-weight: bold; cursor: pointer;">Enviar Mensagem</button>
-                <p id="contactStatus"></p>
-            </form>
         </section>
-
     </main>
 
     <div id="playerModal" class="modal">
@@ -99,9 +85,11 @@
                 <div class="modal-info">
                     <div class="meta-row">
                         <span id="modalYear" class="meta-item">----</span>
-                        <span class="meta-item age-rating">A16</span>
+                        <span class="meta-item age-rating">SR</span>
                         <span id="modalDuration" class="meta-item">-- Temp.</span>
                     </div>
+
+                    <p id="modalGenres" style="color: #999; font-size: 0.85em; margin-bottom: 20px; font-weight: 600;">Carregando gêneros...</p>
                     
                     <div class="action-buttons">
                         <button class="btn-netflix-play" onclick="darPlayNoVideo()"><i class="fa-solid fa-play"></i> Assistir</button>
@@ -115,6 +103,11 @@
 
                     <p id="modalOverview" class="modal-overview">Buscando sinopse oficial no banco de dados do TMDB...</p>
                     
+                    <div class="cast-crew-container">
+                        <p><span class="cast-label">Estrelando:</span> <span id="modalCast">Carregando...</span></p>
+                        <p><span class="cast-label">Direção/Criação:</span> <span id="modalCreator">Carregando...</span></p>
+                    </div>
+                    
                     <div class="rating-inside">
                         <h3 id="ratingTitle">De 1 a 5, como avalia este título?</h3> 
                         <div class="stars-wrapper">
@@ -124,9 +117,7 @@
                             <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
                             <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
                         </div>
-                        <div class="stars-numbers">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-                        </div>
+                        <div class="stars-numbers"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
                         <p id="ratingMsg" style="color: #e50914; margin-top: 10px; font-weight: bold; text-align: center;"></p>
                     </div>
                 </div>
@@ -136,13 +127,11 @@
                 <button class="back-to-details" onclick="voltarParaDetalhes()"><i class="fa-solid fa-arrow-left"></i> Voltar para os Detalhes</button>
                 <div id="videoContainer" style="width:100%; aspect-ratio:16/9; background:#000;"></div>
             </div>
-
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDCNF3pZ3g20UkNDTUYq-X9zkyKA3El1TM",
@@ -153,12 +142,9 @@
             messagingSenderId: "688262885548",
             appId: "1:688262885548:web:166f076180373e466af09"
         };
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
     </script>
-
     <script src="script.js"></script>
 </body>
 </html>
