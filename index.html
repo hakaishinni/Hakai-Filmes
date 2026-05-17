@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=21">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body style="overflow: hidden;">
 
@@ -86,26 +87,56 @@
     </main>
 
     <div id="playerModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="fecharPlayer()">X FECHAR</span>
+        <div class="modal-content netflix-style">
+            <span class="close-btn" onclick="fecharPlayer()"><i class="fa-solid fa-xmark"></i> FECHAR</span>
             
-            <div id="videoContainer" style="width:100%; aspect-ratio:16/9; background:#000;"></div>
-            
-            <div class="rating-inside">
-                <h3 id="ratingTitle">De 1 a 5, como avalia este filme?</h3> 
+            <div id="detailsView">
+                <div id="modalBackdrop" class="modal-backdrop">
+                    <div class="backdrop-gradient"></div>
+                    <h1 id="modalTitle">Carregando...</h1>
+                </div>
                 
-                <div class="stars-wrapper">
-                    <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
-                    <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
-                    <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
-                    <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
-                    <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                <div class="modal-info">
+                    <div class="meta-row">
+                        <span id="modalYear" class="meta-item">----</span>
+                        <span class="meta-item age-rating">A16</span>
+                        <span id="modalDuration" class="meta-item">-- Temp.</span>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-netflix-play" onclick="darPlayNoVideo()"><i class="fa-solid fa-play"></i> Assistir</button>
+                        <button class="btn-netflix-secondary"><i class="fa-solid fa-plus"></i> Minha Lista</button>
+                    </div>
+
+                    <div class="continue-watching-container">
+                        <p><i class="fa-solid fa-rotate-left"></i> Parou no episódio anterior</p>
+                        <div class="fake-progress-bar"><div class="fake-progress-fill"></div></div>
+                    </div>
+
+                    <p id="modalOverview" class="modal-overview">Buscando sinopse oficial no banco de dados do TMDB...</p>
+                    
+                    <div class="rating-inside">
+                        <h3 id="ratingTitle">De 1 a 5, como avalia este título?</h3> 
+                        <div class="stars-wrapper">
+                            <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
+                            <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                            <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                            <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                            <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                        </div>
+                        <div class="stars-numbers">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                        <p id="ratingMsg" style="color: #e50914; margin-top: 10px; font-weight: bold; text-align: center;"></p>
+                    </div>
                 </div>
-                <div class="stars-numbers">
-                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-                </div>
-                <p id="ratingMsg" style="color: #e50914; margin-top: 10px; font-weight: bold; text-align: center;"></p>
             </div>
+
+            <div id="videoView" style="display: none;">
+                <button class="back-to-details" onclick="voltarParaDetalhes()"><i class="fa-solid fa-arrow-left"></i> Voltar para os Detalhes</button>
+                <div id="videoContainer" style="width:100%; aspect-ratio:16/9; background:#000;"></div>
+            </div>
+
         </div>
     </div>
 
