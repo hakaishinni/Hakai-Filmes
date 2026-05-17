@@ -60,14 +60,12 @@ function abrirPlayerSerie(idSerie) {
     exibirTelaDetalhes(idSerie, 'tv');
 }
 
-// === MOTOR TURBINADO: AGORA PUXA CRÉDITOS, GÊNEROS E TEMPO EXATO ===
 function exibirTelaDetalhes(id, tipo) {
     document.getElementById('videoView').style.display = 'none';
     document.getElementById('detailsView').style.display = 'block';
     document.getElementById('videoContainer').innerHTML = ''; 
     document.getElementById('playerModal').classList.add('active');
 
-    // MÁGICA: Adicionado o "credits" no final do link!
     const extraData = tipo === 'movie' ? 'release_dates,credits' : 'content_ratings,credits';
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR&append_to_response=${extraData}`;
     
@@ -82,13 +80,11 @@ function exibirTelaDetalhes(id, tipo) {
             document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível para este título.";
             document.getElementById('modalYear').innerText = ano;
             
-            // --- 1. GÊNEROS ---
             const generos = dados.genres && dados.genres.length > 0 
                 ? dados.genres.map(g => g.name).join(' • ') 
                 : 'Categoria Desconhecida';
             document.getElementById('modalGenres').innerText = generos;
 
-            // --- 2. ELENCO E CRIAÇÃO ---
             const elenco = dados.credits && dados.credits.cast && dados.credits.cast.length > 0 
                 ? dados.credits.cast.slice(0, 4).map(a => a.name).join(', ') 
                 : 'Não informado';
@@ -103,7 +99,6 @@ function exibirTelaDetalhes(id, tipo) {
             }
             document.getElementById('modalCreator').innerText = criador;
             
-            // --- 3. SISTEMA DE CLASSIFICAÇÃO DE IDADE ---
             let ageRating = 'SR'; 
             if (tipo === 'movie' && dados.release_dates) {
                 const brRelease = dados.release_dates.results.find(r => r.iso_3166_1 === 'BR');
@@ -129,12 +124,9 @@ function exibirTelaDetalhes(id, tipo) {
             ratingBadge.innerText = ageRating; ratingBadge.style.backgroundColor = ageColor;
             ratingBadge.style.color = textColor; ratingBadge.style.border = borderStyle;
 
-            // --- 4. DURAÇÃO CORRIGIDA ---
             if (tipo === 'tv') {
                 const temporadas = dados.number_of_seasons || '1';
                 let txtTempo = temporadas + (temporadas > 1 ? " Temporadas" : " Temporada");
-                
-                // Pega o tempo médio do episódio se existir
                 if (dados.episode_run_time && dados.episode_run_time.length > 0) {
                     txtTempo += ` (${dados.episode_run_time[0]}m por ep.)`;
                 }
@@ -159,12 +151,17 @@ function exibirTelaDetalhes(id, tipo) {
     resetarEstrelas(); registrarView(id); 
 }
 
+// === LÓGICA DO PLAYER ESTICADO (FLEX) ===
 function darPlayNoVideo() {
     const id = window.filmeAbertoID; const tipo = window.tipoAberto; if (!id) return;
+    
     document.getElementById('detailsView').style.display = 'none';
-    document.getElementById('videoView').style.display = 'block';
+    document.getElementById('videoView').style.display = 'flex'; // Exibe em modo Flexível
+    
     let urlEmbed = tipo === 'tv' ? `https://myembed.biz/serie/${id}` : `https://myembed.biz/filme/${id}`;
-    document.getElementById('videoContainer').innerHTML = `<iframe src="${urlEmbed}" width="100%" style="height: 100%; border:none;" allowfullscreen></iframe>`;
+    
+    // O Iframe agora tem height="100%" para aproveitar o Flex
+    document.getElementById('videoContainer').innerHTML = `<iframe src="${urlEmbed}" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>`;
 }
 
 function voltarParaDetalhes() {
