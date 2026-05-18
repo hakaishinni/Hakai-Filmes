@@ -238,11 +238,22 @@ function puxarTendenciasGerais() {
         });
 }
 
+// === MOTOR DETETIVE ATUALIZADO ===
 function puxarDadosTMDB(id, containerId, tipo) {
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
     fetch(url).then(resposta => resposta.json()).then(dados => {
-            const titulo = dados.title || dados.name; 
-            const poster = `https://image.tmdb.org/t/p/w500${dados.poster_path}`;
+            let titulo = dados.title || dados.name; 
+            let poster = dados.poster_path ? `https://image.tmdb.org/t/p/w500${dados.poster_path}` : '';
+            
+            // Se o TMDB der erro ou não achar o título, ele mostra o ID na tela.
+            if (!titulo || dados.success === false) {
+                titulo = "⚠️ Erro no ID: " + id;
+                poster = "https://placehold.co/500x750/222/FFF?text=ID+" + id;
+            } else if (!dados.poster_path) {
+                // Se o ID existir mas não tiver poster
+                poster = "https://placehold.co/500x750/222/FFF?text=Sem+Capa";
+            }
+
             const container = document.getElementById(containerId);
             const card = document.createElement('div');
             card.className = 'card';
@@ -252,7 +263,7 @@ function puxarDadosTMDB(id, containerId, tipo) {
             
             database.ref('views/' + id).on('value', snap => { if(snap.exists()) { let v = document.getElementById('view-' + id); if(v) v.innerText = snap.val(); } });
             database.ref('ratings/' + id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(voto => { t += voto.val(); c++; }); let s = document.getElementById('star-' + id); if(s) s.innerText = (t/c).toFixed(1); } });
-        });
+        }).catch(erro => console.error("Erro API:", erro));
 }
 
 document.addEventListener('change', function(e) {
@@ -265,7 +276,6 @@ document.addEventListener('change', function(e) {
     }
 });
 
-// === LÓGICA DE COPIAR CHAVE PIX DO BOTÃO DE AÇÃO ===
 function copiarChavePix() {
     const chavePix = "ba714471-1484-4618-a070-4a991de0395d";
     navigator.clipboard.writeText(chavePix).then(() => {
