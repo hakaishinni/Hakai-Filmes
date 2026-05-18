@@ -5,7 +5,7 @@ const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
 
 function mudarAba(aba) {
     document.getElementById('home').style.display = (aba === 'tudo') ? 'block' : 'none';
-    document.getElementById('tendencias').style.display = (aba === 'tudo' ? 'block' : 'none');
+    document.getElementById('tendencias').style.display = (aba === 'tudo') ? 'block' : 'none';
     document.getElementById('filmes').style.display = (aba === 'tudo' || aba === 'filmes') ? 'block' : 'none';
     document.getElementById('series').style.display = (aba === 'tudo' || aba === 'series') ? 'block' : 'none';
     document.getElementById('animes').style.display = (aba === 'tudo' || aba === 'animes') ? 'block' : 'none';
@@ -190,15 +190,43 @@ function fecharPlayer() {
     document.getElementById('trailerContainer').innerHTML = ''; 
 }
 
+// === MOTOR DE CARREGAMENTO COM CONTADOR INTEGRADO ===
 function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
         if (snapshot.exists()) {
             const dados = snapshot.val();
-            if (dados.filmes) Object.keys(dados.filmes).forEach(id => puxarDadosTMDB(id, 'carrossel-filmes', 'movie'));
-            if (dados.series) Object.keys(dados.series).forEach(id => puxarDadosTMDB(id, 'carrossel-series', 'tv'));
-            if (dados.animes) Object.keys(dados.animes).forEach(id => puxarDadosTMDB(id, 'carrossel-animes', 'tv'));
+            
+            // Conta os itens de cada nó do Firebase e injeta dinamicamente o contador na tela
+            if (dados.filmes) {
+                const totalFilmes = Object.keys(dados.filmes).length;
+                injetarContadorNoTitulo('filmes', totalFilmes);
+                Object.keys(dados.filmes).forEach(id => puxarDadosTMDB(id, 'carrossel-filmes', 'movie'));
+            }
+            if (dados.series) {
+                const totalSeries = Object.keys(dados.series).length;
+                injetarContadorNoTitulo('series', totalSeries);
+                Object.keys(dados.series).forEach(id => puxarDadosTMDB(id, 'carrossel-series', 'tv'));
+            }
+            if (dados.animes) {
+                const totalAnimes = Object.keys(dados.animes).length;
+                injetarContadorNoTitulo('animes', totalAnimes);
+                Object.keys(dados.animes).forEach(id => puxarDadosTMDB(id, 'carrossel-animes', 'tv'));
+            }
         }
     });
+}
+
+// FUNÇÃO AUXILIAR PARA CRIAR O ELEMENTO VISUAL DO CONTADOR
+function injetarContadorNoTitulo(sectionId, total) {
+    const h2Element = document.querySelector(`#${sectionId} h2`);
+    if (h2Element) {
+        // Remove qualquer contador antigo para evitar duplicados ao recarregar
+        const antigo = h2Element.querySelector('.badge-contador');
+        if (antigo) antigo.remove();
+        
+        // Insere o balão com o estilo escuro premium e bordas arredondadas
+        h2Element.innerHTML += ` <span class="badge-contador" style="background: #222; color: #aaa; font-size: 0.55em; padding: 3px 9px; border-radius: 20px; margin-left: 10px; font-weight: 600; vertical-align: middle; border: 1px solid #333;">${total}</span>`;
+    }
 }
 
 function puxarTendenciasGerais() {
@@ -274,7 +302,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// === TRAVA DE SEGURANÇA FRONT-END (ANTI-CURIOSOS) ===
 document.addEventListener('contextmenu', event => event.preventDefault()); 
 document.addEventListener('keydown', function(e) {
     if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
