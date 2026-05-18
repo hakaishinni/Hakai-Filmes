@@ -190,13 +190,11 @@ function fecharPlayer() {
     document.getElementById('trailerContainer').innerHTML = ''; 
 }
 
-// === MOTOR DE CARREGAMENTO COM CONTADOR INTEGRADO ===
 function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
         if (snapshot.exists()) {
             const dados = snapshot.val();
             
-            // Conta os itens de cada nó do Firebase e injeta dinamicamente o contador na tela
             if (dados.filmes) {
                 const totalFilmes = Object.keys(dados.filmes).length;
                 injetarContadorNoTitulo('filmes', totalFilmes);
@@ -216,15 +214,11 @@ function carregarCatalogoDinamicamente() {
     });
 }
 
-// FUNÇÃO AUXILIAR PARA CRIAR O ELEMENTO VISUAL DO CONTADOR
 function injetarContadorNoTitulo(sectionId, total) {
     const h2Element = document.querySelector(`#${sectionId} h2`);
     if (h2Element) {
-        // Remove qualquer contador antigo para evitar duplicados ao recarregar
         const antigo = h2Element.querySelector('.badge-contador');
         if (antigo) antigo.remove();
-        
-        // Insere o balão com o estilo escuro premium e bordas arredondadas
         h2Element.innerHTML += ` <span class="badge-contador" style="background: #222; color: #aaa; font-size: 0.55em; padding: 3px 9px; border-radius: 20px; margin-left: 10px; font-weight: 600; vertical-align: middle; border: 1px solid #333;">${total}</span>`;
     }
 }
@@ -270,6 +264,21 @@ document.addEventListener('change', function(e) {
         });
     }
 });
+
+// === LÓGICA DE COPIAR CHAVE PIX DO BOTÃO DE AÇÃO ===
+function copiarChavePix() {
+    const chavePix = "ba714471-1484-4618-a070-4a991de0395d";
+    navigator.clipboard.writeText(chavePix).then(() => {
+        const msg = document.getElementById('pixStatusMsg');
+        if (msg) {
+            msg.innerText = "✓ Chave PIX copiada! É só colar no seu banco.";
+            msg.style.display = "block";
+            setTimeout(() => { msg.style.display = "none"; }, 4000);
+        }
+    }).catch(err => {
+        alert("Erro ao copiar automaticamente. Use a chave: " + chavePix);
+    });
+}
 
 window.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
