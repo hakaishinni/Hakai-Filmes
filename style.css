@@ -52,7 +52,6 @@ nav ul li a:hover { color: #e50914; }
 .cast-member img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; border: 2px solid #333; background: #222; }
 .cast-member span { font-size: 0.8em; line-height: 1.2; color: #ccc; }
 
-/* TÍTULOS SEMELHANTES - AGORA É UM CARROSSEL HORIZONTAL IGUAL A HOME */
 .similar-carousel { display: flex; overflow-x: auto; gap: 12px; padding: 10px 0; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .similar-carousel::-webkit-scrollbar { display: none; }
 .similar-card { flex: 0 0 auto; width: 120px; border-radius: 6px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease; }
@@ -67,3 +66,17 @@ nav ul li a:hover { color: #e50914; }
 .stars-wrapper label { color: #333; cursor: pointer; }
 .stars-wrapper input:checked ~ label, .stars-wrapper label:hover, .stars-wrapper label:hover ~ label { color: #ffc107; }
 .stars-numbers { display: flex; justify-content: center; gap: 22px; font-size: 0.8em; color: #666; margin-top: 5px; }
+
+/* ESTILOS NOVOS DA ATUALIZAÇÃO SÉRIE BRONZE/PRATA/OURO */
+.brave-alert-badge { background: rgba(230, 120, 34, 0.1); border: 1px solid rgba(230, 120, 34, 0.3); padding: 12px; border-radius: 6px; font-size: 0.85em; color: #e67822; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; }
+.brave-alert-badge i { margin-top: 3px; font-size: 1.1em; }
+
+.brave-player-banner { background: #1f1f25; color: #ffc107; text-align: center; padding: 8px 15px; font-size: 0.8em; font-weight: 600; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+.apoio-premium-box { background: rgba(229, 9, 20, 0.03); border: 1px solid #1c1c24; padding: 30px 20px; border-radius: 12px; text-align: center; max-width: 600px; margin: 0 auto 40px auto; }
+.apoio-text { font-size: 0.9em; color: #aaa; line-height: 1.6; margin-bottom: 20px; text-align: justify; }
+.btn-apoio-pix { background: #e50914; color: white; border: none; padding: 12px 35px; font-weight: 700; border-radius: 30px; cursor: pointer; font-size: 1em; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s ease; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3); }
+.btn-apoio-pix:hover { background: #b80710; transform: scale(1.04); }
+#pixStatusMsg { color: #2ecc71; font-weight: bold; font-size: 0.85em; margin-top: 15px; height: 20px; display: none; }
+
+footer { text-align: center; padding: 40px 20px; border-top: 1px solid #141419; margin-top: 60px; color: #444; font-size: 0.85em; font-weight: 600; background: #040405; width: 100%; }
