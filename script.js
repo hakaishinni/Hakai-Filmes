@@ -5,7 +5,7 @@ const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
 
 function mudarAba(aba) {
     document.getElementById('home').style.display = (aba === 'tudo') ? 'block' : 'none';
-    document.getElementById('tendencias').style.display = (aba === 'tudo') ? 'block' : 'none';
+    document.getElementById('tendencias').style.display = (aba === 'tudo' ? 'block' : 'none');
     document.getElementById('filmes').style.display = (aba === 'tudo' || aba === 'filmes') ? 'block' : 'none';
     document.getElementById('series').style.display = (aba === 'tudo' || aba === 'series') ? 'block' : 'none';
     document.getElementById('animes').style.display = (aba === 'tudo' || aba === 'animes') ? 'block' : 'none';
@@ -35,6 +35,7 @@ function entrarComoConvidado() {
 }
 
 function registrarView(id) {
+    if (localStorage.getItem('hkAdmin') === 'true') return; 
     const ref = database.ref('views/' + id);
     ref.once('value').then(snap => ref.set((snap.val() || 0) + 1));
 }
@@ -132,11 +133,10 @@ function exibirTelaDetalhes(id, tipo) {
             } else { btnTrailer.style.display = 'none'; }
         }
 
-        // TÍTULOS SEMELHANTES NOVO (Carrossel inteiro)
         const similarGrid = document.getElementById('modalSimilarGrid');
         similarGrid.innerHTML = '';
         if (dados.recommendations && dados.recommendations.results && dados.recommendations.results.length > 0) {
-            const similares = dados.recommendations.results.slice(0, 10); // Mostra 10 para poder deslizar
+            const similares = dados.recommendations.results.slice(0, 10);
             similares.forEach(sim => {
                 if(sim.poster_path) {
                     const fnClique = tipo === 'tv' ? `abrirPlayerSerie('${sim.id}')` : `abrirPlayer('${sim.id}')`;
@@ -168,7 +168,8 @@ function abrirTrailer() {
     if(!urlTrailerGlobal) return;
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('trailerView').style.display = 'flex';
-    document.getElementById('trailerContainer').innerHTML = `<iframe src="https://www.youtube.com/embed/${urlTrailerGlobal}?autoplay=1" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>`;
+    const ytLink = `https://www.youtube.com/embed/${urlTrailerGlobal}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&controls=1`;
+    document.getElementById('trailerContainer').innerHTML = `<iframe src="${ytLink}" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>`;
 }
 
 function voltarParaDetalhes() {
@@ -252,4 +253,31 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     carregarCatalogoDinamicamente();
     puxarTendenciasGerais();
+
+    const logoEl = document.querySelector('.logo');
+    if(logoEl) {
+        let cliquesLogo = 0;
+        logoEl.addEventListener('click', () => {
+            cliquesLogo++;
+            if(cliquesLogo >= 5) {
+                if(localStorage.getItem('hkAdmin') === 'true') {
+                    localStorage.removeItem('hkAdmin');
+                    alert('🛠️ Modo Admin DESATIVADO: Suas visualizações voltaram a contar.');
+                } else {
+                    localStorage.setItem('hkAdmin', 'true');
+                    alert('🛠️ Modo Admin ATIVADO: Suas visualizações NÃO serão mais contadas!');
+                }
+                cliquesLogo = 0;
+            }
+            setTimeout(() => cliquesLogo = 0, 2000); 
+        });
+    }
+});
+
+// === TRAVA DE SEGURANÇA FRONT-END (ANTI-CURIOSOS) ===
+document.addEventListener('contextmenu', event => event.preventDefault()); 
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+    if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
 });
