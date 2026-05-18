@@ -6,9 +6,17 @@
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=29">
+    <link rel="stylesheet" href="style.css?v=30">
 </head>
 <body style="overflow: hidden;">
+
+    <noscript>
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #08080a; z-index: 999999; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
+            <div class="logo" style="font-size: 2.5em; margin-bottom: 20px;">HK<span style="color: #e50914;">Filmes</span></div>
+            <h2 style="color: #fff; margin-bottom: 10px;">Opa! Precisamos do JavaScript</h2>
+            <p style="color: #aaa; max-width: 400px; line-height: 1.5; font-size: 0.9em;">O nosso site utiliza scripts de alta performance para buscar o catálogo e carregar os vídeos com segurança. Por favor, <b>desative o bloqueio de scripts</b> ou o escudo rígido do seu navegador para acessar a plataforma.</p>
+        </div>
+    </noscript>
 
     <div id="authOverlay" class="active" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;">
         <div style="background: #111; padding: 40px; border-radius: 10px; text-align: center; border: 1px solid #333; max-width: 400px; width: 90%;">
@@ -25,7 +33,7 @@
     </div>
 
     <header>
-        <div class="logo">HK<span>Filmes</span></div>
+        <div class="logo" style="cursor: pointer;">HK<span>Filmes</span></div>
         <nav>
             <ul>
                 <li><a style="cursor:pointer;" onclick="mudarAba('tudo')">Home</a></li>
@@ -69,12 +77,20 @@
 
         <section id="contato" class="contact-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Contato & Apoio</h2>
-            <p style="margin-bottom: 20px; font-size: 0.9em; color: #ccc;">O HK Filmes é gratuito! Se curte o site, ajude a manter no ar pagando um cafézinho ☕</p>
-            <div class="pix-box" style="background: rgba(229, 9, 20, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 30px; text-align: center; border: 1px solid #e50914;">
-                <p style="color: #e50914; font-weight: bold; margin-bottom: 5px;">Apoie com qualquer valor via PIX:</p>
-                <p style="font-weight: bold; color: #fff;">Chave: ba714471-1484-4618-a070-4a991de0395d</p>
+            
+            <div class="apoio-premium-box">
+                <p class="apoio-text">O HK Filmes é mantido de forma totalmente independente pelo desenvolvedor. Se você curte o site e quer ajudar a manter os servidores ativos, faça uma contribuição copiando a chave PIX abaixo! ☕</p>
+                <button onclick="copiarChavePix()" class="btn-apoio-pix">
+                    <i class="fa-solid fa-copy"></i> Copiar Chave PIX
+                </button>
+                <p id="pixStatusMsg"></p>
             </div>
         </section>
+
+        <footer>
+            <p>Copyright &copy; 2026 HK Filmes. Todos os direitos reservados.</p>
+            <p style="font-size: 0.85em; color: #333; margin-top: 5px;">Desenvolvido com foco em alta performance.</p>
+        </footer>
     </main>
 
     <div id="playerModal" class="modal">
@@ -90,6 +106,10 @@
                 </div>
                 
                 <div class="modal-info">
+                    <div class="brave-alert-badge">
+                        <i class="fa-solid fa-shield-halved"></i> <span><b>Dica de Streaming:</b> Assista usando o navegador <b>Brave</b> para bloquear 100% dos anúncios do player externo.</span>
+                    </div>
+
                     <div class="meta-row">
                         <span id="modalYear" class="meta-item">----</span>
                         <span class="meta-item age-rating">SR</span>
@@ -135,6 +155,9 @@
 
             <div id="videoView" style="display: none; width: 100%; height: 100%; flex-direction: column;">
                 <button class="back-to-details" onclick="voltarParaDetalhes()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+                <div class="brave-player-banner">
+                    <i class="fa-solid fa-circle-info"></i> Se o player travar com pop-ups, mude para o navegador <b>Brave</b> para limpar o sinal.
+                </div>
                 <div id="videoContainer" style="width:100%; flex: 1; background:#000;"></div>
             </div>
             
