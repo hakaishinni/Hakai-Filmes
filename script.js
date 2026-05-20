@@ -190,26 +190,48 @@ function fecharPlayer() {
     document.getElementById('trailerContainer').innerHTML = ''; 
 }
 
+// === MOTOR DE CARREGAMENTO COM O "GUARDA DE TRÂNSITO" ===
 function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
         if (snapshot.exists()) {
             const dados = snapshot.val();
+            let filaGlobal = []; // Colocamos todos os IDs aqui
             
             if (dados.filmes) {
-                const totalFilmes = Object.keys(dados.filmes).length;
-                injetarContadorNoTitulo('filmes', totalFilmes);
-                Object.keys(dados.filmes).forEach(id => puxarDadosTMDB(id, 'carrossel-filmes', 'movie'));
+                const ids = Object.keys(dados.filmes);
+                injetarContadorNoTitulo('filmes', ids.length);
+                ids.forEach(id => filaGlobal.push({id: id, container: 'carrossel-filmes', tipo: 'movie'}));
             }
             if (dados.series) {
-                const totalSeries = Object.keys(dados.series).length;
-                injetarContadorNoTitulo('series', totalSeries);
-                Object.keys(dados.series).forEach(id => puxarDadosTMDB(id, 'carrossel-series', 'tv'));
+                const ids = Object.keys(dados.series);
+                injetarContadorNoTitulo('series', ids.length);
+                ids.forEach(id => filaGlobal.push({id: id, container: 'carrossel-series', tipo: 'tv'}));
             }
             if (dados.animes) {
-                const totalAnimes = Object.keys(dados.animes).length;
-                injetarContadorNoTitulo('animes', totalAnimes);
-                Object.keys(dados.animes).forEach(id => puxarDadosTMDB(id, 'carrossel-animes', 'tv'));
+                const ids = Object.keys(dados.animes);
+                injetarContadorNoTitulo('animes', ids.length);
+                ids.forEach(id => filaGlobal.push({id: id, container: 'carrossel-animes', tipo: 'tv'}));
             }
+
+            // O Guarda de Trânsito organizando a entrada
+            let indexAtual = 0;
+            const tamanhoLote = 15; // Deixa entrar 15 filmes por vez
+            const tempoEspera = 500; // Espera meio segundo entre os lotes
+
+            function liberarProximoLote() {
+                const lote = filaGlobal.slice(indexAtual, indexAtual + tamanhoLote);
+                if (lote.length === 0) return; // Se a fila acabou, o guarda descansa
+                
+                // Manda os 15 filmes do lote atual buscarem os dados
+                lote.forEach(item => puxarDadosTMDB(item.id, item.container, item.tipo));
+                indexAtual += tamanhoLote;
+                
+                // Aciona o cronômetro para o próximo lote
+                setTimeout(liberarProximoLote, tempoEspera);
+            }
+
+            // Abre as portas para o primeiro lote!
+            liberarProximoLote();
         }
     });
 }
@@ -226,6 +248,7 @@ function injetarContadorNoTitulo(sectionId, total) {
 function puxarTendenciasGerais() {
     fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&language=pt-BR`)
         .then(res => res.json()).then(dados => {
+            if(!dados.results) return; // Evita erros se a internet falhar
             const container = document.getElementById('carrossel-tendencias');
             dados.results.slice(0, 10).forEach(item => {
                 const poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
@@ -235,35 +258,33 @@ function puxarTendenciasGerais() {
                 card.innerHTML = `<img src="${poster}" alt="${item.title}"><h3>${item.title}</h3><div class="card-meta"><span style="color:#e50914; font-weight:bold;">Em Alta</span></div>`;
                 container.appendChild(card);
             });
-        });
+        }).catch(erro => console.error("Tendencias ignoradas: ", erro));
 }
 
-// === MOTOR DETETIVE ATUALIZADO ===
+// === BUSCADOR BLINDADO SEM TELAS VERMELHAS ===
 function puxarDadosTMDB(id, containerId, tipo) {
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
-    fetch(url).then(resposta => resposta.json()).then(dados => {
-            let titulo = dados.title || dados.name; 
-            let poster = dados.poster_path ? `https://image.tmdb.org/t/p/w500${dados.poster_path}` : '';
-            
-            // Se o TMDB der erro ou não achar o título, ele mostra o ID na tela.
-            if (!titulo || dados.success === false) {
-                titulo = "⚠️ Erro no ID: " + id;
-                poster = "https://placehold.co/500x750/222/FFF?text=ID+" + id;
-            } else if (!dados.poster_path) {
-                // Se o ID existir mas não tiver poster
-                poster = "https://placehold.co/500x750/222/FFF?text=Sem+Capa";
-            }
+    fetch(url).then(resposta => {
+        if (!resposta.ok) throw new Error("Bloqueio TMDB");
+        return resposta.json();
+    }).then(dados => {
+            // Se o ID for inválido de verdade, ignora em silêncio. Nada de erros na tela!
+            if (dados.success === false || !dados.id) return; 
 
+            let titulo = dados.title || dados.name; 
+            let poster = dados.poster_path ? `https://image.tmdb.org/t/p/w500${dados.poster_path}` : 'https://placehold.co/500x750/222/FFF?text=Sem+Capa';
+            
             const container = document.getElementById(containerId);
+            if (!container) return;
             const card = document.createElement('div');
             card.className = 'card';
             if (tipo === 'tv') card.setAttribute('onclick', `abrirPlayerSerie('${id}')`); else card.setAttribute('onclick', `abrirPlayer('${id}')`);
             card.innerHTML = `<img src="${poster}" alt="${titulo}"><h3>${titulo}</h3><div class="card-meta"><span>⭐ <span id="star-${id}">0.0</span></span><span>👁️ <span id="view-${id}">0</span></span></div>`;
-            if (container) container.appendChild(card);
+            container.appendChild(card);
             
             database.ref('views/' + id).on('value', snap => { if(snap.exists()) { let v = document.getElementById('view-' + id); if(v) v.innerText = snap.val(); } });
             database.ref('ratings/' + id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(voto => { t += voto.val(); c++; }); let s = document.getElementById('star-' + id); if(s) s.innerText = (t/c).toFixed(1); } });
-        }).catch(erro => console.error("Erro API:", erro));
+        }).catch(erro => console.warn("Atraso ignorado no ID:", id));
 }
 
 document.addEventListener('change', function(e) {
@@ -298,8 +319,10 @@ window.addEventListener('DOMContentLoaded', () => {
         if(auth) { auth.style.display = 'none'; auth.classList.remove('active'); }
         document.body.style.overflow = 'auto'; 
     }
-    carregarCatalogoDinamicamente();
+    
+    // Dispara as requisições em paralelo com segurança
     puxarTendenciasGerais();
+    carregarCatalogoDinamicamente();
 
     const logoEl = document.querySelector('.logo');
     if(logoEl) {
