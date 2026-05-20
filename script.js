@@ -211,11 +211,9 @@ function carregarCatalogoDinamicamente() {
                 injetarContadorNoTitulo(containerId.split('-')[1], ids.length);
                 
                 ids.forEach((id, index) => {
-                    // Os primeiros 7 itens carregam instantaneamente para dar a sensação de site rápido
                     if (index < 7) {
                         puxarDadosTMDB(id, containerId, tipo);
                     } else {
-                        // O resto carrega no fundo com apenas 15ms de intervalo
                         setTimeout(() => puxarDadosTMDB(id, containerId, tipo), (index - 7) * 15);
                     }
                 });
@@ -237,15 +235,15 @@ function injetarContadorNoTitulo(sectionId, total) {
     }
 }
 
+// === TENDÊNCIAS COM PASSE VIP ===
 function puxarTendenciasGerais() {
+    document.getElementById('tendencias').style.display = 'block'; // Garante que a seção não vai sumir
     fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&language=pt-BR`)
-        .then(res => {
-            if(!res.ok) throw new Error("Erro de conexão");
-            return res.json();
-        })
+        .then(res => res.json())
         .then(dados => {
             if(dados && dados.results) {
                 const container = document.getElementById('carrossel-tendencias');
+                container.innerHTML = ''; // Limpa pra ter certeza
                 dados.results.slice(0, 10).forEach(item => {
                     const poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
                     const card = document.createElement('div');
@@ -256,7 +254,7 @@ function puxarTendenciasGerais() {
                 });
             }
         })
-        .catch(erro => { document.getElementById('tendencias').style.display = 'none'; });
+        .catch(erro => console.warn("Pequena lentidão ao buscar tendências."));
 }
 
 function renderizarCardAuxiliar(id, titulo, poster, containerId, tipo) {
@@ -317,6 +315,7 @@ function copiarChavePix() {
     });
 }
 
+// === ORDEM DE CARREGAMENTO INTELIGENTE ===
 window.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.addEventListener('input', filtrarCatalogo);
@@ -325,8 +324,12 @@ window.addEventListener('DOMContentLoaded', () => {
         if(auth) { auth.style.display = 'none'; auth.classList.remove('active'); }
         document.body.style.overflow = 'auto'; 
     }
-    carregarCatalogoDinamicamente();
+    
+    // O Em Alta recebe passe VIP e carrega primeiro
     puxarTendenciasGerais();
+    
+    // Dá meio segundo pro Em Alta respirar, depois solta a avalanche do Catálogo!
+    setTimeout(carregarCatalogoDinamicamente, 500);
 
     const logoEl = document.querySelector('.logo');
     if(logoEl) {
