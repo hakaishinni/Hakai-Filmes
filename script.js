@@ -73,7 +73,6 @@ function exibirTelaDetalhes(id, tipo) {
         document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível para este título.";
         document.getElementById('modalYear').innerText = ano;
         document.getElementById('modalTagline').innerText = dados.tagline ? `"${dados.tagline}"` : '';
-
         document.getElementById('modalGenres').innerText = dados.genres?.map(g => g.name).join(' • ') || 'Categoria Desconhecida';
         
         if (tipo === 'tv') {
@@ -161,7 +160,16 @@ function darPlayNoVideo() {
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('videoView').style.display = 'flex'; 
     let urlEmbed = window.tipoAberto === 'tv' ? `https://myembed.biz/serie/${window.filmeAbertoID}` : `https://myembed.biz/filme/${window.filmeAbertoID}`;
-    document.getElementById('videoContainer').innerHTML = `<iframe src="${urlEmbed}" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>`;
+    
+    document.getElementById('videoContainer').innerHTML = `
+        <div style="position: relative; width: 100%; height: 100%; background: #000; overflow: hidden;">
+            <iframe src="${urlEmbed}" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>
+            <button onclick="alert('🍿 Player VIP HK Filmes Ativado!')" 
+                    style="position: absolute; top: 10px; right: 10px; background: #08080a; color: #e50914; border: 2px solid #e50914; padding: 10px 30px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.1em; border-radius: 8px; z-index: 50; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.9); letter-spacing: 1px;">
+                HK FILMES
+            </button>
+        </div>
+    `;
 }
 
 function abrirTrailer() {
@@ -194,20 +202,16 @@ function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
         if (snapshot.exists()) {
             const dados = snapshot.val();
-            
             if (dados.filmes) {
-                const totalFilmes = Object.keys(dados.filmes).length;
-                injetarContadorNoTitulo('filmes', totalFilmes);
+                injetarContadorNoTitulo('filmes', Object.keys(dados.filmes).length);
                 Object.keys(dados.filmes).forEach(id => puxarDadosTMDB(id, 'carrossel-filmes', 'movie'));
             }
             if (dados.series) {
-                const totalSeries = Object.keys(dados.series).length;
-                injetarContadorNoTitulo('series', totalSeries);
+                injetarContadorNoTitulo('series', Object.keys(dados.series).length);
                 Object.keys(dados.series).forEach(id => puxarDadosTMDB(id, 'carrossel-series', 'tv'));
             }
             if (dados.animes) {
-                const totalAnimes = Object.keys(dados.animes).length;
-                injetarContadorNoTitulo('animes', totalAnimes);
+                injetarContadorNoTitulo('animes', Object.keys(dados.animes).length);
                 Object.keys(dados.animes).forEach(id => puxarDadosTMDB(id, 'carrossel-animes', 'tv'));
             }
         }
@@ -223,47 +227,71 @@ function injetarContadorNoTitulo(sectionId, total) {
     }
 }
 
+// === TENDÊNCIAS COM PROTEÇÃO ANTI-QUEDA ===
 function puxarTendenciasGerais() {
     fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&language=pt-BR`)
-        .then(res => res.json()).then(dados => {
-            const container = document.getElementById('carrossel-tendencias');
-            dados.results.slice(0, 10).forEach(item => {
-                const poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.setAttribute('onclick', `abrirPlayer('${item.id}')`);
-                card.innerHTML = `<img src="${poster}" alt="${item.title}"><h3>${item.title}</h3><div class="card-meta"><span style="color:#e50914; font-weight:bold;">Em Alta</span></div>`;
-                container.appendChild(card);
-            });
+        .then(res => {
+            if(!res.ok) throw new Error("Erro " + res.status);
+            return res.json();
+        })
+        .then(dados => {
+            if(dados && dados.results) {
+                const container = document.getElementById('carrossel-tendencias');
+                dados.results.slice(0, 10).forEach(item => {
+                    const poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.setAttribute('onclick', `abrirPlayer('${item.id}')`);
+                    card.innerHTML = `<img src="${poster}" alt="${item.title}"><h3>${item.title}</h3><div class="card-meta"><span style="color:#e50914; font-weight:bold;">Em Alta</span></div>`;
+                    container.appendChild(card);
+                });
+            }
+        })
+        .catch(erro => {
+            console.error("Erro nas tendências:", erro);
+            // Se o TMDB der erro, esconde a seção de tendências inteira para não ficar um buraco feio no site
+            document.getElementById('tendencias').style.display = 'none'; 
         });
 }
 
-// === MOTOR DETETIVE ATUALIZADO ===
+// === RENDERIZADOR AUXILIAR PARA EVITAR DUPLICAÇÃO ===
+function renderizarCardAuxiliar(id, titulo, poster, containerId, tipo) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const card = document.createElement('div');
+    card.className = 'card';
+    if (tipo === 'tv') card.setAttribute('onclick', `abrirPlayerSerie('${id}')`); else card.setAttribute('onclick', `abrirPlayer('${id}')`);
+    card.innerHTML = `<img src="${poster}" alt="${titulo}"><h3>${titulo}</h3><div class="card-meta"><span>⭐ <span id="star-${id}">0.0</span></span><span>👁️ <span id="view-${id}">0</span></span></div>`;
+    container.appendChild(card);
+    
+    database.ref('views/' + id).on('value', snap => { if(snap.exists()) { let v = document.getElementById('view-' + id); if(v) v.innerText = snap.val(); } });
+    database.ref('ratings/' + id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(voto => { t += voto.val(); c++; }); let s = document.getElementById('star-' + id); if(s) s.innerText = (t/c).toFixed(1); } });
+}
+
+// === MOTOR DETETIVE BLINDADO (PEGA ATÉ QUEDA DE INTERNET) ===
 function puxarDadosTMDB(id, containerId, tipo) {
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
-    fetch(url).then(resposta => resposta.json()).then(dados => {
+    fetch(url)
+        .then(resposta => {
+            if (!resposta.ok) throw new Error("Conexão Derrubada pelo TMDB");
+            return resposta.json();
+        })
+        .then(dados => {
             let titulo = dados.title || dados.name; 
             let poster = dados.poster_path ? `https://image.tmdb.org/t/p/w500${dados.poster_path}` : '';
             
-            // Se o TMDB der erro ou não achar o título, ele mostra o ID na tela.
             if (!titulo || dados.success === false) {
-                titulo = "⚠️ Erro no ID: " + id;
-                poster = "https://placehold.co/500x750/222/FFF?text=ID+" + id;
+                renderizarCardAuxiliar(id, "⚠️ ID Inválido: " + id, "https://placehold.co/500x750/222/FFF?text=ID+" + id, containerId, tipo);
             } else if (!dados.poster_path) {
-                // Se o ID existir mas não tiver poster
-                poster = "https://placehold.co/500x750/222/FFF?text=Sem+Capa";
+                renderizarCardAuxiliar(id, titulo, "https://placehold.co/500x750/222/FFF?text=Sem+Capa", containerId, tipo);
+            } else {
+                renderizarCardAuxiliar(id, titulo, poster, containerId, tipo);
             }
-
-            const container = document.getElementById(containerId);
-            const card = document.createElement('div');
-            card.className = 'card';
-            if (tipo === 'tv') card.setAttribute('onclick', `abrirPlayerSerie('${id}')`); else card.setAttribute('onclick', `abrirPlayer('${id}')`);
-            card.innerHTML = `<img src="${poster}" alt="${titulo}"><h3>${titulo}</h3><div class="card-meta"><span>⭐ <span id="star-${id}">0.0</span></span><span>👁️ <span id="view-${id}">0</span></span></div>`;
-            if (container) container.appendChild(card);
-            
-            database.ref('views/' + id).on('value', snap => { if(snap.exists()) { let v = document.getElementById('view-' + id); if(v) v.innerText = snap.val(); } });
-            database.ref('ratings/' + id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(voto => { t += voto.val(); c++; }); let s = document.getElementById('star-' + id); if(s) s.innerText = (t/c).toFixed(1); } });
-        }).catch(erro => console.error("Erro API:", erro));
+        })
+        .catch(erro => {
+            // SE A INTERNET FALHAR OU BARRAR O ID, O CARD FICA VERMELHO!
+            renderizarCardAuxiliar(id, "❌ Falha: " + id, "https://placehold.co/500x750/e50914/FFF?text=Erro+" + id, containerId, tipo);
+        });
 }
 
 document.addEventListener('change', function(e) {
