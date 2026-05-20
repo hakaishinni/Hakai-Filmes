@@ -199,37 +199,31 @@ function fecharPlayer() {
     document.getElementById('trailerContainer').innerHTML = ''; 
 }
 
-// === MOTOR DE CARREGAMENTO INTELIGENTE (FILA INDIANA) ===
+// === MOTOR DE CARREGAMENTO ULTRA RÁPIDO (FAST TRACK) ===
 function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
         if (snapshot.exists()) {
             const dados = snapshot.val();
-            let tempoAtraso = 0; // O tempo que vamos mandar o navegador esperar entre um filme e outro
             
-            if (dados.filmes) {
-                const idsFilmes = Object.keys(dados.filmes);
-                injetarContadorNoTitulo('filmes', idsFilmes.length);
-                idsFilmes.forEach(id => {
-                    setTimeout(() => puxarDadosTMDB(id, 'carrossel-filmes', 'movie'), tempoAtraso);
-                    tempoAtraso += 30; // 30ms de diferença salva os servidores de travar
+            const carregarLote = (pasta, containerId, tipo) => {
+                if (!pasta) return;
+                const ids = Object.keys(pasta);
+                injetarContadorNoTitulo(containerId.split('-')[1], ids.length);
+                
+                ids.forEach((id, index) => {
+                    // Os primeiros 7 itens carregam instantaneamente para dar a sensação de site rápido
+                    if (index < 7) {
+                        puxarDadosTMDB(id, containerId, tipo);
+                    } else {
+                        // O resto carrega no fundo com apenas 15ms de intervalo
+                        setTimeout(() => puxarDadosTMDB(id, containerId, tipo), (index - 7) * 15);
+                    }
                 });
-            }
-            if (dados.series) {
-                const idsSeries = Object.keys(dados.series);
-                injetarContadorNoTitulo('series', idsSeries.length);
-                idsSeries.forEach(id => {
-                    setTimeout(() => puxarDadosTMDB(id, 'carrossel-series', 'tv'), tempoAtraso);
-                    tempoAtraso += 30;
-                });
-            }
-            if (dados.animes) {
-                const idsAnimes = Object.keys(dados.animes);
-                injetarContadorNoTitulo('animes', idsAnimes.length);
-                idsAnimes.forEach(id => {
-                    setTimeout(() => puxarDadosTMDB(id, 'carrossel-animes', 'tv'), tempoAtraso);
-                    tempoAtraso += 30;
-                });
-            }
+            };
+
+            carregarLote(dados.filmes, 'carrossel-filmes', 'movie');
+            carregarLote(dados.series, 'carrossel-series', 'tv');
+            carregarLote(dados.animes, 'carrossel-animes', 'tv');
         }
     });
 }
@@ -243,7 +237,6 @@ function injetarContadorNoTitulo(sectionId, total) {
     }
 }
 
-// === TENDÊNCIAS COM PROTEÇÃO ANTI-QUEDA ===
 function puxarTendenciasGerais() {
     fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&language=pt-BR`)
         .then(res => {
@@ -263,13 +256,9 @@ function puxarTendenciasGerais() {
                 });
             }
         })
-        .catch(erro => {
-            // Se o trânsito parar essa busca, esconde o título para não ficar feio
-            document.getElementById('tendencias').style.display = 'none'; 
-        });
+        .catch(erro => { document.getElementById('tendencias').style.display = 'none'; });
 }
 
-// === RENDERIZADOR AUXILIAR ===
 function renderizarCardAuxiliar(id, titulo, poster, containerId, tipo) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -283,7 +272,6 @@ function renderizarCardAuxiliar(id, titulo, poster, containerId, tipo) {
     database.ref('ratings/' + id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(voto => { t += voto.val(); c++; }); let s = document.getElementById('star-' + id); if(s) s.innerText = (t/c).toFixed(1); } });
 }
 
-// === PUXAR DADOS SEM SANGRAMENTO VISUAL ===
 function puxarDadosTMDB(id, containerId, tipo) {
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
     fetch(url)
@@ -295,7 +283,6 @@ function puxarDadosTMDB(id, containerId, tipo) {
             let titulo = dados.title || dados.name; 
             let poster = dados.poster_path ? `https://image.tmdb.org/t/p/w500${dados.poster_path}` : '';
             
-            // Avisa SÓ se o ID realmente for inventado ou apagado pelo TMDB
             if (dados.success === false) {
                 renderizarCardAuxiliar(id, "ID Inválido", "https://placehold.co/500x750/222/FFF?text=ID+" + id, containerId, tipo);
             } else {
@@ -303,10 +290,7 @@ function puxarDadosTMDB(id, containerId, tipo) {
                 renderizarCardAuxiliar(id, titulo, poster, containerId, tipo);
             }
         })
-        .catch(erro => {
-            // Se foi só uma falha de conexão ou trânsito, a gente ignora em silêncio.
-            console.warn("Lentidão evitou carregar: " + id);
-        });
+        .catch(erro => { console.warn("Lentidão evitou carregar: " + id); });
 }
 
 document.addEventListener('change', function(e) {
