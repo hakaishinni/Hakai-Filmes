@@ -34,12 +34,6 @@ function entrarComoConvidado() {
     localStorage.setItem('hkFilmes_acessoLiberado', 'true');
 }
 
-function registrarView(id) {
-    if (localStorage.getItem('hkAdmin') === 'true') return; 
-    const ref = database.ref('views/' + id);
-    ref.once('value').then(snap => ref.set((snap.val() || 0) + 1));
-}
-
 function abrirPlayer(idFilme) { window.filmeAbertoID = idFilme; window.tipoAberto = 'movie'; exibirTelaDetalhes(idFilme, 'movie'); }
 function abrirPlayerSerie(idSerie) { window.filmeAbertoID = idSerie; window.tipoAberto = 'tv'; exibirTelaDetalhes(idSerie, 'tv'); }
 
@@ -70,60 +64,11 @@ function exibirTelaDetalhes(id, tipo) {
             titleContainer.innerHTML = `<h1 id="modalTitle">${titulo}</h1>`;
         }
 
-        document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível para este título.";
+        document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível.";
         document.getElementById('modalYear').innerText = ano;
-        document.getElementById('modalTagline').innerText = dados.tagline ? `"${dados.tagline}"` : '';
-
         document.getElementById('modalGenres').innerText = dados.genres?.map(g => g.name).join(' • ') || 'Categoria Desconhecida';
         
-        if (tipo === 'tv') {
-            const temps = dados.number_of_seasons || '1';
-            const eps = dados.number_of_episodes || '?';
-            document.getElementById('modalDuration').innerText = `${temps} Temp. (${eps} Episódios)`;
-            document.getElementById('ratingTitle').innerText = "Avalie esta série/anime";
-        } else {
-            const rt = dados.runtime;
-            document.getElementById('modalDuration').innerText = rt > 0 ? `${Math.floor(rt / 60)}h ${rt % 60}m` : 'Duração Indisponível';
-            document.getElementById('ratingTitle').innerText = "Avalie este filme";
-        }
-
-        let ageRating = 'SR', ageColor = '#555', textColor = '#fff', borderStyle = '1px solid transparent';
-        if (tipo === 'movie' && dados.release_dates) {
-            const br = dados.release_dates.results.find(r => r.iso_3166_1 === 'BR');
-            if (br && br.release_dates.length > 0) ageRating = br.release_dates.find(d => d.certification)?.certification || 'SR';
-        } else if (tipo === 'tv' && dados.content_ratings) {
-            const br = dados.content_ratings.results.find(r => r.iso_3166_1 === 'BR');
-            if (br && br.rating) ageRating = br.rating;
-        }
-        if (ageRating === 'L' || ageRating === 'Livre' || ageRating === '0') { ageRating = 'L'; ageColor = '#0c8b3e'; } 
-        else if (ageRating === '10') { ageColor = '#0f7cc0'; } 
-        else if (ageRating === '12') { ageColor = '#ffc107'; textColor = '#000'; } 
-        else if (ageRating === '14') { ageColor = '#e67822'; } 
-        else if (ageRating === '16') { ageColor = '#e50914'; } 
-        else if (ageRating === '18') { ageColor = '#000000'; borderStyle = '1px solid #fff'; } 
-        else { ageRating = 'SR'; borderStyle = '1px solid #888'; ageColor='transparent'; textColor='#888';} 
-
-        const badge = document.querySelector('.meta-item.age-rating');
-        badge.innerText = ageRating; badge.style.backgroundColor = ageColor; badge.style.color = textColor; badge.style.border = borderStyle;
-
-        const castGrid = document.getElementById('modalCastGrid');
-        castGrid.innerHTML = '';
-        if (dados.credits && dados.credits.cast) {
-            const atores = dados.credits.cast.slice(0, 5);
-            atores.forEach(ator => {
-                const foto = ator.profile_path ? `https://image.tmdb.org/t/p/w185${ator.profile_path}` : 'https://placehold.co/60x60/222/555?text=Foto';
-                castGrid.innerHTML += `
-                    <div class="cast-member">
-                        <img src="${foto}" alt="${ator.name}">
-                        <span>${ator.name.split(' ')[0]}</span>
-                    </div>`;
-            });
-        }
-        let criador = tipo === 'tv' ? dados.created_by?.map(c => c.name).join(', ') : dados.credits?.crew?.find(c => c.job === 'Director')?.name;
-        document.getElementById('modalCreator').innerText = criador || 'Não informado';
-
         const btnTrailer = document.getElementById('btnTrailer');
-        urlTrailerGlobal = null;
         if (dados.videos && dados.videos.results) {
             const trailer = dados.videos.results.find(v => v.site === "YouTube" && v.type === "Trailer");
             if (trailer) {
@@ -135,25 +80,16 @@ function exibirTelaDetalhes(id, tipo) {
 
         const similarGrid = document.getElementById('modalSimilarGrid');
         similarGrid.innerHTML = '';
-        if (dados.recommendations && dados.recommendations.results && dados.recommendations.results.length > 0) {
-            const similares = dados.recommendations.results.slice(0, 10);
-            similares.forEach(sim => {
+        if (dados.recommendations && dados.recommendations.results) {
+            dados.recommendations.results.slice(0, 10).forEach(sim => {
                 if(sim.poster_path) {
                     const fnClique = tipo === 'tv' ? `abrirPlayerSerie('${sim.id}')` : `abrirPlayer('${sim.id}')`;
-                    similarGrid.innerHTML += `
-                        <div class="similar-card" onclick="${fnClique}">
-                            <img src="https://image.tmdb.org/t/p/w342${sim.poster_path}" alt="Capa">
-                        </div>`;
+                    similarGrid.innerHTML += `<div class="similar-card" onclick="${fnClique}"><img src="https://image.tmdb.org/t/p/w342${sim.poster_path}"></div>`;
                 }
             });
-            document.getElementById('similarSection').style.display = 'block';
-        } else {
-            document.getElementById('similarSection').style.display = 'none';
+            document.getElementById('similarSection').style.display = dados.recommendations.results.length > 0 ? 'block' : 'none';
         }
-
-    }).catch(erro => console.error("Erro API:", erro));
-
-    resetarEstrelas(); registrarView(id); 
+    }).catch(e => console.error(e));
 }
 
 function darPlayNoVideo() {
@@ -161,192 +97,84 @@ function darPlayNoVideo() {
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('videoView').style.display = 'flex'; 
     let urlEmbed = window.tipoAberto === 'tv' ? `https://myembed.biz/serie/${window.filmeAbertoID}` : `https://myembed.biz/filme/${window.filmeAbertoID}`;
-    document.getElementById('videoContainer').innerHTML = `<iframe src="${urlEmbed}" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>`;
+    document.getElementById('videoContainer').innerHTML = `<div style="position: relative; width: 100%; height: 100%; background: #000; overflow: hidden;"><iframe src="${urlEmbed}" width="100%" height="100%" style="border:none;" allowfullscreen></iframe><button onclick="alert('🍿 Player VIP HK Filmes Ativado!')" style="position: absolute; top: 10px; right: 10px; background: #08080a; color: #e50914; border: 2px solid #e50914; padding: 10px 30px; font-weight: 800; border-radius: 8px; z-index: 50; cursor: pointer;">HK FILMES</button></div>`;
 }
 
 function abrirTrailer() {
-    if(!urlTrailerGlobal) return;
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('trailerView').style.display = 'flex';
-    const ytLink = `https://www.youtube.com/embed/${urlTrailerGlobal}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&controls=1`;
-    document.getElementById('trailerContainer').innerHTML = `<iframe src="${ytLink}" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>`;
+    document.getElementById('trailerContainer').innerHTML = `<iframe src="https://www.youtube.com/embed/${urlTrailerGlobal}?autoplay=1" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>`;
 }
 
 function voltarParaDetalhes() {
     document.getElementById('videoView').style.display = 'none'; 
     document.getElementById('trailerView').style.display = 'none'; 
     document.getElementById('detailsView').style.display = 'block';
-    document.getElementById('videoContainer').innerHTML = ''; 
-    document.getElementById('trailerContainer').innerHTML = ''; 
 }
 
-function resetarEstrelas() {
-    const msgEl = document.getElementById('ratingMsg'); if(msgEl) msgEl.innerText = "";
-    document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; });
-}
 function fecharPlayer() {
     document.getElementById('playerModal').classList.remove('active'); 
     document.getElementById('videoContainer').innerHTML = ''; 
     document.getElementById('trailerContainer').innerHTML = ''; 
 }
 
-// === MOTOR DE CARREGAMENTO COM O "GUARDA DE TRÂNSITO" ===
 function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
-        if (snapshot.exists()) {
-            const dados = snapshot.val();
-            let filaGlobal = []; // Colocamos todos os IDs aqui
-            
-            if (dados.filmes) {
-                const ids = Object.keys(dados.filmes);
-                injetarContadorNoTitulo('filmes', ids.length);
-                ids.forEach(id => filaGlobal.push({id: id, container: 'carrossel-filmes', tipo: 'movie'}));
-            }
-            if (dados.series) {
-                const ids = Object.keys(dados.series);
-                injetarContadorNoTitulo('series', ids.length);
-                ids.forEach(id => filaGlobal.push({id: id, container: 'carrossel-series', tipo: 'tv'}));
-            }
-            if (dados.animes) {
-                const ids = Object.keys(dados.animes);
-                injetarContadorNoTitulo('animes', ids.length);
-                ids.forEach(id => filaGlobal.push({id: id, container: 'carrossel-animes', tipo: 'tv'}));
-            }
+        if (!snapshot.exists()) return;
+        const dados = snapshot.val();
+        let fila = [];
+        if (dados.filmes) Object.keys(dados.filmes).forEach(id => fila.push({id, cont: 'carrossel-filmes', tipo: 'movie'}));
+        if (dados.series) Object.keys(dados.series).forEach(id => fila.push({id, cont: 'carrossel-series', tipo: 'tv'}));
+        if (dados.animes) Object.keys(dados.animes).forEach(id => fila.push({id, cont: 'carrossel-animes', tipo: 'tv'}));
 
-            // O Guarda de Trânsito organizando a entrada
-            let indexAtual = 0;
-            const tamanhoLote = 15; // Deixa entrar 15 filmes por vez
-            const tempoEspera = 500; // Espera meio segundo entre os lotes
-
-            function liberarProximoLote() {
-                const lote = filaGlobal.slice(indexAtual, indexAtual + tamanhoLote);
-                if (lote.length === 0) return; // Se a fila acabou, o guarda descansa
-                
-                // Manda os 15 filmes do lote atual buscarem os dados
-                lote.forEach(item => puxarDadosTMDB(item.id, item.container, item.tipo));
-                indexAtual += tamanhoLote;
-                
-                // Aciona o cronômetro para o próximo lote
-                setTimeout(liberarProximoLote, tempoEspera);
-            }
-
-            // Abre as portas para o primeiro lote!
-            liberarProximoLote();
+        let i = 0;
+        function rodarFila() {
+            if (i >= fila.length) return;
+            const lote = fila.slice(i, i + 15);
+            lote.forEach(item => puxarDados(item.id, item.cont, item.tipo));
+            i += 15;
+            setTimeout(rodarFila, 600);
         }
+        rodarFila();
     });
 }
 
-function injetarContadorNoTitulo(sectionId, total) {
-    const h2Element = document.querySelector(`#${sectionId} h2`);
-    if (h2Element) {
-        const antigo = h2Element.querySelector('.badge-contador');
-        if (antigo) antigo.remove();
-        h2Element.innerHTML += ` <span class="badge-contador" style="background: #222; color: #aaa; font-size: 0.55em; padding: 3px 9px; border-radius: 20px; margin-left: 10px; font-weight: 600; vertical-align: middle; border: 1px solid #333;">${total}</span>`;
-    }
+function puxarDados(id, cont, tipo) {
+    fetch(`https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`)
+        .then(res => res.json()).then(d => {
+            if (d.success === false || !d.id) return;
+            const container = document.getElementById(cont);
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => (tipo === 'tv' ? abrirPlayerSerie(id) : abrirPlayer(id));
+            card.innerHTML = `<img src="${d.poster_path ? 'https://image.tmdb.org/t/p/w500' + d.poster_path : 'https://placehold.co/500x750/222/FFF?text=Sem+Capa'}"><h3>${d.title || d.name}</h3>`;
+            container.appendChild(card);
+        }).catch(() => {});
 }
 
 function puxarTendenciasGerais() {
     fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&language=pt-BR`)
-        .then(res => res.json()).then(dados => {
-            if(!dados.results) return; // Evita erros se a internet falhar
+        .then(res => res.json()).then(d => {
             const container = document.getElementById('carrossel-tendencias');
-            dados.results.slice(0, 10).forEach(item => {
-                const poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+            d.results.slice(0, 10).forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.setAttribute('onclick', `abrirPlayer('${item.id}')`);
-                card.innerHTML = `<img src="${poster}" alt="${item.title}"><h3>${item.title}</h3><div class="card-meta"><span style="color:#e50914; font-weight:bold;">Em Alta</span></div>`;
+                card.onclick = () => abrirPlayer(item.id);
+                card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}"><h3>${item.title}</h3><div class="card-meta"><span style="color:#e50914; font-weight:bold;">Em Alta</span></div>`;
                 container.appendChild(card);
             });
-        }).catch(erro => console.error("Tendencias ignoradas: ", erro));
-}
-
-// === BUSCADOR BLINDADO SEM TELAS VERMELHAS ===
-function puxarDadosTMDB(id, containerId, tipo) {
-    const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
-    fetch(url).then(resposta => {
-        if (!resposta.ok) throw new Error("Bloqueio TMDB");
-        return resposta.json();
-    }).then(dados => {
-            // Se o ID for inválido de verdade, ignora em silêncio. Nada de erros na tela!
-            if (dados.success === false || !dados.id) return; 
-
-            let titulo = dados.title || dados.name; 
-            let poster = dados.poster_path ? `https://image.tmdb.org/t/p/w500${dados.poster_path}` : 'https://placehold.co/500x750/222/FFF?text=Sem+Capa';
-            
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            const card = document.createElement('div');
-            card.className = 'card';
-            if (tipo === 'tv') card.setAttribute('onclick', `abrirPlayerSerie('${id}')`); else card.setAttribute('onclick', `abrirPlayer('${id}')`);
-            card.innerHTML = `<img src="${poster}" alt="${titulo}"><h3>${titulo}</h3><div class="card-meta"><span>⭐ <span id="star-${id}">0.0</span></span><span>👁️ <span id="view-${id}">0</span></span></div>`;
-            container.appendChild(card);
-            
-            database.ref('views/' + id).on('value', snap => { if(snap.exists()) { let v = document.getElementById('view-' + id); if(v) v.innerText = snap.val(); } });
-            database.ref('ratings/' + id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(voto => { t += voto.val(); c++; }); let s = document.getElementById('star-' + id); if(s) s.innerText = (t/c).toFixed(1); } });
-        }).catch(erro => console.warn("Atraso ignorado no ID:", id));
-}
-
-document.addEventListener('change', function(e) {
-    if(e.target.name === 'rating' && window.filmeAbertoID) {
-        let nota = parseInt(e.target.value); let timestamp = new Date().getTime(); 
-        database.ref('ratings/' + window.filmeAbertoID + '/' + timestamp).set(nota).then(() => {
-            const msgEl = document.getElementById('ratingMsg'); if(msgEl) msgEl.innerText = "Obrigado por avaliar!";
-            document.querySelectorAll('input[name="rating"]').forEach(s => s.disabled = true);
         });
-    }
-});
+}
 
 function copiarChavePix() {
-    const chavePix = "ba714471-1484-4618-a070-4a991de0395d";
-    navigator.clipboard.writeText(chavePix).then(() => {
+    navigator.clipboard.writeText("ba714471-1484-4618-a070-4a991de0395d").then(() => {
         const msg = document.getElementById('pixStatusMsg');
-        if (msg) {
-            msg.innerText = "✓ Chave PIX copiada! É só colar no seu banco.";
-            msg.style.display = "block";
-            setTimeout(() => { msg.style.display = "none"; }, 4000);
-        }
-    }).catch(err => {
-        alert("Erro ao copiar automaticamente. Use a chave: " + chavePix);
+        msg.innerText = "✓ Chave PIX copiada!";
+        setTimeout(() => { msg.innerText = ""; }, 3000);
     });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) searchInput.addEventListener('input', filtrarCatalogo);
-    if (localStorage.getItem('hkFilmes_acessoLiberado') === 'true') {
-        let auth = document.getElementById('authOverlay');
-        if(auth) { auth.style.display = 'none'; auth.classList.remove('active'); }
-        document.body.style.overflow = 'auto'; 
-    }
-    
-    // Dispara as requisições em paralelo com segurança
     puxarTendenciasGerais();
     carregarCatalogoDinamicamente();
-
-    const logoEl = document.querySelector('.logo');
-    if(logoEl) {
-        let cliquesLogo = 0;
-        logoEl.addEventListener('click', () => {
-            cliquesLogo++;
-            if(cliquesLogo >= 5) {
-                if(localStorage.getItem('hkAdmin') === 'true') {
-                    localStorage.removeItem('hkAdmin');
-                    alert('🛠️ Modo Admin DESATIVADO: Suas visualizações voltaram a contar.');
-                } else {
-                    localStorage.setItem('hkAdmin', 'true');
-                    alert('🛠️ Modo Admin ATIVADO: Suas visualizações NÃO serão mais contadas!');
-                }
-                cliquesLogo = 0;
-            }
-            setTimeout(() => cliquesLogo = 0, 2000); 
-        });
-    }
-});
-
-document.addEventListener('contextmenu', event => event.preventDefault()); 
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
-    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
-    if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
 });
