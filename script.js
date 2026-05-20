@@ -73,6 +73,7 @@ function exibirTelaDetalhes(id, tipo) {
         document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível para este título.";
         document.getElementById('modalYear').innerText = ano;
         document.getElementById('modalTagline').innerText = dados.tagline ? `"${dados.tagline}"` : '';
+
         document.getElementById('modalGenres').innerText = dados.genres?.map(g => g.name).join(' • ') || 'Categoria Desconhecida';
         
         if (tipo === 'tv') {
@@ -198,21 +199,36 @@ function fecharPlayer() {
     document.getElementById('trailerContainer').innerHTML = ''; 
 }
 
+// === MOTOR DE CARREGAMENTO INTELIGENTE (FILA INDIANA) ===
 function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
         if (snapshot.exists()) {
             const dados = snapshot.val();
+            let tempoAtraso = 0; // O tempo que vamos mandar o navegador esperar entre um filme e outro
+            
             if (dados.filmes) {
-                injetarContadorNoTitulo('filmes', Object.keys(dados.filmes).length);
-                Object.keys(dados.filmes).forEach(id => puxarDadosTMDB(id, 'carrossel-filmes', 'movie'));
+                const idsFilmes = Object.keys(dados.filmes);
+                injetarContadorNoTitulo('filmes', idsFilmes.length);
+                idsFilmes.forEach(id => {
+                    setTimeout(() => puxarDadosTMDB(id, 'carrossel-filmes', 'movie'), tempoAtraso);
+                    tempoAtraso += 30; // 30ms de diferença salva os servidores de travar
+                });
             }
             if (dados.series) {
-                injetarContadorNoTitulo('series', Object.keys(dados.series).length);
-                Object.keys(dados.series).forEach(id => puxarDadosTMDB(id, 'carrossel-series', 'tv'));
+                const idsSeries = Object.keys(dados.series);
+                injetarContadorNoTitulo('series', idsSeries.length);
+                idsSeries.forEach(id => {
+                    setTimeout(() => puxarDadosTMDB(id, 'carrossel-series', 'tv'), tempoAtraso);
+                    tempoAtraso += 30;
+                });
             }
             if (dados.animes) {
-                injetarContadorNoTitulo('animes', Object.keys(dados.animes).length);
-                Object.keys(dados.animes).forEach(id => puxarDadosTMDB(id, 'carrossel-animes', 'tv'));
+                const idsAnimes = Object.keys(dados.animes);
+                injetarContadorNoTitulo('animes', idsAnimes.length);
+                idsAnimes.forEach(id => {
+                    setTimeout(() => puxarDadosTMDB(id, 'carrossel-animes', 'tv'), tempoAtraso);
+                    tempoAtraso += 30;
+                });
             }
         }
     });
@@ -231,7 +247,7 @@ function injetarContadorNoTitulo(sectionId, total) {
 function puxarTendenciasGerais() {
     fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&language=pt-BR`)
         .then(res => {
-            if(!res.ok) throw new Error("Erro " + res.status);
+            if(!res.ok) throw new Error("Erro de conexão");
             return res.json();
         })
         .then(dados => {
@@ -248,13 +264,12 @@ function puxarTendenciasGerais() {
             }
         })
         .catch(erro => {
-            console.error("Erro nas tendências:", erro);
-            // Se o TMDB der erro, esconde a seção de tendências inteira para não ficar um buraco feio no site
+            // Se o trânsito parar essa busca, esconde o título para não ficar feio
             document.getElementById('tendencias').style.display = 'none'; 
         });
 }
 
-// === RENDERIZADOR AUXILIAR PARA EVITAR DUPLICAÇÃO ===
+// === RENDERIZADOR AUXILIAR ===
 function renderizarCardAuxiliar(id, titulo, poster, containerId, tipo) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -268,29 +283,29 @@ function renderizarCardAuxiliar(id, titulo, poster, containerId, tipo) {
     database.ref('ratings/' + id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(voto => { t += voto.val(); c++; }); let s = document.getElementById('star-' + id); if(s) s.innerText = (t/c).toFixed(1); } });
 }
 
-// === MOTOR DETETIVE BLINDADO (PEGA ATÉ QUEDA DE INTERNET) ===
+// === PUXAR DADOS SEM SANGRAMENTO VISUAL ===
 function puxarDadosTMDB(id, containerId, tipo) {
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
     fetch(url)
         .then(resposta => {
-            if (!resposta.ok) throw new Error("Conexão Derrubada pelo TMDB");
+            if (!resposta.ok) throw new Error("Engarrafamento TMDB");
             return resposta.json();
         })
         .then(dados => {
             let titulo = dados.title || dados.name; 
             let poster = dados.poster_path ? `https://image.tmdb.org/t/p/w500${dados.poster_path}` : '';
             
-            if (!titulo || dados.success === false) {
-                renderizarCardAuxiliar(id, "⚠️ ID Inválido: " + id, "https://placehold.co/500x750/222/FFF?text=ID+" + id, containerId, tipo);
-            } else if (!dados.poster_path) {
-                renderizarCardAuxiliar(id, titulo, "https://placehold.co/500x750/222/FFF?text=Sem+Capa", containerId, tipo);
+            // Avisa SÓ se o ID realmente for inventado ou apagado pelo TMDB
+            if (dados.success === false) {
+                renderizarCardAuxiliar(id, "ID Inválido", "https://placehold.co/500x750/222/FFF?text=ID+" + id, containerId, tipo);
             } else {
+                if (!dados.poster_path) poster = "https://placehold.co/500x750/222/FFF?text=Sem+Capa";
                 renderizarCardAuxiliar(id, titulo, poster, containerId, tipo);
             }
         })
         .catch(erro => {
-            // SE A INTERNET FALHAR OU BARRAR O ID, O CARD FICA VERMELHO!
-            renderizarCardAuxiliar(id, "❌ Falha: " + id, "https://placehold.co/500x750/e50914/FFF?text=Erro+" + id, containerId, tipo);
+            // Se foi só uma falha de conexão ou trânsito, a gente ignora em silêncio.
+            console.warn("Lentidão evitou carregar: " + id);
         });
 }
 
