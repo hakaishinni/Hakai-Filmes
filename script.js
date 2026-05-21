@@ -3,6 +3,12 @@ let tipoAberto = null;
 let urlTrailerGlobal = null;
 const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
 
+// === MOTOR DA TELA DE AUTENTICAÇÃO VIP ===
+function alternarTelaAuth(tela) {
+    document.getElementById('loginView').style.display = tela === 'login' ? 'block' : 'none';
+    document.getElementById('registroView').style.display = tela === 'registro' ? 'block' : 'none';
+}
+
 function mudarAba(aba) {
     document.getElementById('home').style.display = (aba === 'tudo') ? 'block' : 'none';
     document.getElementById('tendencias').style.display = (aba === 'tudo') ? 'block' : 'none';
@@ -366,6 +372,45 @@ function iniciarCarrosselAutomatico() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    // === SISTEMA DE SELEÇÃO DE AVATAR E VALIDAÇÃO DE REGISTRO ===
+    document.querySelectorAll('.avatar-option').forEach(img => {
+        img.addEventListener('click', function() {
+            // Remove a seleção de todos
+            document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
+            // Adiciona a seleção apenas no clicado
+            this.classList.add('selected');
+            // Salva a escolha na gaveta invisível
+            document.getElementById('avatarSelecionado').value = this.getAttribute('data-avatar');
+        });
+    });
+
+    const formRegistro = document.getElementById('formRegistro');
+    if(formRegistro) {
+        formRegistro.addEventListener('submit', function(e) {
+            e.preventDefault(); // Impede a tela de recarregar
+            
+            const emailInput = document.getElementById('regEmail').value.toLowerCase();
+            const erroMsg = document.getElementById('erroRegistro');
+            
+            // A Lista VIP de provedores
+            const provedoresPermitidos = ['@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com'];
+            
+            // Verifica se o e-mail termina com algum provedor da lista VIP
+            const emailValido = provedoresPermitidos.some(provedor => emailInput.endsWith(provedor));
+
+            if (!emailValido) {
+                // Barrado na porta!
+                erroMsg.innerText = "❌ E-mail inválido. Utilize apenas contas do Google, Outlook, Hotmail ou Yahoo.";
+                erroMsg.style.display = 'block';
+            } else {
+                // Passou pelo segurança!
+                erroMsg.style.display = 'none';
+                const avatarEscolhido = document.getElementById('avatarSelecionado').value;
+                alert(`✅ CONTA APROVADA NA TRIAGEM!\n\nE-mail: ${emailInput}\nAvatar: [${avatarEscolhido}]\n\n*A conexão com o Firebase será feita na próxima etapa.*`);
+            }
+        });
+    }
+
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.addEventListener('input', filtrarCatalogo);
     if (localStorage.getItem('hkFilmes_acessoLiberado') === 'true') {
