@@ -214,6 +214,39 @@ function carregarCatalogoDinamicamente() {
     });
 }
 
+// === MOTOR DE RANKING (TOP 10 MAIS ASSISTIDOS) ===
+async function carregarTop10Assistidos() {
+    const snapViews = await database.ref('views').once('value');
+    let viewsData = snapViews.exists() ? snapViews.val() : {};
+
+    const snapCat = await database.ref('catalogo').once('value');
+    if (!snapCat.exists()) return;
+    const catalogo = snapCat.val();
+
+    const processarRanking = async (idsCategoria, containerId, tipo_tmdb) => {
+        if (!idsCategoria) return;
+        
+        let ranking = [];
+        for (let id of Object.keys(idsCategoria)) {
+            ranking.push({ id: id, views: viewsData[id] || 0 });
+        }
+        
+        ranking.sort((a, b) => b.views - a.views);
+        let top10 = ranking.slice(0, 10);
+
+        let cont = 0;
+        for (let item of top10) {
+            if (cont % 5 === 0) await new Promise(r => setTimeout(r, 400));
+            puxarDadosTMDB(item.id, containerId, tipo_tmdb);
+            cont++;
+        }
+    };
+
+    await processarRanking(catalogo.filmes, 'carrossel-top-filmes', 'movie');
+    await processarRanking(catalogo.series, 'carrossel-top-series', 'tv');
+    await processarRanking(catalogo.animes, 'carrossel-top-animes', 'tv');
+}
+
 function injetarContadorNoTitulo(sectionId, total) {
     const h2Element = document.querySelector(`#${sectionId} h2`);
     if (h2Element) {
@@ -255,11 +288,13 @@ function puxarDadosTMDB(id, containerId, tipo) {
             }
 
             const container = document.getElementById(containerId);
+            if (!container) return; // Segurança extra para evitar erros se a gaveta HTML ainda não existir
+            
             const card = document.createElement('div');
             card.className = 'card';
             if (tipo === 'tv') card.setAttribute('onclick', `abrirPlayerSerie('${id}')`); else card.setAttribute('onclick', `abrirPlayer('${id}')`);
             card.innerHTML = `<img src="${poster}" alt="${titulo}"><h3>${titulo}</h3><div class="card-meta"><span>⭐ <span id="star-${id}">0.0</span></span><span>👁️ <span id="view-${id}">0</span></span></div>`;
-            if (container) container.appendChild(card);
+            container.appendChild(card);
             
             database.ref('views/' + id).on('value', snap => { if(snap.exists()) { let v = document.getElementById('view-' + id); if(v) v.innerText = snap.val(); } });
             database.ref('ratings/' + id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(voto => { t += voto.val(); c++; }); let s = document.getElementById('star-' + id); if(s) s.innerText = (t/c).toFixed(1); } });
@@ -299,6 +334,7 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'auto'; 
     }
     carregarCatalogoDinamicamente();
+    carregarTop10Assistidos(); // O novo Motor sendo acionado aqui!
     puxarTendenciasGerais();
 
     const logoEl = document.querySelector('.logo');
