@@ -325,6 +325,46 @@ function copiarChavePix() {
     });
 }
 
+// === EFEITO CARROSSEL PREMIUM (PING-PONG) ===
+function iniciarCarrosselAutomatico() {
+    // Pega as 3 gavetas de Top 10
+    const prateleiras = ['carrossel-top-filmes', 'carrossel-top-series', 'carrossel-top-animes'];
+
+    prateleiras.forEach(id => {
+        const container = document.getElementById(id);
+        if (!container) return;
+
+        let direcao = 1; // 1 = Vai para a Direita, -1 = Volta para a Esquerda
+
+        setInterval(() => {
+            const card = container.querySelector('.card');
+            if (!card) return; // Se as capas ainda não carregaram, ele espera em silêncio
+
+            // Calcula o tamanho exato de 1 capa + o espaço entre elas
+            const tamanhoPulo = card.offsetWidth + 15; 
+            
+            // Descobre onde é o "muro" do final da prateleira
+            const limiteMaximo = container.scrollWidth - container.clientWidth;
+
+            // Se bateu no muro da direita, inverte a direção
+            if (direcao === 1 && container.scrollLeft >= limiteMaximo - 10) {
+                direcao = -1;
+            }
+            // Se bateu no muro da esquerda (início), inverte a direção de novo
+            else if (direcao === -1 && container.scrollLeft <= 10) {
+                direcao = 1;
+            }
+
+            // Dá o comando para o navegador deslizar suavemente 1 capa para o lado
+            container.scrollBy({
+                left: tamanhoPulo * direcao,
+                behavior: 'smooth'
+            });
+
+        }, 3000); // 3000 milissegundos = Desliza 1 capa a cada 3 segundos
+    });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.addEventListener('input', filtrarCatalogo);
@@ -336,6 +376,9 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarCatalogoDinamicamente();
     carregarTop10Assistidos(); // O novo Motor sendo acionado aqui!
     puxarTendenciasGerais();
+    
+    // Liga o motor do Carrossel Automático
+    iniciarCarrosselAutomatico();
 
     const logoEl = document.querySelector('.logo');
     if(logoEl) {
