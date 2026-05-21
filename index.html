@@ -61,17 +61,26 @@
         </section>
 
         <section id="filmes" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+            <h3 style="color: #fff; font-size: 1.2em; margin-bottom: 15px;"><i class="fa-solid fa-trophy" style="color:#e50914;"></i> Top 10 Filmes Mais Assistidos</h3>
+            <div id="carrossel-top-filmes" class="grid-catalog" style="margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;"></div>
+
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Catálogo de Filmes</h2>
             <div id="carrossel-filmes" class="grid-catalog"></div>
         </section>
 
         <section id="series" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-            <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Séries</h2>
+            <h3 style="color: #fff; font-size: 1.2em; margin-bottom: 15px;"><i class="fa-solid fa-trophy" style="color:#e50914;"></i> Top 10 Séries Mais Assistidas</h3>
+            <div id="carrossel-top-series" class="grid-catalog" style="margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;"></div>
+
+            <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Catálogo de Séries</h2>
             <div id="carrossel-series" class="grid-catalog"></div>
         </section>
 
         <section id="animes" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-            <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Animes</h2>
+            <h3 style="color: #fff; font-size: 1.2em; margin-bottom: 15px;"><i class="fa-solid fa-trophy" style="color:#e50914;"></i> Top 10 Animes Mais Assistidos</h3>
+            <div id="carrossel-top-animes" class="grid-catalog" style="margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;"></div>
+
+            <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Catálogo de Animes</h2>
             <div id="carrossel-animes" class="grid-catalog"></div>
         </section>
 
@@ -183,6 +192,7 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
     </script>
-    <script src="script.js"></script>
+    
+    <script src="script.js?v=top10"></script>
 </body>
 </html>
