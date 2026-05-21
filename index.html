@@ -6,7 +6,7 @@
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=auth-raw-fix">
+    <link rel="stylesheet" href="style.css?v=auth-premium-v1">
 </head>
 <body style="overflow: hidden;">
 
@@ -71,6 +71,11 @@
                 <li><a style="cursor:pointer;" onclick="mudarAba('tudo')">Contato</a></li>
             </ul>
         </nav>
+        
+        <div id="userHeaderProfile" style="display: none; align-items: center; gap: 12px;">
+            <img id="userHeaderAvatar" src="" style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid #e50914; object-fit: cover; box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);">
+            <button onclick="fazerLogout()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 0.8em; cursor: pointer; font-weight: 600; transition: 0.3s;">Sair</button>
+        </div>
     </header>
 
     <main>
@@ -116,7 +121,7 @@
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Contato & Apoio</h2>
             
             <div class="apoio-premium-box">
-                <p class="apoio-text">O HK Filmes é mantido de forma totalmente independente pelo desenvolvedor. Se você curte o site e quer ajudar a manter os servidores ativos, faça uma contribuição copiando a chave PIX abaixo! ☕</p>
+                <p class="apoio-text">O HK Filmes é mantido de forma totalmente independente pelo desenvolvedor. Se você curte o site and quer ajudar a manter os servidores ativos, faça uma contribuição copiando a chave PIX abaixo! ☕</p>
                 <button onclick="copiarChavePix()" class="btn-apoio-pix">
                     <i class="fa-solid fa-copy"></i> Copiar Chave PIX
                 </button>
@@ -159,7 +164,7 @@
                     <div class="action-buttons" style="flex-wrap: wrap;">
                         <button class="btn-netflix-play" onclick="darPlayNoVideo()"><i class="fa-solid fa-play"></i> Assistir</button>
                         <button id="btnTrailer" class="btn-netflix-secondary" style="display: none;"><i class="fa-solid fa-film"></i> Trailer</button>
-                        <button class="btn-netflix-secondary"><i class="fa-solid fa-plus"></i> Minha Lista</button>
+                        <button id="btnMinhaLista" class="btn-netflix-secondary"><i class="fa-solid fa-plus"></i> Minha Lista</button>
                     </div>
 
                     <p id="modalOverview" class="modal-overview">Buscando sinopse oficial...</p>
@@ -222,6 +227,6 @@
         const database = firebase.database();
     </script>
     
-    <script src="script.js?v=auth-raw-fix"></script>
+    <script src="script.js?v=auth-premium-v1"></script>
 </body>
 </html>
