@@ -2,17 +2,53 @@ let filmeAbertoID = null;
 let tipoAberto = null; 
 let urlTrailerGlobal = null;
 const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
-const auth = firebase.auth(); // Motor de Autenticação Ativado
+const auth = firebase.auth(); 
 
-// === OBSERVADOR DE LOGIN ===
-// Verifica se o usuário já está logado para não pedir senha toda vez
+// Dicionário global para mapear a string salva no Firebase com o link RAW das fotos do repositório
+const avatarUrls = {
+    gojo: "https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/gojo.jpg",
+    ninja: "https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/ninja.jpg",
+    vampiro: "https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/vampiro.jpg",
+    heroi: "https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/heroi.jpg"
+};
+
+// === OBSERVADOR DE LOGIN (MONITORA O CABEÇALHO) ===
 auth.onAuthStateChanged((user) => {
+    const authTela = document.getElementById('authOverlay');
+    const headerProfile = document.getElementById('userHeaderProfile');
+    const headerAvatar = document.getElementById('userHeaderAvatar');
+
     if (user) {
-        let authTela = document.getElementById('authOverlay');
+        // Remove a barreira de login automaticamente
         if(authTela) { authTela.style.display = 'none'; authTela.classList.remove('active'); }
         document.body.style.overflow = 'auto';
+
+        // Busca o avatar do usuário logado no Realtime Database
+        database.ref('usuarios/' + user.uid).once('value').then((snap) => {
+            if (snap.exists() && headerAvatar && headerProfile) {
+                const dados = snap.val();
+                const escolha = dados.avatar || 'gojo';
+                headerAvatar.src = avatarUrls[escolha];
+                headerProfile.style.display = 'flex';
+            }
+        });
+    } else {
+        // Se deslogado e não tiver o token de convidado, mantém a tela de login
+        if (localStorage.getItem('hkFilmes_acessoLiberado') !== 'true') {
+            if(authTela) { authTela.style.display = 'flex'; authTela.classList.add('active'); }
+            document.body.style.overflow = 'hidden';
+        }
+        if (headerProfile) headerProfile.style.display = 'none';
     }
 });
+
+// === FUNÇÃO DE LOGOUT (SAIR DA CONTA) ===
+function fazerLogout() {
+    auth.signOut().then(() => {
+        localStorage.removeItem('hkFilmes_acessoLiberado');
+        window.location.reload(); 
+    });
+}
 
 // === MOTOR DA TELA DE AUTENTICAÇÃO VIP ===
 function alternarTelaAuth(tela) {
@@ -90,7 +126,6 @@ function exibirTelaDetalhes(id, tipo) {
         document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível para este título.";
         document.getElementById('modalYear').innerText = ano;
         document.getElementById('modalTagline').innerText = dados.tagline ? `"${dados.tagline}"` : '';
-
         document.getElementById('modalGenres').innerText = dados.genres?.map(g => g.name).join(' • ') || 'Categoria Desconhecida';
         
         if (tipo === 'tv') {
@@ -150,6 +185,24 @@ function exibirTelaDetalhes(id, tipo) {
             } else { btnTrailer.style.display = 'none'; }
         }
 
+        // === CONTROLE EM TEMPO REAL DO BOTÃO "MINHA LISTA" ===
+        const user = auth.currentUser;
+        const btnLista = document.getElementById('btnMinhaLista');
+        if (user && btnLista) {
+            database.ref('usuarios/' + user.uid + '/minhaLista/' + id).on('value', snap => {
+                if (snap.exists() && snap.val() === true) {
+                    btnLista.innerHTML = `<i class="fa-solid fa-check" style="color: #2ecc71;"></i> Remover da Lista`;
+                    btnLista.onclick = () => removerDaLista(id);
+                } else {
+                    btnLista.innerHTML = `<i class="fa-solid fa-plus"></i> Minha Lista`;
+                    btnLista.onclick = () => adicionarNaLista(id);
+                }
+            });
+        } else if (btnLista) {
+            btnLista.innerHTML = `<i class="fa-solid fa-plus"></i> Minha Lista`;
+            btnLista.onclick = () => alert("Acesso de Convidado. Crie uma conta VIP para gerenciar sua lista!");
+        }
+
         const similarGrid = document.getElementById('modalSimilarGrid');
         similarGrid.innerHTML = '';
         if (dados.recommendations && dados.recommendations.results && dados.recommendations.results.length > 0) {
@@ -171,6 +224,19 @@ function exibirTelaDetalhes(id, tipo) {
     }).catch(erro => console.error("Erro API:", erro));
 
     resetarEstrelas(); registrarView(id); 
+}
+
+// === SISTEMA DE ADICIONAR/REMOVER DA LISTA NO FIREBASE ===
+function adicionarNaLista(id) {
+    const user = auth.currentUser;
+    if (!user) return;
+    database.ref('usuarios/' + user.uid + '/minhaLista/' + id).set(true);
+}
+
+function removerDaLista(id) {
+    const user = auth.currentUser;
+    if (!user) return;
+    database.ref('usuarios/' + user.uid + '/minhaLista/' + id).remove();
 }
 
 function darPlayNoVideo() {
@@ -211,7 +277,6 @@ function carregarCatalogoDinamicamente() {
     database.ref('catalogo').once('value').then((snapshot) => {
         if (snapshot.exists()) {
             const dados = snapshot.val();
-            
             if (dados.filmes) {
                 const totalFilmes = Object.keys(dados.filmes).length;
                 injetarContadorNoTitulo('filmes', totalFilmes);
@@ -231,26 +296,21 @@ function carregarCatalogoDinamicamente() {
     });
 }
 
-// === MOTOR DE RANKING (TOP 10 MAIS ASSISTIDOS) ===
 async function carregarTop10Assistidos() {
     const snapViews = await database.ref('views').once('value');
     let viewsData = snapViews.exists() ? snapViews.val() : {};
-
     const snapCat = await database.ref('catalogo').once('value');
     if (!snapCat.exists()) return;
     const catalogo = snapCat.val();
 
     const processarRanking = async (idsCategoria, containerId, tipo_tmdb) => {
         if (!idsCategoria) return;
-        
         let ranking = [];
         for (let id of Object.keys(idsCategoria)) {
             ranking.push({ id: id, views: viewsData[id] || 0 });
         }
-        
         ranking.sort((a, b) => b.views - a.views);
         let top10 = ranking.slice(0, 10);
-
         let cont = 0;
         for (let item of top10) {
             if (cont % 5 === 0) await new Promise(r => setTimeout(r, 400));
@@ -258,7 +318,6 @@ async function carregarTop10Assistidos() {
             cont++;
         }
     };
-
     await processarRanking(catalogo.filmes, 'carrossel-top-filmes', 'movie');
     await processarRanking(catalogo.series, 'carrossel-top-series', 'tv');
     await processarRanking(catalogo.animes, 'carrossel-top-animes', 'tv');
@@ -288,25 +347,19 @@ function puxarTendenciasGerais() {
         });
 }
 
-// === MOTOR DETETIVE ATUALIZADO ===
 function puxarDadosTMDB(id, containerId, tipo) {
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
     fetch(url).then(resposta => resposta.json()).then(dados => {
             let titulo = dados.title || dados.name; 
             let poster = dados.poster_path ? `https://image.tmdb.org/t/p/w500${dados.poster_path}` : '';
-            
-            // Se o TMDB der erro ou não achar o título, ele mostra o ID na tela.
             if (!titulo || dados.success === false) {
                 titulo = "⚠️ Erro no ID: " + id;
                 poster = "https://placehold.co/500x750/222/FFF?text=ID+" + id;
             } else if (!dados.poster_path) {
-                // Se o ID existir mas não tiver poster
                 poster = "https://placehold.co/500x750/222/FFF?text=Sem+Capa";
             }
-
             const container = document.getElementById(containerId);
-            if (!container) return; // Segurança extra para evitar erros se a gaveta HTML ainda não existir
-            
+            if (!container) return; 
             const card = document.createElement('div');
             card.className = 'card';
             if (tipo === 'tv') card.setAttribute('onclick', `abrirPlayerSerie('${id}')`); else card.setAttribute('onclick', `abrirPlayer('${id}')`);
@@ -337,35 +390,28 @@ function copiarChavePix() {
             msg.style.display = "block";
             setTimeout(() => { msg.style.display = "none"; }, 4000);
         }
-    }).catch(err => {
-        alert("Erro ao copiar automaticamente. Use a chave: " + chavePix);
-    });
+    }).catch(err => { alert("Erro ao copiar automaticamente. Use a chave: " + chavePix); });
 }
 
-// === EFEITO CARROSSEL PREMIUM (PING-PONG) ===
 function iniciarCarrosselAutomatico() {
     const prateleiras = ['carrossel-top-filmes', 'carrossel-top-series', 'carrossel-top-animes'];
     prateleiras.forEach(id => {
         const container = document.getElementById(id);
         if (!container) return;
         let direcao = 1; 
-
         setInterval(() => {
             const card = container.querySelector('.card');
             if (!card) return; 
             const tamanhoPulo = card.offsetWidth + 15; 
             const limiteMaximo = container.scrollWidth - container.clientWidth;
-
             if (direcao === 1 && container.scrollLeft >= limiteMaximo - 10) { direcao = -1; }
             else if (direcao === -1 && container.scrollLeft <= 10) { direcao = 1; }
-
             container.scrollBy({ left: tamanhoPulo * direcao, behavior: 'smooth' });
         }, 3000); 
     });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // === SISTEMA DE SELEÇÃO DE AVATAR ===
     document.querySelectorAll('.avatar-option').forEach(img => {
         img.addEventListener('click', function() {
             document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
@@ -374,7 +420,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // === CRIAÇÃO DE CONTA COM FIREBASE ===
+    // === CRIAÇÃO DE CONTA COM FIREBASE AUTH + REALTIME DATABASE ===
     const formRegistro = document.getElementById('formRegistro');
     if(formRegistro) {
         formRegistro.addEventListener('submit', function(e) {
@@ -392,13 +438,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Manda o Firebase criar a conta
             auth.createUserWithEmailAndPassword(email, senha)
             .then((userCredential) => {
                 const user = userCredential.user;
                 const avatarEscolhido = document.getElementById('avatarSelecionado').value;
                 
-                // Salva o avatar no banco de dados
                 database.ref('usuarios/' + user.uid).set({
                     avatar: avatarEscolhido,
                     email: email,
@@ -423,13 +467,14 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // === LOGIN COM FIREBASE ===
+    // === LOGIN COM FIREBASE AUTH ===
     const formLogin = document.getElementById('formLogin');
     if(formLogin) {
         formLogin.addEventListener('submit', function(e) {
             e.preventDefault();
             const email = formLogin.querySelector('input[type="email"]').value;
             const senha = formLogin.querySelector('input[type="password"]').value;
+            const erroMsg = document.getElementById('erroRegistro');
             
             auth.signInWithEmailAndPassword(email, senha)
             .then((userCredential) => {
@@ -444,11 +489,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.addEventListener('input', filtrarCatalogo);
-    if (localStorage.getItem('hkFilmes_acessoLiberado') === 'true') {
-        let authTela = document.getElementById('authOverlay');
-        if(authTela) { authTela.style.display = 'none'; authTela.classList.remove('active'); }
-        document.body.style.overflow = 'auto'; 
-    }
     carregarCatalogoDinamicamente();
     carregarTop10Assistidos(); 
     puxarTendenciasGerais();
