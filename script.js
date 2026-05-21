@@ -2,6 +2,17 @@ let filmeAbertoID = null;
 let tipoAberto = null; 
 let urlTrailerGlobal = null;
 const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
+const auth = firebase.auth(); // Motor de Autenticação Ativado
+
+// === OBSERVADOR DE LOGIN ===
+// Verifica se o usuário já está logado para não pedir senha toda vez
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        let authTela = document.getElementById('authOverlay');
+        if(authTela) { authTela.style.display = 'none'; authTela.classList.remove('active'); }
+        document.body.style.overflow = 'auto';
+    }
+});
 
 // === MOTOR DA TELA DE AUTENTICAÇÃO VIP ===
 function alternarTelaAuth(tela) {
@@ -34,8 +45,8 @@ function filtrarCatalogo() {
 }
 
 function entrarComoConvidado() {
-    let auth = document.getElementById('authOverlay');
-    if(auth) { auth.style.display = 'none'; auth.classList.remove('active'); }
+    let authTela = document.getElementById('authOverlay');
+    if(authTela) { authTela.style.display = 'none'; authTela.classList.remove('active'); }
     document.body.style.overflow = 'auto'; 
     localStorage.setItem('hkFilmes_acessoLiberado', 'true');
 }
@@ -333,96 +344,114 @@ function copiarChavePix() {
 
 // === EFEITO CARROSSEL PREMIUM (PING-PONG) ===
 function iniciarCarrosselAutomatico() {
-    // Pega as 3 gavetas de Top 10
     const prateleiras = ['carrossel-top-filmes', 'carrossel-top-series', 'carrossel-top-animes'];
-
     prateleiras.forEach(id => {
         const container = document.getElementById(id);
         if (!container) return;
-
-        let direcao = 1; // 1 = Vai para a Direita, -1 = Volta para a Esquerda
+        let direcao = 1; 
 
         setInterval(() => {
             const card = container.querySelector('.card');
-            if (!card) return; // Se as capas ainda não carregaram, ele espera em silêncio
-
-            // Calcula o tamanho exato de 1 capa + o espaço entre elas
+            if (!card) return; 
             const tamanhoPulo = card.offsetWidth + 15; 
-            
-            // Descobre onde é o "muro" do final da prateleira
             const limiteMaximo = container.scrollWidth - container.clientWidth;
 
-            // Se bateu no muro da direita, inverte a direção
-            if (direcao === 1 && container.scrollLeft >= limiteMaximo - 10) {
-                direcao = -1;
-            }
-            // Se bateu no muro da esquerda (início), inverte a direção de novo
-            else if (direcao === -1 && container.scrollLeft <= 10) {
-                direcao = 1;
-            }
+            if (direcao === 1 && container.scrollLeft >= limiteMaximo - 10) { direcao = -1; }
+            else if (direcao === -1 && container.scrollLeft <= 10) { direcao = 1; }
 
-            // Dá o comando para o navegador deslizar suavemente 1 capa para o lado
-            container.scrollBy({
-                left: tamanhoPulo * direcao,
-                behavior: 'smooth'
-            });
-
-        }, 3000); // 3000 milissegundos = Desliza 1 capa a cada 3 segundos
+            container.scrollBy({ left: tamanhoPulo * direcao, behavior: 'smooth' });
+        }, 3000); 
     });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // === SISTEMA DE SELEÇÃO DE AVATAR E VALIDAÇÃO DE REGISTRO ===
+    // === SISTEMA DE SELEÇÃO DE AVATAR ===
     document.querySelectorAll('.avatar-option').forEach(img => {
         img.addEventListener('click', function() {
-            // Remove a seleção de todos
             document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
-            // Adiciona a seleção apenas no clicado
             this.classList.add('selected');
-            // Salva a escolha na gaveta invisível
             document.getElementById('avatarSelecionado').value = this.getAttribute('data-avatar');
         });
     });
 
+    // === CRIAÇÃO DE CONTA COM FIREBASE ===
     const formRegistro = document.getElementById('formRegistro');
     if(formRegistro) {
         formRegistro.addEventListener('submit', function(e) {
-            e.preventDefault(); // Impede a tela de recarregar
-            
-            const emailInput = document.getElementById('regEmail').value.toLowerCase();
+            e.preventDefault(); 
+            const email = document.getElementById('regEmail').value.toLowerCase();
+            const senha = document.getElementById('regSenha').value;
             const erroMsg = document.getElementById('erroRegistro');
             
-            // A Lista VIP de provedores
             const provedoresPermitidos = ['@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com'];
-            
-            // Verifica se o e-mail termina com algum provedor da lista VIP
-            const emailValido = provedoresPermitidos.some(provedor => emailInput.endsWith(provedor));
+            const emailValido = provedoresPermitidos.some(prov => email.endsWith(prov));
 
             if (!emailValido) {
-                // Barrado na porta!
-                erroMsg.innerText = "❌ E-mail inválido. Utilize apenas contas do Google, Outlook, Hotmail ou Yahoo.";
+                erroMsg.innerText = "❌ E-mail inválido. Utilize Google, Outlook, Hotmail ou Yahoo.";
                 erroMsg.style.display = 'block';
-            } else {
-                // Passou pelo segurança!
-                erroMsg.style.display = 'none';
-                const avatarEscolhido = document.getElementById('avatarSelecionado').value;
-                alert(`✅ CONTA APROVADA NA TRIAGEM!\n\nE-mail: ${emailInput}\nAvatar: [${avatarEscolhido}]\n\n*A conexão com o Firebase será feita na próxima etapa.*`);
+                return;
             }
+
+            // Manda o Firebase criar a conta
+            auth.createUserWithEmailAndPassword(email, senha)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                const avatarEscolhido = document.getElementById('avatarSelecionado').value;
+                
+                // Salva o avatar no banco de dados
+                database.ref('usuarios/' + user.uid).set({
+                    avatar: avatarEscolhido,
+                    email: email,
+                    dataCriacao: new Date().toISOString()
+                }).then(() => {
+                    erroMsg.style.color = '#2ecc71';
+                    erroMsg.innerText = "✅ Conta VIP criada com sucesso! Entrando...";
+                    erroMsg.style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('authOverlay').style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }, 2000);
+                });
+            })
+            .catch((error) => {
+                erroMsg.style.color = '#e50914';
+                if(error.code === 'auth/email-already-in-use') { erroMsg.innerText = "❌ Este e-mail já está cadastrado."; } 
+                else if(error.code === 'auth/weak-password') { erroMsg.innerText = "❌ A senha deve ter pelo menos 6 caracteres."; } 
+                else { erroMsg.innerText = "❌ Erro ao criar conta: " + error.message; }
+                erroMsg.style.display = 'block';
+            });
+        });
+    }
+
+    // === LOGIN COM FIREBASE ===
+    const formLogin = document.getElementById('formLogin');
+    if(formLogin) {
+        formLogin.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = formLogin.querySelector('input[type="email"]').value;
+            const senha = formLogin.querySelector('input[type="password"]').value;
+            
+            auth.signInWithEmailAndPassword(email, senha)
+            .then((userCredential) => {
+                document.getElementById('authOverlay').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            })
+            .catch((error) => {
+                alert("❌ Erro ao entrar. Verifique seu e-mail e senha.");
+            });
         });
     }
 
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.addEventListener('input', filtrarCatalogo);
     if (localStorage.getItem('hkFilmes_acessoLiberado') === 'true') {
-        let auth = document.getElementById('authOverlay');
-        if(auth) { auth.style.display = 'none'; auth.classList.remove('active'); }
+        let authTela = document.getElementById('authOverlay');
+        if(authTela) { authTela.style.display = 'none'; authTela.classList.remove('active'); }
         document.body.style.overflow = 'auto'; 
     }
     carregarCatalogoDinamicamente();
-    carregarTop10Assistidos(); // O novo Motor sendo acionado aqui!
+    carregarTop10Assistidos(); 
     puxarTendenciasGerais();
-    
-    // Liga o motor do Carrossel Automático
     iniciarCarrosselAutomatico();
 
     const logoEl = document.querySelector('.logo');
