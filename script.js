@@ -12,7 +12,7 @@ const avatarUrls = {
     heroi: "https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/heroi.jpg"
 };
 
-// === OBSERVADOR DE LOGIN ===
+// === OBSERVADOR DE LOGIN BLINDADO (ANTIFALHAS) ===
 auth.onAuthStateChanged((user) => {
     const authTela = document.getElementById('authOverlay');
     const headerProfile = document.getElementById('userHeaderProfile');
@@ -20,19 +20,26 @@ auth.onAuthStateChanged((user) => {
     const headerAvatar = document.getElementById('userHeaderAvatar');
 
     if (user) {
+        // 1. Libera a tela imediatamente e esconde o botão de convidado
         if(authTela) { authTela.style.display = 'none'; authTela.classList.remove('active'); }
         document.body.style.overflow = 'auto';
+        if (guestProfile) guestProfile.style.display = 'none';
 
+        // 2. Mostra o Avatar Padrão (Gojo) imediatamente para evitar o "Limbo"
+        if (headerAvatar && headerProfile) {
+            headerAvatar.src = avatarUrls['gojo'];
+            headerProfile.style.display = 'flex';
+        }
+
+        // 3. Puxa do Banco de Dados a escolha real (em segundo plano)
         database.ref('usuarios/' + user.uid).once('value').then((snap) => {
-            if (snap.exists() && headerAvatar && headerProfile) {
-                const dados = snap.val();
-                const escolha = dados.avatar || 'gojo';
-                headerAvatar.src = avatarUrls[escolha];
-                headerProfile.style.display = 'flex';
-                if (guestProfile) guestProfile.style.display = 'none';
+            if (snap.exists() && snap.val().avatar) {
+                headerAvatar.src = avatarUrls[snap.val().avatar];
             }
-        });
+        }).catch(err => console.log("Sincronizando perfil..."));
+        
     } else {
+        // Se NÃO estiver logado
         if (localStorage.getItem('hkFilmes_acessoLiberado') !== 'true') {
             if(authTela) { authTela.style.display = 'flex'; authTela.classList.add('active'); }
             document.body.style.overflow = 'hidden';
@@ -69,7 +76,6 @@ function mudarAba(aba) {
     document.getElementById('animes').style.display = (aba === 'tudo' || aba === 'animes') ? 'block' : 'none';
     document.getElementById('contato').style.display = (aba === 'tudo') ? 'block' : 'none';
     
-    // Esconder a pesquisa se mudar de aba
     let areaBusca = document.getElementById('area-resultados-busca');
     if(areaBusca) areaBusca.style.display = 'none';
     
@@ -85,9 +91,7 @@ function entrarComoConvidado() {
     if (guestProfile) guestProfile.style.display = 'flex';
 }
 
-// ========================================================
-// 🔎 NOVO MOTOR DE PESQUISA GLOBAL (TMDB API)
-// ========================================================
+// === MOTOR DE PESQUISA GLOBLAL ===
 let tempoDigitacao = null;
 
 function filtrarCatalogo() {
@@ -114,7 +118,6 @@ function filtrarCatalogo() {
         return;
     }
 
-    // Esconde a vitrine inicial e mostra a pesquisa
     document.getElementById('tendencias').style.display = 'none';
     document.getElementById('filmes').style.display = 'none';
     document.getElementById('series').style.display = 'none';
@@ -153,7 +156,7 @@ function filtrarCatalogo() {
                 novoGrid.appendChild(card);
             });
         });
-    }, 600); // Aguarda meio segundo após a pessoa parar de digitar para não travar
+    }, 600);
 }
 
 function registrarView(id, tipoTracking) {
@@ -283,18 +286,12 @@ function voltarParaDetalhes() {
 function fecharPlayer() { document.getElementById('playerModal').classList.remove('active'); }
 function resetarEstrelas() { document.getElementById('ratingMsg').innerText = ""; document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; }); }
 
-// ========================================================
-// 🟢 NOVO MOTOR DE VITRINE E CONTADORES ABSURDOS
-// ========================================================
+// === MOTOR DE VITRINE ===
 async function carregarCatalogoDinamicamente() {
-    const paginasParaCarregar = 4; // Carrega 80 itens na vitrine
+    const paginasParaCarregar = 4; 
 
-    // 1. Filmes Populares
     fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`)
-    .then(r => r.json()).then(d => {
-        // Usa o número TOTAL oficial do banco mundial (Ex: 45.000)
-        injetarContadorNoTitulo('filmes', d.total_results.toLocaleString('pt-BR') + ' títulos');
-    });
+    .then(r => r.json()).then(d => injetarContadorNoTitulo('filmes', d.total_results.toLocaleString('pt-BR') + ' títulos'));
 
     for(let i = 1; i <= paginasParaCarregar; i++) {
         let res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=${i}`);
@@ -302,7 +299,6 @@ async function carregarCatalogoDinamicamente() {
         if(dados.results) dados.results.forEach(item => exibirCardNaGrade(item, 'carrossel-filmes', 'movie', 'movie'));
     }
 
-    // 2. Séries Populares
     fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`)
     .then(r => r.json()).then(d => injetarContadorNoTitulo('series', d.total_results.toLocaleString('pt-BR') + ' séries'));
 
@@ -315,7 +311,6 @@ async function carregarCatalogoDinamicamente() {
         }
     }
 
-    // 3. Animes Populares
     fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_API_KEY}&language=pt-BR&with_genres=16&with_original_language=ja&sort_by=popularity.desc&page=1`)
     .then(r => r.json()).then(d => injetarContadorNoTitulo('animes', d.total_results.toLocaleString('pt-BR') + ' animes'));
 
@@ -343,9 +338,7 @@ function exibirCardNaGrade(item, containerId, tipoTMDB, tipoTracking) {
     database.ref('ratings/' + item.id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(vo => { t += vo.val(); c++; }); let s = document.getElementById('star-' + item.id); if(s) s.innerText = (t/c).toFixed(1); } });
 }
 
-// ========================================================
-// 🔥 MOTOR DO TOP 10 MAIS ASSISTIDOS DO SEU SITE
-// ========================================================
+// === MOTOR DO TOP 10 ===
 async function carregarTop10Assistidos() {
     const renderizarRanking = async (tipoTracking, containerId, tipoTMDB) => {
         const snap = await database.ref('views/' + tipoTracking).once('value');
@@ -452,7 +445,6 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // A barra de pesquisa agora aciona o motor do TMDB
     document.getElementById('searchInput')?.addEventListener('input', filtrarCatalogo);
     carregarCatalogoDinamicamente();
     carregarTop10Assistidos(); 
