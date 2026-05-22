@@ -76,44 +76,48 @@ nav ul li a:hover { color: #e50914; }
 .apoio-premium-box { background: rgba(229, 9, 20, 0.03); border: 1px solid #1c1c24; padding: 30px 20px; border-radius: 12px; text-align: center; max-width: 600px; margin: 0 auto 40px auto; }
 .apoio-text { font-size: 0.9em; color: #aaa; line-height: 1.6; margin-bottom: 20px; text-align: justify; }
 .btn-apoio-pix { background: #e50914; color: white; border: none; padding: 12px 35px; font-weight: 700; border-radius: 30px; cursor: pointer; font-size: 1em; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s ease; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3); }
-.btn-apoio-pix:hover { background: #b80710; transform: scale(1.04); }
-#pixStatusMsg { color: #2ecc71; font-weight: bold; font-size: 0.85em; margin-top: 15px; height: 20px; display: none; }
+    .btn-apoio-pix:hover { background: #b80710; transform: scale(1.04); }
+    #pixStatusMsg { color: #2ecc71; font-weight: bold; font-size: 0.85em; margin-top: 15px; height: 20px; display: none; }
 
-/* =========================================
-   TELA DE REGISTRO E PAREDE DE AVATARES
-========================================= */
-.avatar-selection {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.avatar-option {
-    width: 60px;
-    height: 60px;
-    border-radius: 10px; /* Deixei quadrado arredondado pra ficar moderno */
-    cursor: pointer;
-    opacity: 0.4;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-    object-fit: cover;
-    filter: grayscale(80%); /* Deixa em preto e branco quando não selecionado */
-}
-
-.avatar-option:hover {
-    opacity: 0.8;
-    transform: scale(1.1);
-    filter: grayscale(20%);
-}
-
-.avatar-option.selected {
-    opacity: 1;
-    border: 2px solid #e50914;
-    transform: scale(1.15);
-    filter: grayscale(0%); /* Fica 100% colorido */
-    box-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
-}
+/* TELA DE REGISTRO E PAREDE DE AVATARES */
+.avatar-selection { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+.avatar-option { width: 60px; height: 60px; border-radius: 10px; cursor: pointer; opacity: 0.4; border: 2px solid transparent; transition: all 0.3s ease; object-fit: cover; filter: grayscale(80%); }
+.avatar-option:hover { opacity: 0.8; transform: scale(1.1); filter: grayscale(20%); }
+.avatar-option.selected { opacity: 1; border: 2px solid #e50914; transform: scale(1.15); filter: grayscale(0%); box-shadow: 0 0 15px rgba(229, 9, 20, 0.6); }
 
 footer { text-align: center; padding: 40px 20px; border-top: 1px solid #141419; margin-top: 60px; color: #444; font-size: 0.85em; font-weight: 600; background: #040405; width: 100%; }
+
+/* =========================================
+   RESPONSIVIDADE: CORREÇÃO MOBILE DO CABEÇALHO
+========================================= */
+@media (max-width: 768px) {
+    header { 
+        flex-wrap: wrap; 
+        justify-content: space-between; 
+        padding: 15px 5%; 
+    }
+    .logo { 
+        order: 1; 
+        font-size: 1.3em; 
+    }
+    #userHeaderProfile { 
+        order: 2; /* Garante que o avatar fica no topo, à direita */
+        gap: 8px; 
+    }
+    nav { 
+        order: 3; /* Desce o menu para a linha de baixo */
+        width: 100%; 
+        margin-top: 15px; 
+        overflow-x: auto; /* Permite deslizar o menu para o lado se for muito grande */
+        padding-bottom: 5px; 
+    }
+    nav ul { 
+        justify-content: flex-start; 
+        flex-wrap: nowrap; 
+        gap: 15px; 
+    }
+    nav ul li a { 
+        white-space: nowrap; 
+        font-size: 0.85em; 
+    }
+}
