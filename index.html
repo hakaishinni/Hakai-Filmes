@@ -6,7 +6,7 @@
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=hk-master">
+    <link rel="stylesheet" href="style.css?v=hk-master-v3">
 </head>
 <body style="overflow: hidden;">
 
@@ -61,7 +61,7 @@
     </div>
 
     <header>
-        <div class="logo" style="cursor: pointer;">HK<span>Filmes</span></div>
+        <div class="logo" style="cursor: pointer;" onclick="mudarAba('tudo')">HK<span>Filmes</span></div>
         <nav>
             <ul>
                 <li><a style="cursor:pointer;" onclick="mudarAba('tudo')">Home</a></li>
@@ -72,9 +72,13 @@
             </ul>
         </nav>
         
-        <div id="userHeaderProfile" style="display: none; align-items: center; gap: 12px;">
-            <img id="userHeaderAvatar" src="" style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid #e50914; object-fit: cover; box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);">
-            <button onclick="fazerLogout()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 0.8em; cursor: pointer; font-weight: 600; transition: 0.3s;">Sair</button>
+        <div id="userHeaderProfile" class="profile-menu-container" style="display: none;">
+            <img id="userHeaderAvatar" src="" onclick="toggleProfileMenu(event)" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e50914; object-fit: cover; box-shadow: 0 0 10px rgba(229, 9, 20, 0.4); transition: transform 0.2s; cursor: pointer;">
+            
+            <div id="profileDropdown" class="profile-dropdown">
+                <a onclick="mostrarMinhaLista()"><i class="fa-solid fa-bookmark"></i> Minha Lista</a>
+                <a onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</a>
+            </div>
         </div>
 
         <div id="guestHeaderProfile" style="display: none; align-items: center;">
@@ -121,11 +125,16 @@
             <div id="carrossel-animes" class="grid-catalog"></div>
         </section>
 
+        <section id="sessaoMinhaLista" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px; display: none; min-height: 50vh;">
+            <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Sua Lista VIP</h2>
+            <div id="grid-minha-lista" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>
+        </section>
+
         <section id="contato" class="contact-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Contato & Apoio</h2>
             
             <div class="apoio-premium-box">
-                <p class="apoio-text">O HK Filmes é mantido de forma totalmente independente pelo desenvolvedor. Se você curte o site e quer ajudar a manter os servidores ativos, faça uma contribuição copiando a chave PIX abaixo! ☕</p>
+                <p class="apoio-text">O HK Filmes é mantido de forma totalmente independente pelo desenvolvedor. Se você curte o site e quer ajudar a manter os servidores activos, faça uma contribuição copiando a chave PIX abaixo! ☕</p>
                 <button onclick="copiarChavePix()" class="btn-apoio-pix">
                     <i class="fa-solid fa-copy"></i> Copiar Chave PIX
                 </button>
@@ -232,6 +241,6 @@
         const database = firebase.database();
     </script>
     
-    <script src="script.js?v=hk-master"></script>
+    <script src="script.js?v=hk-master-v3"></script>
 </body>
 </html>
