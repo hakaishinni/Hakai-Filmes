@@ -86,6 +86,23 @@ nav ul li a:hover { color: #e50914; }
 footer { text-align: center; padding: 40px 20px; border-top: 1px solid #141419; margin-top: 60px; color: #444; font-size: 0.85em; font-weight: 600; background: #040405; width: 100%; }
 
 /* =========================================
+   MENU DROPDOWN PRIVADO DO AVATAR VIP
+========================================= */
+.profile-menu-container { position: relative; display: flex; align-items: center; }
+.profile-dropdown { 
+    display: none; position: absolute; right: 0; top: 55px; 
+    background: #111; border: 1px solid #333; border-radius: 8px; 
+    width: 175px; z-index: 1000; box-shadow: 0 8px 25px rgba(0,0,0,0.85);
+    padding: 8px 0; overflow: hidden;
+}
+.profile-dropdown a { 
+    display: block; padding: 12px 20px; color: #fff; text-decoration: none; 
+    font-size: 0.9em; cursor: pointer; transition: 0.2s; font-weight: 600; text-align: left;
+}
+.profile-dropdown a i { margin-right: 10px; color: #e50914; font-size: 1.1em; width: 15px; text-align: center; }
+.profile-dropdown a:hover { background: #222; color: #e50914; padding-left: 25px; }
+
+/* =========================================
    RESPONSIVIDADE MÓVEL
 ========================================= */
 @media (max-width: 768px) {
