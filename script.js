@@ -68,15 +68,12 @@ function mudarAba(aba) {
     document.getElementById('series').style.display = (aba === 'tudo' || aba === 'series') ? 'block' : 'none';
     document.getElementById('animes').style.display = (aba === 'tudo' || aba === 'animes') ? 'block' : 'none';
     document.getElementById('contato').style.display = (aba === 'tudo') ? 'block' : 'none';
+    
+    // Esconder a pesquisa se mudar de aba
+    let areaBusca = document.getElementById('area-resultados-busca');
+    if(areaBusca) areaBusca.style.display = 'none';
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function filtrarCatalogo() {
-    const filter = document.getElementById('searchInput').value.toLowerCase();
-    document.querySelectorAll('.card').forEach(card => {
-        const titleEl = card.querySelector('h3');
-        if (titleEl) card.style.display = titleEl.innerText.toLowerCase().includes(filter) ? "" : "none";
-    });
 }
 
 function entrarComoConvidado() {
@@ -86,6 +83,77 @@ function entrarComoConvidado() {
     localStorage.setItem('hkFilmes_acessoLiberado', 'true');
     const guestProfile = document.getElementById('guestHeaderProfile');
     if (guestProfile) guestProfile.style.display = 'flex';
+}
+
+// ========================================================
+// 🔎 NOVO MOTOR DE PESQUISA GLOBAL (TMDB API)
+// ========================================================
+let tempoDigitacao = null;
+
+function filtrarCatalogo() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    clearTimeout(tempoDigitacao);
+
+    let areaBusca = document.getElementById('area-resultados-busca');
+    if (!areaBusca) {
+        areaBusca = document.createElement('section');
+        areaBusca.id = 'area-resultados-busca';
+        areaBusca.className = 'catalog-section';
+        areaBusca.style.maxWidth = '1200px';
+        areaBusca.style.margin = '0 auto';
+        areaBusca.style.padding = '20px';
+        document.getElementById('home').insertAdjacentElement('afterend', areaBusca);
+    }
+
+    if (query.length < 2) {
+        document.getElementById('tendencias').style.display = 'block';
+        document.getElementById('filmes').style.display = 'block';
+        document.getElementById('series').style.display = 'block';
+        document.getElementById('animes').style.display = 'block';
+        areaBusca.style.display = 'none';
+        return;
+    }
+
+    // Esconde a vitrine inicial e mostra a pesquisa
+    document.getElementById('tendencias').style.display = 'none';
+    document.getElementById('filmes').style.display = 'none';
+    document.getElementById('series').style.display = 'none';
+    document.getElementById('animes').style.display = 'none';
+    areaBusca.style.display = 'block';
+
+    tempoDigitacao = setTimeout(() => {
+        areaBusca.innerHTML = `<h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Buscando resultados globais...</h2><div id="grid-busca" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>`;
+        
+        fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}&page=1`)
+        .then(res => res.json())
+        .then(dados => {
+            const gridBusca = document.getElementById('grid-busca');
+            const resultados = dados.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
+            
+            if (resultados.length === 0) {
+                areaBusca.innerHTML = `<h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Nenhum título encontrado.</h2>`;
+                return;
+            }
+
+            areaBusca.innerHTML = `<h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Encontrados para "${query}"</h2><div id="grid-busca" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>`;
+            const novoGrid = document.getElementById('grid-busca');
+
+            resultados.forEach(item => {
+                let title = item.title || item.name;
+                let poster = item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : 'https://placehold.co/342x513/222/FFF?text=Sem+Capa';
+                
+                let tipoTracking = item.media_type;
+                if(item.media_type === 'tv' && item.origin_country?.includes('JP')) tipoTracking = 'anime';
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.flex = '0 0 auto';
+                card.setAttribute('onclick', `abrirPlayerGeral('${item.id}', '${item.media_type}', '${tipoTracking}')`);
+                card.innerHTML = `<img src="${poster}" alt="${title}"><h3>${title}</h3>`;
+                novoGrid.appendChild(card);
+            });
+        });
+    }, 600); // Aguarda meio segundo após a pessoa parar de digitar para não travar
 }
 
 function registrarView(id, tipoTracking) {
@@ -216,33 +284,46 @@ function fecharPlayer() { document.getElementById('playerModal').classList.remov
 function resetarEstrelas() { document.getElementById('ratingMsg').innerText = ""; document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; }); }
 
 // ========================================================
-// 🟢 NOVO MOTOR 100% AUTOMÁTICO DO CATÁLOGO GERAL
+// 🟢 NOVO MOTOR DE VITRINE E CONTADORES ABSURDOS
 // ========================================================
-function carregarCatalogoDinamicamente() {
+async function carregarCatalogoDinamicamente() {
+    const paginasParaCarregar = 4; // Carrega 80 itens na vitrine
+
+    // 1. Filmes Populares
     fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`)
-        .then(res => res.json()).then(dados => {
-            if(dados.results) {
-                injetarContadorNoTitulo('filmes', dados.results.length);
-                dados.results.forEach(item => exibirCardNaGrade(item, 'carrossel-filmes', 'movie', 'movie'));
-            }
-        });
+    .then(r => r.json()).then(d => {
+        // Usa o número TOTAL oficial do banco mundial (Ex: 45.000)
+        injetarContadorNoTitulo('filmes', d.total_results.toLocaleString('pt-BR') + ' títulos');
+    });
 
+    for(let i = 1; i <= paginasParaCarregar; i++) {
+        let res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=${i}`);
+        let dados = await res.json();
+        if(dados.results) dados.results.forEach(item => exibirCardNaGrade(item, 'carrossel-filmes', 'movie', 'movie'));
+    }
+
+    // 2. Séries Populares
     fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`)
-        .then(res => res.json()).then(dados => {
-            if(dados.results) {
-                const completas = dados.results.filter(s => !s.origin_country?.includes('JP'));
-                injetarContadorNoTitulo('series', completas.length);
-                completas.forEach(item => exibirCardNaGrade(item, 'carrossel-series', 'tv', 'tv'));
-            }
-        });
+    .then(r => r.json()).then(d => injetarContadorNoTitulo('series', d.total_results.toLocaleString('pt-BR') + ' séries'));
 
+    for(let i = 1; i <= paginasParaCarregar; i++) {
+        let res = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=${i}`);
+        let dados = await res.json();
+        if(dados.results) {
+            const completas = dados.results.filter(s => !s.origin_country?.includes('JP'));
+            completas.forEach(item => exibirCardNaGrade(item, 'carrossel-series', 'tv', 'tv'));
+        }
+    }
+
+    // 3. Animes Populares
     fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_API_KEY}&language=pt-BR&with_genres=16&with_original_language=ja&sort_by=popularity.desc&page=1`)
-        .then(res => res.json()).then(dados => {
-            if(dados.results) {
-                injetarContadorNoTitulo('animes', dados.results.length);
-                dados.results.forEach(item => exibirCardNaGrade(item, 'carrossel-animes', 'tv', 'anime'));
-            }
-        });
+    .then(r => r.json()).then(d => injetarContadorNoTitulo('animes', d.total_results.toLocaleString('pt-BR') + ' animes'));
+
+    for(let i = 1; i <= paginasParaCarregar; i++) {
+        let res = await fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_API_KEY}&language=pt-BR&with_genres=16&with_original_language=ja&sort_by=popularity.desc&page=${i}`);
+        let dados = await res.json();
+        if(dados.results) dados.results.forEach(item => exibirCardNaGrade(item, 'carrossel-animes', 'tv', 'anime'));
+    }
 }
 
 function exibirCardNaGrade(item, containerId, tipoTMDB, tipoTracking) {
@@ -297,7 +378,7 @@ function injetarContadorNoTitulo(sectionId, total) {
     if (h2Element) {
         const antigo = h2Element.querySelector('.badge-contador');
         if (antigo) antigo.remove();
-        h2Element.innerHTML += ` <span class="badge-contador" style="background: #e50914; color: #fff; font-size: 0.55em; padding: 3px 9px; border-radius: 20px; margin-left: 10px; font-weight: 600; vertical-align: middle;">${total}</span>`;
+        h2Element.innerHTML += ` <span class="badge-contador" style="background: #e50914; color: #fff; font-size: 0.6em; padding: 3px 9px; border-radius: 20px; margin-left: 10px; font-weight: 600; vertical-align: middle; white-space: nowrap;">${total}</span>`;
     }
 }
 
@@ -371,6 +452,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // A barra de pesquisa agora aciona o motor do TMDB
     document.getElementById('searchInput')?.addEventListener('input', filtrarCatalogo);
     carregarCatalogoDinamicamente();
     carregarTop10Assistidos(); 
