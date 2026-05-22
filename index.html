@@ -6,7 +6,7 @@
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=auth-premium-v1">
+    <link rel="stylesheet" href="style.css?v=auth-premium-v2">
 </head>
 <body style="overflow: hidden;">
 
@@ -121,7 +121,7 @@
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Contato & Apoio</h2>
             
             <div class="apoio-premium-box">
-                <p class="apoio-text">O HK Filmes é mantido de forma totalmente independente pelo desenvolvedor. Se você curte o site and quer ajudar a manter os servidores ativos, faça uma contribuição copiando a chave PIX abaixo! ☕</p>
+                <p class="apoio-text">O HK Filmes é mantido de forma totalmente independente pelo desenvolvedor. Se você curte o site e quer ajudar a manter os servidores ativos, faça uma contribuição copiando a chave PIX abaixo! ☕</p>
                 <button onclick="copiarChavePix()" class="btn-apoio-pix">
                     <i class="fa-solid fa-copy"></i> Copiar Chave PIX
                 </button>
@@ -215,18 +215,19 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyDCNF3pZ3g20UkNDTUYq-X9zkyKA3El1TM",
+            apiKey: "AIzaSyBoSXyvKqfgp5MomiHlY_p6GPPUpC8_5O0",
             authDomain: "hk-filmes-db.firebaseapp.com",
             databaseURL: "https://hk-filmes-db-default-rtdb.firebaseio.com",
             projectId: "hk-filmes-db",
-            storageBucket: "hk-filmes-db.appspot.com",
-            messagingSenderId: "688262885548",
-            appId: "1:688262885548:web:166f076180373e466af09"
+            storageBucket: "hk-filmes-db.firebasestorage.app",
+            messagingSenderId: "675387078007",
+            appId: "1:675387078007:web:866fdde7812fbc661ddd72",
+            measurementId: "G-J2RF7FRL6P"
         };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
     </script>
     
-    <script src="script.js?v=auth-premium-v1"></script>
+    <script src="script.js?v=auth-premium-v2"></script>
 </body>
 </html>
