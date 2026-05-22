@@ -12,6 +12,31 @@ const avatarUrls = {
     heroi: "https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/heroi.jpg"
 };
 
+// === MOTOR DO MENU FLUTUANTE DROPDOWN VIP ===
+function toggleProfileMenu(event) {
+    if(event) event.stopPropagation();
+    const menu = document.getElementById('profileDropdown');
+    const avatar = document.getElementById('userHeaderAvatar');
+    if (menu.style.display === 'block') {
+        menu.style.display = 'none';
+        if(avatar) avatar.style.transform = 'scale(1)';
+    } else {
+        menu.style.display = 'block';
+        if(avatar) avatar.style.transform = 'scale(1.1)';
+    }
+}
+
+// Fechar ao clicar fora
+document.addEventListener('click', (e) => {
+    const container = document.querySelector('.profile-menu-container');
+    const menu = document.getElementById('profileDropdown');
+    const avatar = document.getElementById('userHeaderAvatar');
+    if (container && menu && !container.contains(e.target)) {
+        menu.style.display = 'none';
+        if(avatar) avatar.style.transform = 'scale(1)';
+    }
+});
+
 // === OBSERVADOR DE LOGIN BLINDADO (ANTIFALHAS) ===
 auth.onAuthStateChanged((user) => {
     const authTela = document.getElementById('authOverlay');
@@ -20,26 +45,24 @@ auth.onAuthStateChanged((user) => {
     const headerAvatar = document.getElementById('userHeaderAvatar');
 
     if (user) {
-        // 1. Libera a tela imediatamente e esconde o botão de convidado
         if(authTela) { authTela.style.display = 'none'; authTela.classList.remove('active'); }
         document.body.style.overflow = 'auto';
         if (guestProfile) guestProfile.style.display = 'none';
 
-        // 2. Mostra o Avatar Padrão (Gojo) imediatamente para evitar o "Limbo"
+        // Carrega o Gojo na hora para não dar buraco vazio
         if (headerAvatar && headerProfile) {
             headerAvatar.src = avatarUrls['gojo'];
             headerProfile.style.display = 'flex';
         }
 
-        // 3. Puxa do Banco de Dados a escolha real (em segundo plano)
+        // Puxa o customizado em background
         database.ref('usuarios/' + user.uid).once('value').then((snap) => {
-            if (snap.exists() && snap.val().avatar) {
+            if (snap.exists() && snap.val().avatar && headerAvatar) {
                 headerAvatar.src = avatarUrls[snap.val().avatar];
             }
         }).catch(err => console.log("Sincronizando perfil..."));
         
     } else {
-        // Se NÃO estiver logado
         if (localStorage.getItem('hkFilmes_acessoLiberado') !== 'true') {
             if(authTela) { authTela.style.display = 'flex'; authTela.classList.add('active'); }
             document.body.style.overflow = 'hidden';
@@ -79,6 +102,9 @@ function mudarAba(aba) {
     let areaBusca = document.getElementById('area-resultados-busca');
     if(areaBusca) areaBusca.style.display = 'none';
     
+    let sessaoLista = document.getElementById('sessaoMinhaLista');
+    if(sessaoLista) sessaoLista.style.display = 'none';
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -91,7 +117,79 @@ function entrarComoConvidado() {
     if (guestProfile) guestProfile.style.display = 'flex';
 }
 
-// === MOTOR DE PESQUISA GLOBLAL ===
+// === VISUALIZAÇÃO DA MINHA LISTA EXCLUSIVA ===
+function mostrarMinhaLista() {
+    const dropdown = document.getElementById('profileDropdown');
+    if(dropdown) dropdown.style.display = 'none';
+
+    document.getElementById('home').style.display = 'none';
+    document.getElementById('tendencias').style.display = 'none';
+    document.getElementById('filmes').style.display = 'none';
+    document.getElementById('series').style.display = 'none';
+    document.getElementById('animes').style.display = 'none';
+    let areaBusca = document.getElementById('area-resultados-busca');
+    if(areaBusca) areaBusca.style.display = 'none';
+    
+    const sessaoLista = document.getElementById('sessaoMinhaLista');
+    sessaoLista.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const grid = document.getElementById('grid-minha-lista');
+    grid.innerHTML = '<h3 style="color: #aaa; width: 100%; text-align: center; margin-top: 40px;">Buscando seus títulos...</h3>';
+
+    const user = auth.currentUser;
+    if(!user) return; 
+
+    database.ref('usuarios/' + user.uid + '/minhaLista').once('value').then(snap => {
+        if(!snap.exists()) {
+            grid.innerHTML = `
+                <div style="text-align: center; width: 100%; margin-top: 40px;">
+                    <i class="fa-solid fa-box-open" style="font-size: 3em; color: #444; margin-bottom: 15px;"></i>
+                    <h3 style="color: #aaa;">Sua lista está vazia</h3>
+                    <p style="color: #666; font-size: 0.9em; margin-top: 10px;">Navegue pelo catálogo e clique em "+ Minha Lista" para salvar títulos aqui.</p>
+                </div>`;
+            return;
+        }
+        
+        grid.innerHTML = '';
+        snap.forEach(child => {
+            const id = child.key;
+            const dadosLista = child.val();
+            
+            let tipoFetch = 'movie'; 
+            let tipoTracking = 'movie';
+            if(typeof dadosLista === 'object') {
+                tipoFetch = dadosLista.tipo || 'movie';
+                tipoTracking = dadosLista.tracking || 'movie';
+            }
+
+            fetch(`https://api.themoviedb.org/3/${tipoFetch}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`)
+            .then(r => r.json()).then(dados => {
+                if(dados.success === false && typeof dadosLista !== 'object') {
+                    fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}&language=pt-BR`)
+                    .then(r2 => r2.json()).then(dados2 => renderizarCardLista(dados2, 'tv', 'tv'));
+                } else if(dados.id) {
+                    renderizarCardLista(dados, tipoFetch, tipoTracking);
+                }
+            });
+        });
+    });
+}
+
+function renderizarCardLista(item, tipoTMDB, tipoTracking) {
+    const grid = document.getElementById('grid-minha-lista');
+    let title = item.title || item.name;
+    let poster = item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : 'https://placehold.co/342x513/222/FFF?text=Sem+Capa';
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.flex = '0 0 auto';
+    card.setAttribute('onclick', `abrirPlayerGeral('${item.id}', '${tipoTMDB}', '${tipoTracking}')`);
+    card.innerHTML = `<img src="${poster}" alt="${title}"><h3>${title}</h3>`;
+    grid.appendChild(card);
+}
+
+// === PESQUISA GLOBAL SECRETA TMDB ===
 let tempoDigitacao = null;
 
 function filtrarCatalogo() {
@@ -122,6 +220,9 @@ function filtrarCatalogo() {
     document.getElementById('filmes').style.display = 'none';
     document.getElementById('series').style.display = 'none';
     document.getElementById('animes').style.display = 'none';
+    let sessaoLista = document.getElementById('sessaoMinhaLista');
+    if(sessaoLista) sessaoLista.style.display = 'none';
+    
     areaBusca.style.display = 'block';
 
     tempoDigitacao = setTimeout(() => {
@@ -231,17 +332,22 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         const trailer = dados.videos?.results?.find(v => v.site === "YouTube" && v.type === "Trailer");
         if (trailer) { urlTrailerGlobal = trailer.key; btnTrailer.style.display = 'flex'; btnTrailer.onclick = abrirTrailer; } else { btnTrailer.style.display = 'none'; }
 
-        // SISTEMA DE LISTA PROTEGIDO
+        // SISTEMA DE LISTA PROTEGIDO + COMPATÍVEL COM O DROPDOWN REFRESH
         const user = auth.currentUser;
         const btnLista = document.getElementById('btnMinhaLista');
         if (user && btnLista) {
             database.ref('usuarios/' + user.uid + '/minhaLista/' + id).on('value', snap => {
-                if (snap.exists() && snap.val() === true) {
+                if (snap.exists()) {
                     btnLista.innerHTML = `<i class="fa-solid fa-check" style="color: #2ecc71;"></i> Remover da Lista`;
-                    btnLista.onclick = () => database.ref('usuarios/' + user.uid + '/minhaLista/' + id).remove();
+                    btnLista.onclick = () => {
+                        database.ref('usuarios/' + user.uid + '/minhaLista/' + id).remove().then(() => {
+                            const sLista = document.getElementById('sessaoMinhaLista');
+                            if(sLista && sLista.style.display === 'block') mostrarMinhaLista();
+                        });
+                    };
                 } else {
                     btnLista.innerHTML = `<i class="fa-solid fa-plus"></i> Minha Lista`;
-                    btnLista.onclick = () => database.ref('usuarios/' + user.uid + '/minhaLista/' + id).set(true);
+                    btnLista.onclick = () => database.ref('usuarios/' + user.uid + '/minhaLista/' + id).set({ tipo: tipo, tracking: tipoTracking });
                 }
             });
         } else if (btnLista) {
@@ -286,7 +392,7 @@ function voltarParaDetalhes() {
 function fecharPlayer() { document.getElementById('playerModal').classList.remove('active'); }
 function resetarEstrelas() { document.getElementById('ratingMsg').innerText = ""; document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; }); }
 
-// === MOTOR DE VITRINE ===
+// === MOTOR DE VITRINE AUTOMÁTICA MULTIPAGE COM VALORES ABSURDOS ===
 async function carregarCatalogoDinamicamente() {
     const paginasParaCarregar = 4; 
 
@@ -331,11 +437,11 @@ function exibirCardNaGrade(item, containerId, tipoTMDB, tipoTracking) {
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('onclick', `abrirPlayerGeral('${item.id}', '${tipoTMDB}', '${tipoTracking}')`);
-    card.innerHTML = `<img src="${poster}" alt="${title}"><h3>${title}</h3><div class="card-meta"><span>⭐ <span id="star-${item.id}">0.0</span></span><span>👁️ <span id="view-${item.id}">0</span></span></div>`;
+    card.innerHTML = `<img src="${poster}" alt="${title}"><h3>${title}</h3><div class="card-meta"><span>⭐ <span id="star-${containerId}-${item.id}">0.0</span></span><span>👁️ <span id="view-${containerId}-${item.id}">0</span></span></div>`;
     container.appendChild(card);
     
-    database.ref(`views/${tipoTracking}/${item.id}`).on('value', snap => { if(snap.exists()) { let v = document.getElementById('view-' + item.id); if(v) v.innerText = snap.val(); } });
-    database.ref('ratings/' + item.id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(vo => { t += vo.val(); c++; }); let s = document.getElementById('star-' + item.id); if(s) s.innerText = (t/c).toFixed(1); } });
+    database.ref(`views/${tipoTracking}/${item.id}`).on('value', snap => { if(snap.exists()) { let v = document.getElementById(`view-${containerId}-${item.id}`); if(v) v.innerText = snap.val(); } });
+    database.ref('ratings/' + item.id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(vo => { t += vo.val(); c++; }); let s = document.getElementById(`star-${containerId}-${item.id}`); if(s) s.innerText = (t/c).toFixed(1); } });
 }
 
 // === MOTOR DO TOP 10 ===
