@@ -6,7 +6,7 @@
     <title>HK Filmes</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=auth-premium-v2">
+    <link rel="stylesheet" href="style.css?v=hk-master">
 </head>
 <body style="overflow: hidden;">
 
@@ -75,6 +75,10 @@
         <div id="userHeaderProfile" style="display: none; align-items: center; gap: 12px;">
             <img id="userHeaderAvatar" src="" style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid #e50914; object-fit: cover; box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);">
             <button onclick="fazerLogout()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 0.8em; cursor: pointer; font-weight: 600; transition: 0.3s;">Sair</button>
+        </div>
+
+        <div id="guestHeaderProfile" style="display: none; align-items: center;">
+            <button onclick="abrirTelaLogin()" style="background: #e50914; border: none; color: #fff; padding: 8px 15px; border-radius: 4px; font-size: 0.85em; cursor: pointer; font-weight: bold; transition: 0.3s; box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);"><i class="fa-solid fa-user"></i> Entrar VIP</button>
         </div>
     </header>
 
@@ -228,6 +232,6 @@
         const database = firebase.database();
     </script>
     
-    <script src="script.js?v=auth-premium-v2"></script>
+    <script src="script.js?v=hk-master"></script>
 </body>
 </html>
