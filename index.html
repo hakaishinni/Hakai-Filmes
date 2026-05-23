@@ -18,14 +18,8 @@
         </div>
     </noscript>
 
-    <div id="adblockOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(8,8,10,0.98); z-index: 999999; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
-        <i class="fa-solid fa-shield-cat" style="font-size: 4em; color: #e50914; margin-bottom: 20px;"></i>
-        <h2 style="color: #fff; font-size: 2em; margin-bottom: 10px;">Bloqueador de Anúncios Detetado</h2>
-        <p style="color: #aaa; max-width: 500px; line-height: 1.6; font-size: 1em; margin-bottom: 30px;">O <b>HK Filmes</b> é uma plataforma 100% gratuita. Para continuarmos a trazer os melhores filmes e séries, dependemos da exibição de anúncios.<br><br>Por favor, <b>desative o seu AdBlock</b> ou o escudo do navegador (como o Brave) para esta página e recarregue para continuar assistindo.</p>
-        <button onclick="window.location.reload()" style="background: #e50914; color: white; border: none; padding: 15px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);">Já desativei, Recarregar Site</button>
-    </div>
-
     <div id="authOverlay" class="active" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow-y: auto;">
+        
         <div class="auth-box" style="background: #111; padding: 40px; border-radius: 10px; text-align: center; border: 1px solid #333; max-width: 450px; width: 90%; margin: 20px 0;">
             <div class="logo" style="font-size: 2em; margin-bottom: 10px;">HK<span style="color: #e50914;">Filmes</span></div>
 
@@ -41,21 +35,24 @@
 
             <div id="registroView" style="display: none;">
                 <p style="margin-bottom: 15px; color: #aaa;">Escolha seu avatar e crie sua conta VIP.</p>
+
                 <div class="avatar-selection">
-                    <img src="https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/gojo.jpg" class="avatar-option selected" data-avatar="gojo" alt="Gojo">
-                    <img src="https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/ninja.jpg" class="avatar-option" data-avatar="ninja" alt="Ninja">
-                    <img src="https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/vampiro.jpg" class="avatar-option" data-avatar="vampiro" alt="Vampiro">
-                    <img src="https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/heroi.jpg" class="avatar-option" data-avatar="heroi" alt="Herói">
+                    <img src="https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/gojo.jpg" class="avatar-option selected" data-avatar="gojo" alt="Gojo" title="O Mais Forte">
+                    <img src="https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/ninja.jpg" class="avatar-option" data-avatar="ninja" alt="Ninja" title="Sombra">
+                    <img src="https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/vampiro.jpg" class="avatar-option" data-avatar="vampiro" alt="Vampiro" title="Ancestral">
+                    <img src="https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/heroi.jpg" class="avatar-option" data-avatar="heroi" alt="Herói" title="Protetor">
                 </div>
                 <input type="hidden" id="avatarSelecionado" value="gojo">
 
                 <form id="formRegistro" style="display: flex; flex-direction: column; gap: 15px;">
-                    <input type="email" id="regEmail" placeholder="E-mail" required style="padding: 12px; border-radius: 5px; border: none; background: #222; color: white;">
-                    <input type="password" id="regSenha" placeholder="Senha Forte" required style="padding: 12px; border-radius: 5px; border: none; background: #222; color: white;">
+                    <input type="email" id="regEmail" placeholder="E-mail (@gmail, @hotmail...)" required style="padding: 12px; border-radius: 5px; border: none; background: #222; color: white;">
+                    <input type="password" id="regSenha" placeholder="Crie uma Senha Forte" required style="padding: 12px; border-radius: 5px; border: none; background: #222; color: white;">
+                    
                     <p id="erroRegistro" style="color: #e50914; font-size: 0.85em; font-weight: bold; display: none; margin: 0;"></p>
+                    
                     <button type="submit" class="btn-primary" style="padding: 12px; border-radius: 5px; background: #e50914; color: white; border: none; font-weight: bold; cursor: pointer;">Criar Conta VIP</button>
                 </form>
-                <p style="margin-top: 15px; color: #aaa; font-size: 0.9em;">Já tem conta? <span onclick="alternarTelaAuth('login')" style="color: #fff; font-weight: bold; cursor: pointer; text-decoration: underline;">Entrar.</span></p>
+                <p style="margin-top: 15px; color: #aaa; font-size: 0.9em;">Já tem uma conta? <span onclick="alternarTelaAuth('login')" style="color: #fff; font-weight: bold; cursor: pointer; text-decoration: underline;">Entrar.</span></p>
             </div>
 
             <p style="margin: 15px 0; color: #555;">ou</p>
@@ -76,7 +73,8 @@
         </nav>
         
         <div id="userHeaderProfile" class="profile-menu-container" style="display: none;">
-            <img id="userHeaderAvatar" src="" onclick="toggleProfileMenu(event)" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e50914; object-fit: cover; cursor: pointer;">
+            <img id="userHeaderAvatar" src="" onclick="toggleProfileMenu(event)" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e50914; object-fit: cover; box-shadow: 0 0 10px rgba(229, 9, 20, 0.4); transition: transform 0.2s; cursor: pointer;">
+            
             <div id="profileDropdown" class="profile-dropdown">
                 <a onclick="mostrarMinhaLista()"><i class="fa-solid fa-bookmark"></i> Minha Lista</a>
                 <a onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</a>
@@ -84,7 +82,7 @@
         </div>
 
         <div id="guestHeaderProfile" style="display: none; align-items: center;">
-            <button onclick="abrirTelaLogin()" style="background: #e50914; border: none; color: #fff; padding: 8px 15px; border-radius: 4px; font-size: 0.85em; cursor: pointer; font-weight: bold;"><i class="fa-solid fa-user"></i> Entrar VIP</button>
+            <button onclick="abrirTelaLogin()" style="background: #e50914; border: none; color: #fff; padding: 8px 15px; border-radius: 4px; font-size: 0.85em; cursor: pointer; font-weight: bold; transition: 0.3s; box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);"><i class="fa-solid fa-user"></i> Entrar VIP</button>
         </div>
     </header>
 
@@ -106,6 +104,7 @@
         <section id="filmes" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
             <h3 style="color: #fff; font-size: 1.2em; margin-bottom: 15px;"><i class="fa-solid fa-trophy" style="color:#e50914;"></i> Top 10 Filmes Mais Assistidos</h3>
             <div id="carrossel-top-filmes" class="grid-catalog" style="margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;"></div>
+
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Catálogo de Filmes</h2>
             <div id="carrossel-filmes" class="grid-catalog"></div>
         </section>
@@ -113,6 +112,7 @@
         <section id="series" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
             <h3 style="color: #fff; font-size: 1.2em; margin-bottom: 15px;"><i class="fa-solid fa-trophy" style="color:#e50914;"></i> Top 10 Séries Mais Assistidas</h3>
             <div id="carrossel-top-series" class="grid-catalog" style="margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;"></div>
+
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Catálogo de Séries</h2>
             <div id="carrossel-series" class="grid-catalog"></div>
         </section>
@@ -120,6 +120,7 @@
         <section id="animes" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
             <h3 style="color: #fff; font-size: 1.2em; margin-bottom: 15px;"><i class="fa-solid fa-trophy" style="color:#e50914;"></i> Top 10 Animes Mais Assistidos</h3>
             <div id="carrossel-top-animes" class="grid-catalog" style="margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;"></div>
+
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Catálogo de Animes</h2>
             <div id="carrossel-animes" class="grid-catalog"></div>
         </section>
@@ -131,14 +132,19 @@
 
         <section id="contato" class="contact-section" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Contato & Apoio</h2>
+            
             <div class="apoio-premium-box">
-                <p class="apoio-text">O HK Filmes é mantido de forma independente. Se você curte o site, apoie o projeto copiando a chave PIX abaixo! ☕</p>
-                <button onclick="copiarChavePix()" class="btn-apoio-pix"><i class="fa-solid fa-copy"></i> Copiar Chave PIX</button>
+                <p class="apoio-text">O HK Filmes é mantido de forma totalmente independente pelo desenvolvedor. Se você curte o site e quer ajudar a manter os servidores activos, faça uma contribuição copiando a chave PIX abaixo! ☕</p>
+                <button onclick="copiarChavePix()" class="btn-apoio-pix">
+                    <i class="fa-solid fa-copy"></i> Copiar Chave PIX
+                </button>
+                <p id="pixStatusMsg"></p>
             </div>
         </section>
 
         <footer>
             <p>Copyright &copy; 2026 HK Filmes. Todos os direitos reservados.</p>
+            <p style="font-size: 0.85em; color: #333; margin-top: 5px;">Desenvolvido com foco em alta performance.</p>
         </footer>
     </main>
 
@@ -149,10 +155,16 @@
             <div id="detailsView">
                 <div id="modalBackdrop" class="modal-backdrop">
                     <div class="backdrop-gradient"></div>
-                    <div id="modalTitleContainer" style="z-index: 2; width: 100%;"><h1 id="modalTitle">Carregando...</h1></div>
+                    <div id="modalTitleContainer" style="z-index: 2; width: 100%;">
+                        <h1 id="modalTitle">Carregando...</h1>
+                    </div>
                 </div>
                 
                 <div class="modal-info">
+                    <div class="brave-alert-badge">
+                        <i class="fa-solid fa-shield-halved"></i> <span><b>Dica de Streaming:</b> Assista usando o navegador <b>Brave</b> para bloquear 100% dos anúncios do player externo.</span>
+                    </div>
+
                     <div class="meta-row">
                         <span id="modalYear" class="meta-item">----</span>
                         <span class="meta-item age-rating">SR</span>
@@ -168,21 +180,39 @@
                         <button id="btnMinhaLista" class="btn-netflix-secondary"><i class="fa-solid fa-plus"></i> Minha Lista</button>
                     </div>
 
-                    <p id="modalOverview" class="modal-overview">Buscando sinopse...</p>
+                    <p id="modalOverview" class="modal-overview">Buscando sinopse oficial...</p>
                     
                     <div class="cast-crew-container">
+                        <p class="cast-label">Elenco Principal:</p>
                         <div id="modalCastGrid" class="cast-grid"></div>
+                        <p style="margin-top: 15px;"><span class="cast-label">Direção/Criação:</span> <span id="modalCreator">Carregando...</span></p>
                     </div>
                     
                     <div id="similarSection" class="similar-section" style="margin-top: 30px; border-top: 1px solid #222; padding-top: 20px;">
                         <h3 style="font-size: 1.1em; margin-bottom: 15px; color: #fff;">Títulos Semelhantes</h3>
                         <div id="modalSimilarGrid" class="similar-carousel"></div>
                     </div>
+
+                    <div class="rating-inside">
+                        <h3 id="ratingTitle">De 1 a 5, como avalia este título?</h3> 
+                        <div class="stars-wrapper">
+                            <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
+                            <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                            <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                            <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                            <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                        </div>
+                        <div class="stars-numbers"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+                        <p id="ratingMsg" style="color: #e50914; margin-top: 10px; font-weight: bold; text-align: center;"></p>
+                    </div>
                 </div>
             </div>
 
             <div id="videoView" style="display: none; width: 100%; height: 100%; flex-direction: column;">
                 <button class="back-to-details" onclick="voltarParaDetalhes()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+                <div class="brave-player-banner">
+                    <i class="fa-solid fa-circle-info"></i> Se o player travar com pop-ups, mude para o navegador <b>Brave</b> para limpar o sinal.
+                </div>
                 <div id="videoContainer" style="width:100%; flex: 1; background:#000;"></div>
             </div>
             
@@ -192,30 +222,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                var bait = document.createElement('div');
-                bait.className = 'ad-banner adsbox ad-zone pub_300x250'; // Classes que os AdBlockers odeiam
-                bait.style.height = '1px';
-                bait.style.width = '1px';
-                bait.style.position = 'absolute';
-                bait.style.left = '-999px';
-                document.body.appendChild(bait);
-
-                setTimeout(function() {
-                    // Verifica se o AdBlock "matou" a isca escondendo-a
-                    var isBlocked = (bait.offsetHeight === 0 || window.getComputedStyle(bait).display === 'none');
-                    if (isBlocked) {
-                        document.getElementById('adblockOverlay').style.display = 'flex';
-                        document.body.style.overflow = 'hidden'; // Trava a tela do site
-                    }
-                    bait.remove();
-                }, 400);
-            }, 1500); // Dá um segundo e meio pro site carregar antes de checar
-        });
-    </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -237,7 +243,7 @@
     
     <script src="script.js?v=hk-master-v3"></script>
 
-    <script async="true" data-cfasync="false" src="https://pl29526720.effectivecpmnetwork.com/13/aa/fa/13aafa5311acd18e0a595024ef09f7ee.js"></script>
+    <script src="https://pl29526720.effectivecpmnetwork.com/13/aa/fa/13aafa5311acd18e0a595024ef09f7ee.js"></script>
 
 </body>
 </html>
