@@ -394,7 +394,8 @@ function resetarEstrelas() { document.getElementById('ratingMsg').innerText = ""
 
 // === MOTOR DE VITRINE AUTOMÁTICA MULTIPAGE COM VALORES ABSURDOS ===
 async function carregarCatalogoDinamicamente() {
-    const paginasParaCarregar = 4; 
+    // Reduzido de 4 para 2 para cortar o payload inicial pela metade (Otimização Mobile)
+    const paginasParaCarregar = 2; 
 
     fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`)
     .then(r => r.json()).then(d => injetarContadorNoTitulo('filmes', d.total_results.toLocaleString('pt-BR') + ' títulos'));
@@ -490,7 +491,6 @@ function puxarTendenciasGerais() {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('onclick', `abrirPlayerGeral('${item.id}', 'movie', 'movie')`);
-                // Corrigido para a cor de acessibilidade aprovada #ff4d4d
                 card.innerHTML = `<img src="${poster}" alt="${item.title}" loading="lazy"><h3>${item.title}</h3><div class="card-meta"><span style="color:#ff4d4d; font-weight:bold;">Em Alta</span></div>`;
                 container.appendChild(card);
             });
