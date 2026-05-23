@@ -437,7 +437,7 @@ function exibirCardNaGrade(item, containerId, tipoTMDB, tipoTracking) {
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('onclick', `abrirPlayerGeral('${item.id}', '${tipoTMDB}', '${tipoTracking}')`);
-    card.innerHTML = `<img src="${poster}" alt="${title}"><h3>${title}</h3><div class="card-meta"><span>⭐ <span id="star-${containerId}-${item.id}">0.0</span></span><span>👁️ <span id="view-${containerId}-${item.id}">0</span></span></div>`;
+    card.innerHTML = `<img src="${poster}" alt="${title}" loading="lazy"><h3>${title}</h3><div class="card-meta"><span>⭐ <span id="star-${containerId}-${item.id}">0.0</span></span><span>👁️ <span id="view-${containerId}-${item.id}">0</span></span></div>`;
     container.appendChild(card);
     
     database.ref(`views/${tipoTracking}/${item.id}`).on('value', snap => { if(snap.exists()) { let v = document.getElementById(`view-${containerId}-${item.id}`); if(v) v.innerText = snap.val(); } });
@@ -490,7 +490,8 @@ function puxarTendenciasGerais() {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('onclick', `abrirPlayerGeral('${item.id}', 'movie', 'movie')`);
-                card.innerHTML = `<img src="${poster}" alt="${item.title}"><h3>${item.title}</h3><div class="card-meta"><span style="color:#e50914; font-weight:bold;">Em Alta</span></div>`;
+                // Corrigido para a cor de acessibilidade aprovada #ff4d4d
+                card.innerHTML = `<img src="${poster}" alt="${item.title}" loading="lazy"><h3>${item.title}</h3><div class="card-meta"><span style="color:#ff4d4d; font-weight:bold;">Em Alta</span></div>`;
                 container.appendChild(card);
             });
         });
