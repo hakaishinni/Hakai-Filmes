@@ -432,8 +432,9 @@ function exibirCardNaGrade(item, containerId, tipoTMDB, tipoTracking) {
     const container = document.getElementById(containerId);
     if (!container) return;
     
+    // OTIMIZAÇÃO: Capas reduzidas de w500 para w342 para poupar banda no mobile
     let title = item.title || item.name;
-    let poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://placehold.co/500x750/222/FFF?text=Sem+Capa';
+    let poster = item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : 'https://placehold.co/342x513/222/FFF?text=Sem+Capa';
     
     const card = document.createElement('div');
     card.className = 'card';
@@ -487,7 +488,8 @@ function puxarTendenciasGerais() {
         .then(res => res.json()).then(dados => {
             const container = document.getElementById('carrossel-tendencias');
             dados.results.slice(0, 10).forEach(item => {
-                const poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+                // OTIMIZAÇÃO: Capas reduzidas de w500 para w342 para poupar banda no mobile
+                const poster = `https://image.tmdb.org/t/p/w342${item.poster_path}`;
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('onclick', `abrirPlayerGeral('${item.id}', 'movie', 'movie')`);
