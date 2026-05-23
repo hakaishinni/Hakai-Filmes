@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HK Filmes</title>
 
+    <meta name="description" content="Assista aos melhores Filmes, Séries e Animes online grátis no HK Filmes. O seu catálogo atualizado diariamente com lançamentos, tendências e qualidade máxima.">
+
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -81,11 +83,11 @@
         <div class="logo" style="cursor: pointer;" onclick="mudarAba('tudo')">HK<span>Filmes</span></div>
         <nav>
             <ul>
-                <li><a style="cursor:pointer;" onclick="mudarAba('tudo')">Home</a></li>
-                <li><a style="cursor:pointer;" onclick="mudarAba('filmes')">Filmes</a></li>
-                <li><a style="cursor:pointer;" onclick="mudarAba('series')">Séries</a></li>
-                <li><a style="cursor:pointer;" onclick="mudarAba('animes')">Animes</a></li>
-                <li><a style="cursor:pointer;" onclick="mudarAba('tudo')">Contato</a></li>
+                <li><a href="#home" onclick="mudarAba('tudo')">Home</a></li>
+                <li><a href="#filmes" onclick="mudarAba('filmes')">Filmes</a></li>
+                <li><a href="#series" onclick="mudarAba('series')">Séries</a></li>
+                <li><a href="#animes" onclick="mudarAba('animes')">Animes</a></li>
+                <li><a href="#contato" onclick="mudarAba('tudo')">Contato</a></li>
             </ul>
         </nav>
         
@@ -93,8 +95,8 @@
             <img id="userHeaderAvatar" src="" onclick="toggleProfileMenu(event)" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e50914; object-fit: cover; box-shadow: 0 0 10px rgba(229, 9, 20, 0.4); transition: transform 0.2s; cursor: pointer;">
             
             <div id="profileDropdown" class="profile-dropdown">
-                <a onclick="mostrarMinhaLista()"><i class="fa-solid fa-bookmark"></i> Minha Lista</a>
-                <a onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</a>
+                <a href="#sessaoMinhaLista" onclick="mostrarMinhaLista()"><i class="fa-solid fa-bookmark"></i> Minha Lista</a>
+                <a href="#" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</a>
             </div>
         </div>
 
