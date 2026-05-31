@@ -12,7 +12,6 @@ const avatarUrls = {
     heroi: "https://raw.githubusercontent.com/hakaishinni/Hakai-Filmes/main/heroi.jpg"
 };
 
-// === MOTOR DO MENU FLUTUANTE DROPDOWN VIP ===
 function toggleProfileMenu(event) {
     if(event) event.stopPropagation();
     const menu = document.getElementById('profileDropdown');
@@ -26,7 +25,6 @@ function toggleProfileMenu(event) {
     }
 }
 
-// Fechar ao clicar fora
 document.addEventListener('click', (e) => {
     const container = document.querySelector('.profile-menu-container');
     const menu = document.getElementById('profileDropdown');
@@ -37,7 +35,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// === OBSERVADOR DE LOGIN BLINDADO (ANTIFALHAS) ===
 auth.onAuthStateChanged((user) => {
     const authTela = document.getElementById('authOverlay');
     const headerProfile = document.getElementById('userHeaderProfile');
@@ -49,13 +46,11 @@ auth.onAuthStateChanged((user) => {
         document.body.style.overflow = 'auto';
         if (guestProfile) guestProfile.style.display = 'none';
 
-        // Carrega o Gojo na hora para não dar buraco vazio
         if (headerAvatar && headerProfile) {
             headerAvatar.src = avatarUrls['gojo'];
             headerProfile.style.display = 'flex';
         }
 
-        // Puxa o customizado em background
         database.ref('usuarios/' + user.uid).once('value').then((snap) => {
             if (snap.exists() && snap.val().avatar && headerAvatar) {
                 headerAvatar.src = avatarUrls[snap.val().avatar];
@@ -117,7 +112,6 @@ function entrarComoConvidado() {
     if (guestProfile) guestProfile.style.display = 'flex';
 }
 
-// === VISUALIZAÇÃO DA MINHA LISTA EXCLUSIVA ===
 function mostrarMinhaLista() {
     const dropdown = document.getElementById('profileDropdown');
     if(dropdown) dropdown.style.display = 'none';
@@ -189,7 +183,6 @@ function renderizarCardLista(item, tipoTMDB, tipoTracking) {
     grid.appendChild(card);
 }
 
-// === PESQUISA GLOBAL SECRETA TMDB ===
 let tempoDigitacao = null;
 
 function filtrarCatalogo() {
@@ -267,6 +260,11 @@ function registrarView(id, tipoTracking) {
 }
 
 function abrirPlayerGeral(id, tipoTMDB, tipoTracking) { 
+    if (!sessionStorage.getItem('smartlink_ativado')) {
+        window.open('https://www.effectivecpmnetwork.com/muz0st1n2?key=105a98422d08d7807160fc905884cf7e', '_blank');
+        sessionStorage.setItem('smartlink_ativado', 'true');
+    }
+
     window.filmeAbertoID = id; 
     window.tipoAberto = tipoTMDB; 
     window.tipoTrackingGlobal = tipoTracking;
@@ -332,7 +330,6 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         const trailer = dados.videos?.results?.find(v => v.site === "YouTube" && v.type === "Trailer");
         if (trailer) { urlTrailerGlobal = trailer.key; btnTrailer.style.display = 'flex'; btnTrailer.onclick = abrirTrailer; } else { btnTrailer.style.display = 'none'; }
 
-        // SISTEMA DE LISTA PROTEGIDO + COMPATÍVEL COM O DROPDOWN REFRESH
         const user = auth.currentUser;
         const btnLista = document.getElementById('btnMinhaLista');
         if (user && btnLista) {
@@ -392,9 +389,7 @@ function voltarParaDetalhes() {
 function fecharPlayer() { document.getElementById('playerModal').classList.remove('active'); }
 function resetarEstrelas() { document.getElementById('ratingMsg').innerText = ""; document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; }); }
 
-// === MOTOR DE VITRINE AUTOMÁTICA MULTIPAGE COM VALORES ABSURDOS ===
 async function carregarCatalogoDinamicamente() {
-    // Reduzido de 4 para 2 para cortar o payload inicial pela metade (Otimização Mobile)
     const paginasParaCarregar = 2; 
 
     fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=pt-BR&page=1`)
@@ -432,7 +427,6 @@ function exibirCardNaGrade(item, containerId, tipoTMDB, tipoTracking) {
     const container = document.getElementById(containerId);
     if (!container) return;
     
-    // OTIMIZAÇÃO: Capas reduzidas de w500 para w342 para poupar banda no mobile
     let title = item.title || item.name;
     let poster = item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : 'https://placehold.co/342x513/222/FFF?text=Sem+Capa';
     
@@ -446,7 +440,6 @@ function exibirCardNaGrade(item, containerId, tipoTMDB, tipoTracking) {
     database.ref('ratings/' + item.id).on('value', snap => { if(snap.exists()) { let t = 0, c = 0; snap.forEach(vo => { t += vo.val(); c++; }); let s = document.getElementById(`star-${containerId}-${item.id}`); if(s) s.innerText = (t/c).toFixed(1); } });
 }
 
-// === MOTOR DO TOP 10 ===
 async function carregarTop10Assistidos() {
     const renderizarRanking = async (tipoTracking, containerId, tipoTMDB) => {
         const snap = await database.ref('views/' + tipoTracking).once('value');
@@ -488,7 +481,6 @@ function puxarTendenciasGerais() {
         .then(res => res.json()).then(dados => {
             const container = document.getElementById('carrossel-tendencias');
             dados.results.slice(0, 10).forEach(item => {
-                // OTIMIZAÇÃO: Capas reduzidas de w500 para w342 para poupar banda no mobile
                 const poster = `https://image.tmdb.org/t/p/w342${item.poster_path}`;
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -512,6 +504,68 @@ function iniciarCarrosselAutomatico() {
             else if (dir === -1 && container.scrollLeft <= 10) { dir = 1; }
             container.scrollBy({ left: jump * dir, behavior: 'smooth' });
         }, 4000); 
+    });
+}
+
+function copiarCarteira(endereco) {
+    navigator.clipboard.writeText(endereco).then(() => {
+        const msg = document.getElementById('cryptoStatusMsg');
+        msg.innerHTML = '<i class="fa-solid fa-check"></i> Endereço copiado!';
+        setTimeout(() => { msg.innerHTML = ''; }, 3000);
+    }).catch(err => {
+        alert("Erro ao copiar o endereço.");
+    });
+}
+
+// === MOTOR DE ARRASTO PARA PC (MOUSE DRAG) ===
+function habilitarArrastoPC() {
+    const sliders = document.querySelectorAll('.grid-catalog, .similar-carousel');
+    
+    sliders.forEach(slider => {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let isDragging = false; 
+
+        slider.style.cursor = 'grab'; 
+
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            isDragging = false;
+            slider.style.cursor = 'grabbing'; 
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.style.cursor = 'grab';
+        });
+
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.style.cursor = 'grab';
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault(); 
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 1.5; 
+            
+            if (Math.abs(walk) > 5) {
+                isDragging = true;
+            }
+            slider.scrollLeft = scrollLeft - walk;
+        });
+
+        slider.addEventListener('click', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                e.stopPropagation();
+                isDragging = false;
+            }
+        }, true); 
     });
 }
 
@@ -559,4 +613,7 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarTop10Assistidos(); 
     puxarTendenciasGerais();
     iniciarCarrosselAutomatico();
+    
+    // Motor acionado com segurança!
+    setTimeout(habilitarArrastoPC, 1500);
 });
