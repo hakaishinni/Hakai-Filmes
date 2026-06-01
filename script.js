@@ -105,7 +105,6 @@ function mudarAba(aba) {
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Carrega os gêneros automaticamente na primeira vez que o usuário abre a aba
     if(aba === 'generos' && document.getElementById('filtros-generos').innerHTML.trim() === '') {
         carregarListaGeneros();
     }
@@ -295,6 +294,11 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
     document.getElementById('trailerContainer').innerHTML = ''; 
     document.getElementById('playerModal').classList.add('active');
 
+    // Limpa o vídeo de fundo anterior imediatamente
+    const videoBackground = document.getElementById('modalVideoBackground');
+    videoBackground.innerHTML = '';
+    document.getElementById('modalBackdrop').style.backgroundImage = 'none';
+
     const extraData = tipo === 'movie' ? 'release_dates,credits,images,videos,recommendations' : 'content_ratings,credits,images,videos,recommendations';
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR&append_to_response=${extraData}`;
     
@@ -302,8 +306,34 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         const titulo = dados.title || dados.name; 
         const backdrop = dados.backdrop_path ? `https://image.tmdb.org/t/p/w780${dados.backdrop_path}` : '';
         const ano = (dados.release_date || dados.first_air_date || '----').split('-')[0];
-        
-        document.getElementById('modalBackdrop').style.backgroundImage = backdrop ? `url('${backdrop}')` : 'none';
+
+        // =====================================================
+        // LÓGICA DO VÍDEO DE FUNDO (estilo Netflix)
+        // Busca na ordem: Teaser > Clip > Trailer
+        // =====================================================
+        const prioridade = ['Teaser', 'Clip', 'Trailer'];
+        let videoFundo = null;
+        for (const tipoBusca of prioridade) {
+            videoFundo = dados.videos?.results?.find(v => v.site === "YouTube" && v.type === tipoBusca);
+            if (videoFundo) break;
+        }
+
+        if (videoFundo) {
+            // TEM VÍDEO: coloca iframe mudo e em loop no fundo
+            document.getElementById('modalBackdrop').style.backgroundImage = 'none';
+            videoBackground.innerHTML = `
+                <iframe
+                    class="backdrop-video-iframe"
+                    src="https://www.youtube-nocookie.com/embed/${videoFundo.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoFundo.key}&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&start=5"
+                    allow="autoplay; encrypted-media"
+                    allowfullscreen>
+                </iframe>`;
+        } else {
+            // SEM VÍDEO: usa a imagem estática normalmente
+            document.getElementById('modalBackdrop').style.backgroundImage = backdrop ? `url('${backdrop}')` : 'none';
+            videoBackground.innerHTML = '';
+        }
+        // =====================================================
 
         const titleContainer = document.getElementById('modalTitleContainer');
         if (dados.images && dados.images.logos && dados.images.logos.length > 0) {
@@ -341,10 +371,17 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
             castGrid.innerHTML += `<div class="cast-member"><img src="${foto}"><span>${ator.name.split(' ')[0]}</span></div>`;
         });
 
+        // Botão Trailer: busca um trailer separado do vídeo de fundo
         const btnTrailer = document.getElementById('btnTrailer');
         urlTrailerGlobal = null;
-        const trailer = dados.videos?.results?.find(v => v.site === "YouTube" && v.type === "Trailer");
-        if (trailer) { urlTrailerGlobal = trailer.key; btnTrailer.style.display = 'flex'; btnTrailer.onclick = abrirTrailer; } else { btnTrailer.style.display = 'none'; }
+        const trailerBtn = dados.videos?.results?.find(v => v.site === "YouTube" && v.type === "Trailer");
+        if (trailerBtn) {
+            urlTrailerGlobal = trailerBtn.key;
+            btnTrailer.style.display = 'flex';
+            btnTrailer.onclick = abrirTrailer;
+        } else {
+            btnTrailer.style.display = 'none';
+        }
 
         const user = auth.currentUser;
         const btnLista = document.getElementById('btnMinhaLista');
@@ -384,6 +421,11 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
 
 function darPlayNoVideo() {
     if (!window.filmeAbertoID) return;
+
+    // Para o vídeo de fundo antes de abrir o player
+    const videoBackground = document.getElementById('modalVideoBackground');
+    if (videoBackground) videoBackground.innerHTML = '';
+
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('videoView').style.display = 'flex'; 
     let urlEmbed = window.tipoAberto === 'tv' ? `https://myembed.biz/serie/${window.filmeAbertoID}` : `https://myembed.biz/filme/${window.filmeAbertoID}`;
@@ -392,17 +434,31 @@ function darPlayNoVideo() {
 
 function abrirTrailer() {
     if(!urlTrailerGlobal) return;
+
+    // Para o vídeo de fundo antes de abrir o trailer
+    const videoBackground = document.getElementById('modalVideoBackground');
+    if (videoBackground) videoBackground.innerHTML = '';
+
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('trailerView').style.display = 'flex';
     document.getElementById('trailerContainer').innerHTML = `<iframe src="https://www.youtube.com/embed/${urlTrailerGlobal}?autoplay=1" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>`;
 }
 
 function voltarParaDetalhes() {
-    document.getElementById('videoView').style.display = 'none'; document.getElementById('trailerView').style.display = 'none'; 
+    document.getElementById('videoView').style.display = 'none';
+    document.getElementById('trailerView').style.display = 'none'; 
     document.getElementById('detailsView').style.display = 'block';
-    document.getElementById('videoContainer').innerHTML = ''; document.getElementById('trailerContainer').innerHTML = ''; 
+    document.getElementById('videoContainer').innerHTML = '';
+    document.getElementById('trailerContainer').innerHTML = ''; 
 }
-function fecharPlayer() { document.getElementById('playerModal').classList.remove('active'); }
+
+function fecharPlayer() {
+    // Para o vídeo de fundo ao fechar o modal
+    const videoBackground = document.getElementById('modalVideoBackground');
+    if (videoBackground) videoBackground.innerHTML = '';
+    document.getElementById('playerModal').classList.remove('active');
+}
+
 function resetarEstrelas() { document.getElementById('ratingMsg').innerText = ""; document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; }); }
 
 async function carregarCatalogoDinamicamente() {
@@ -533,7 +589,6 @@ function copiarCarteira(endereco) {
     });
 }
 
-// === MOTOR DE ARRASTO PARA PC (MOUSE DRAG) ===
 function habilitarArrastoPC() {
     const sliders = document.querySelectorAll('.grid-catalog, .similar-carousel, #filtros-generos');
     
@@ -630,7 +685,6 @@ window.addEventListener('DOMContentLoaded', () => {
     puxarTendenciasGerais();
     iniciarCarrosselAutomatico();
     
-    // Motor acionado com segurança!
     setTimeout(habilitarArrastoPC, 1500);
 });
 
