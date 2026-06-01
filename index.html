@@ -9,7 +9,7 @@
 
     <script>
         // ATENÇÃO: Quando fizer uma alteração grande e quiser forçar a limpeza, mude "v4" para "v5".
-        const versaoAtual = "v5"; 
+        const versaoAtual = "v6"; 
         
         const versaoSalva = localStorage.getItem("hk_versao_site");
         if (versaoSalva !== versaoAtual) {
@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     
-    <link rel="stylesheet" href="style.css?v=hk-master-v5">
+    <link rel="stylesheet" href="style.css?v=hk-master-v6">
 </head>
 <body style="overflow: hidden;">
 
@@ -89,6 +89,7 @@
                 <li><a href="#filmes" onclick="mudarAba('filmes')">Filmes</a></li>
                 <li><a href="#series" onclick="mudarAba('series')">Séries</a></li>
                 <li><a href="#animes" onclick="mudarAba('animes')">Animes</a></li>
+                <li><a href="#generos" onclick="mudarAba('generos')">Gêneros</a></li>
                 <li><a href="#contato" onclick="mudarAba('tudo')">Contato</a></li>
             </ul>
         </nav>
@@ -146,6 +147,15 @@
             <div id="carrossel-animes" class="grid-catalog"></div>
         </section>
 
+        <section id="sessaoGeneros" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px; display: none; min-height: 50vh;">
+            <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Explorar por Gênero</h2>
+            <div id="filtros-generos" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 20px; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+            </div>
+            <div id="grid-generos" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
+                <p style="color: #aaa; width: 100%; text-align: center; margin-top: 20px;">Selecione um gênero acima para começar.</p>
+            </div>
+        </section>
+
         <section id="sessaoMinhaLista" class="catalog-section" style="max-width: 1200px; margin: 0 auto; padding: 20px; display: none; min-height: 50vh;">
             <h2 style="border-left: 4px solid #e50914; padding-left: 10px; margin-bottom: 20px;">Sua Lista VIP</h2>
             <div id="grid-minha-lista" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>
@@ -157,16 +167,14 @@
             <div class="apoio-premium-box" style="text-align: left;">
                 <p class="apoio-text" style="text-align: center;">O HK Filmes é 100% independente. Para manter o anonimato e a segurança do projeto, aceitamos contribuições apenas via <b>Criptomoedas</b>. Ajude a manter os servidores no ar! 🛡️</p>
 
-                <!-- Carteira Litecoin -->
                 <div style="background: #222; padding: 15px; border-radius: 8px; margin-top: 15px;">
                     <p style="color: #fff; font-size: 0.9em; margin-bottom: 5px;"><b><i class="fa-brands fa-litecoin-sign" style="color: #bebebe;"></i> Litecoin (LTC) - Recomendado / Taxa Quase Zero:</b></p>
                     <div style="display: flex; gap: 10px;">
                         <input type="text" value="ltc1qw2juwvcjl8s6gfkw6ge77zqhsa40s3e07fxyee" readonly style="flex: 1; padding: 8px; border-radius: 4px; border: none; background: #111; color: #aaa; font-size: 0.8em; outline: none;">
-                        <button ltc1qw2juwvcjl8s6gfkw6ge77zqhsa40s3e07fxyee" style="background: #e50914; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; transition: 0.3s;"><i class="fa-solid fa-copy"></i> Copiar</button>
+                        <button onclick="copiarCarteira('ltc1qw2juwvcjl8s6gfkw6ge77zqhsa40s3e07fxyee')" style="background: #e50914; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; transition: 0.3s;"><i class="fa-solid fa-copy"></i> Copiar</button>
                     </div>
                 </div>
 
-                <!-- Carteira USDT -->
                 <div style="background: #222; padding: 15px; border-radius: 8px; margin-top: 10px;">
                     <p style="color: #fff; font-size: 0.9em; margin-bottom: 5px;"><b><i class="fa-solid fa-dollar-sign" style="color: #26a17b;"></i> USDT (Use apenas a rede Tron/TRC20):</b></p>
                     <div style="display: flex; gap: 10px;">
@@ -278,7 +286,7 @@
         const database = firebase.database();
     </script>
     
-    <script src="script.js?v=hk-master-v5"></script>
+    <script src="script.js?v=hk-master-v6"></script>
 
 </body>
 </html>
