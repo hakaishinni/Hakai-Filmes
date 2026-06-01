@@ -113,3 +113,31 @@ footer { text-align: center; padding: 40px 20px; border-top: 1px solid #141419; 
     nav ul { justify-content: flex-start; flex-wrap: nowrap; gap: 15px; }
     nav ul li a { white-space: nowrap; font-size: 0.85em; }
 }
+
+/* =========================================
+   BOTÕES DE GÊNEROS (FILTROS)
+========================================= */
+.btn-genero {
+    background: #111;
+    color: #ccc;
+    border: 1px solid #333;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.btn-genero:hover {
+    border-color: #e50914;
+    color: #fff;
+}
+
+.btn-genero.active {
+    background: #e50914;
+    color: #fff;
+    border-color: #e50914;
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
+}
