@@ -2,6 +2,7 @@ let filmeAbertoID = null;
 let tipoAberto = null; 
 let tipoTrackingGlobal = null;
 let urlTrailerGlobal = null;
+let backdropMutado = true; // Começa mudo (obrigatório pelos navegadores)
 const TMDB_API_KEY = '40a84247b6de679f7ee596d02231aeb0';
 const auth = firebase.auth(); 
 
@@ -298,6 +299,9 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
     const videoBackground = document.getElementById('modalVideoBackground');
     videoBackground.innerHTML = '';
     document.getElementById('modalBackdrop').style.backgroundImage = 'none';
+    // Remove botão de mudo anterior se existir
+    const btnAnterior = document.getElementById('btnMuteBackdrop');
+    if (btnAnterior) btnAnterior.remove();
 
     const extraData = tipo === 'movie' ? 'release_dates,credits,images,videos,recommendations' : 'content_ratings,credits,images,videos,recommendations';
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR&append_to_response=${extraData}`;
@@ -320,14 +324,25 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
 
         if (videoFundo) {
             // TEM VÍDEO: coloca iframe mudo e em loop no fundo
+            window._videoFundoKey = videoFundo.key;
+            backdropMutado = true; // Sempre começa mudo (regra dos navegadores)
             document.getElementById('modalBackdrop').style.backgroundImage = 'none';
             videoBackground.innerHTML = `
                 <iframe
+                    id="backdropIframe"
                     class="backdrop-video-iframe"
                     src="https://www.youtube-nocookie.com/embed/${videoFundo.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoFundo.key}&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&start=5"
                     allow="autoplay; encrypted-media"
                     allowfullscreen>
                 </iframe>`;
+            // Botão de mudo visível sobre o backdrop
+            const btnMute = document.createElement('button');
+            btnMute.id = 'btnMuteBackdrop';
+            btnMute.className = 'btn-mute-backdrop';
+            btnMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            btnMute.title = 'Ativar som';
+            btnMute.onclick = alternarMuteBackdrop;
+            document.getElementById('modalBackdrop').appendChild(btnMute);
         } else {
             // SEM VÍDEO: usa a imagem estática normalmente
             document.getElementById('modalBackdrop').style.backgroundImage = backdrop ? `url('${backdrop}')` : 'none';
@@ -417,6 +432,23 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
 
     resetarEstrelas(); 
     registrarView(id, tipoTracking); 
+}
+
+function alternarMuteBackdrop() {
+    backdropMutado = !backdropMutado;
+    const btn = document.getElementById('btnMuteBackdrop');
+    const key = window._videoFundoKey;
+    if (!btn || !key) return;
+
+    // Recarrega o iframe com ou sem mute (funciona pois é ação do usuário)
+    const muteParam = backdropMutado ? '&mute=1' : '&mute=0';
+    document.getElementById('backdropIframe').src =
+        `https://www.youtube-nocookie.com/embed/${key}?autoplay=1${muteParam}&controls=0&loop=1&playlist=${key}&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&start=5`;
+
+    btn.innerHTML = backdropMutado
+        ? '<i class="fa-solid fa-volume-xmark"></i>'
+        : '<i class="fa-solid fa-volume-high"></i>';
+    btn.title = backdropMutado ? 'Ativar som' : 'Silenciar';
 }
 
 function darPlayNoVideo() {
@@ -524,13 +556,18 @@ async function carregarTop10Assistidos() {
         const top10 = lista.slice(0, 10);
         const container = document.getElementById(containerId);
         if(container) container.innerHTML = ''; 
-        
-        for (let item of top10) {
-            await new Promise(r => setTimeout(r, 100)); 
-            fetch(`https://api.themoviedb.org/3/${tipoTMDB}/${item.id}?api_key=${TMDB_API_KEY}&language=pt-BR`)
-            .then(r => r.json()).then(dados => {
-                if(dados.id) exibirCardNaGrade(dados, containerId, tipoTMDB, tipoTracking);
-            });
+
+        // CORREÇÃO: aguarda cada fetch antes do próximo (evita dados chegando fora de ordem)
+        for (let rankItem of top10) {
+            try {
+                const r = await fetch(`https://api.themoviedb.org/3/${tipoTMDB}/${rankItem.id}?api_key=${TMDB_API_KEY}&language=pt-BR`);
+                const dados = await r.json();
+                if (dados && dados.id) {
+                    exibirCardNaGrade(dados, containerId, tipoTMDB, tipoTracking);
+                }
+            } catch(e) {
+                console.warn('Erro ao carregar item do Top 10:', rankItem.id);
+            }
         }
     };
 
