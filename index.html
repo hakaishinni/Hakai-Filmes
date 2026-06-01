@@ -8,9 +8,7 @@
     <meta name="description" content="Assista aos melhores Filmes, Séries e Animes online grátis no HK Filmes. O seu catálogo atualizado diariamente com lançamentos, tendências e qualidade máxima.">
 
     <script>
-        // ATENÇÃO: Mudando para "v7" para forçar a limpeza de cache do trailer de fundo.
-        const versaoAtual = "v7"; 
-        
+        const versaoAtual = "v8"; 
         const versaoSalva = localStorage.getItem("hk_versao_site");
         if (versaoSalva !== versaoAtual) {
             localStorage.setItem("hk_versao_site", versaoAtual);
@@ -27,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     
-    <link rel="stylesheet" href="style.css?v=hk-master-v7">
+    <link rel="stylesheet" href="style.css?v=hk-master-v8">
 </head>
 <body style="overflow: hidden;">
 
@@ -198,10 +196,15 @@
             <span class="close-btn" onclick="fecharPlayer()"><i class="fa-solid fa-xmark"></i> FECHAR</span>
             
             <div id="detailsView">
-                <!-- AQUI OCORREU A MÁGICA DO VÍDEO DE FUNDO -->
                 <div id="modalBackdrop" class="modal-backdrop">
                     <div id="modalVideoBackground" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; pointer-events: none;"></div>
                     <div class="backdrop-gradient"></div>
+
+                    <!-- BOTÃO DE MUDO FIXO NO HTML — nunca some -->
+                    <button id="btnMuteBackdrop" class="btn-mute-backdrop" style="display:none;" onclick="alternarMuteBackdrop()">
+                        <i class="fa-solid fa-volume-xmark"></i>
+                    </button>
+
                     <div id="modalTitleContainer" style="z-index: 2; width: 100%;">
                         <h1 id="modalTitle">Carregando...</h1>
                     </div>
@@ -288,7 +291,7 @@
         const database = firebase.database();
     </script>
     
-    <script src="script.js?v=hk-master-v7"></script>
+    <script src="script.js?v=hk-master-v8"></script>
 
 </body>
 </html>
