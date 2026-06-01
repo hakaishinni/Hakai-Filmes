@@ -155,3 +155,37 @@ footer { text-align: center; padding: 40px 20px; border-top: 1px solid #141419; 
     border: none;
     pointer-events: none;
 }
+
+/* =========================================
+   BOTÃO DE MUTE DO VÍDEO DE FUNDO
+========================================= */
+#modalTitleContainer {
+    position: relative; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.btn-mute-netflix {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    font-size: 1.1em;
+    margin-right: 15px; /* Afasta da borda direita no mobile */
+}
+
+.btn-mute-netflix:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+    border-color: #fff;
+}
