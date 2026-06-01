@@ -94,6 +94,9 @@ function mudarAba(aba) {
     document.getElementById('animes').style.display = (aba === 'tudo' || aba === 'animes') ? 'block' : 'none';
     document.getElementById('contato').style.display = (aba === 'tudo') ? 'block' : 'none';
     
+    let sessaoGeneros = document.getElementById('sessaoGeneros');
+    if(sessaoGeneros) sessaoGeneros.style.display = (aba === 'generos') ? 'block' : 'none';
+
     let areaBusca = document.getElementById('area-resultados-busca');
     if(areaBusca) areaBusca.style.display = 'none';
     
@@ -101,6 +104,11 @@ function mudarAba(aba) {
     if(sessaoLista) sessaoLista.style.display = 'none';
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Carrega os gêneros automaticamente na primeira vez que o usuário abre a aba
+    if(aba === 'generos' && document.getElementById('filtros-generos').innerHTML.trim() === '') {
+        carregarListaGeneros();
+    }
 }
 
 function entrarComoConvidado() {
@@ -121,6 +129,10 @@ function mostrarMinhaLista() {
     document.getElementById('filmes').style.display = 'none';
     document.getElementById('series').style.display = 'none';
     document.getElementById('animes').style.display = 'none';
+    
+    let sessaoGeneros = document.getElementById('sessaoGeneros');
+    if(sessaoGeneros) sessaoGeneros.style.display = 'none';
+
     let areaBusca = document.getElementById('area-resultados-busca');
     if(areaBusca) areaBusca.style.display = 'none';
     
@@ -213,6 +225,10 @@ function filtrarCatalogo() {
     document.getElementById('filmes').style.display = 'none';
     document.getElementById('series').style.display = 'none';
     document.getElementById('animes').style.display = 'none';
+    
+    let sessaoGeneros = document.getElementById('sessaoGeneros');
+    if(sessaoGeneros) sessaoGeneros.style.display = 'none';
+
     let sessaoLista = document.getElementById('sessaoMinhaLista');
     if(sessaoLista) sessaoLista.style.display = 'none';
     
@@ -519,7 +535,7 @@ function copiarCarteira(endereco) {
 
 // === MOTOR DE ARRASTO PARA PC (MOUSE DRAG) ===
 function habilitarArrastoPC() {
-    const sliders = document.querySelectorAll('.grid-catalog, .similar-carousel');
+    const sliders = document.querySelectorAll('.grid-catalog, .similar-carousel, #filtros-generos');
     
     sliders.forEach(slider => {
         let isDown = false;
@@ -617,3 +633,57 @@ window.addEventListener('DOMContentLoaded', () => {
     // Motor acionado com segurança!
     setTimeout(habilitarArrastoPC, 1500);
 });
+
+// =========================================
+// FUNÇÕES DA NOVA ABA DE GÊNEROS
+// =========================================
+function carregarListaGeneros() {
+    const container = document.getElementById('filtros-generos');
+    container.innerHTML = '<span style="color:#aaa; font-size: 0.9em; margin-left: 10px;">Carregando categorias...</span>';
+
+    fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}&language=pt-BR`)
+        .then(res => res.json())
+        .then(dados => {
+            container.innerHTML = ''; 
+            dados.genres.forEach(genero => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-genero';
+                btn.innerText = genero.name;
+                btn.onclick = () => {
+                    document.querySelectorAll('.btn-genero').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    buscarPorGenero(genero.id, genero.name);
+                };
+                container.appendChild(btn);
+            });
+        })
+        .catch(err => console.error("Erro ao carregar gêneros:", err));
+}
+
+function buscarPorGenero(idGenero, nomeGenero) {
+    const grid = document.getElementById('grid-generos');
+    grid.innerHTML = `<h3 style="color: #aaa; width: 100%; text-align: center; margin-top: 40px;">Buscando títulos de ${nomeGenero}... <i class="fa-solid fa-spinner fa-spin"></i></h3>`;
+
+    fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&language=pt-BR&with_genres=${idGenero}&sort_by=popularity.desc&page=1`)
+        .then(res => res.json())
+        .then(dados => {
+            grid.innerHTML = ''; 
+            if(dados.results.length === 0) {
+                grid.innerHTML = '<p style="color: #aaa;">Nenhum título encontrado.</p>';
+                return;
+            }
+            
+            dados.results.forEach(item => {
+                let title = item.title || item.name;
+                let poster = item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : 'https://placehold.co/342x513/222/FFF?text=Sem+Capa';
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.flex = '0 0 auto';
+                card.setAttribute('onclick', `abrirPlayerGeral('${item.id}', 'movie', 'movie')`);
+                card.innerHTML = `<img src="${poster}" alt="${title}" loading="lazy"><h3>${title}</h3>`;
+                grid.appendChild(card);
+            });
+        })
+        .catch(err => console.error("Erro ao buscar títulos:", err));
+}
