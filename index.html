@@ -8,7 +8,7 @@
     <meta name="description" content="Assista aos melhores Filmes, Séries e Animes online grátis no HK Filmes. O seu catálogo atualizado diariamente com lançamentos, tendências e qualidade máxima.">
 
     <script>
-        const versaoAtual = "v10"; 
+        const versaoAtual = "v11"; 
         const versaoSalva = localStorage.getItem("hk_versao_site");
         if (versaoSalva !== versaoAtual) {
             localStorage.setItem("hk_versao_site", versaoAtual);
@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     
-    <link rel="stylesheet" href="style.css?v=hk-master-v10">
+    <link rel="stylesheet" href="style.css?v=hk-master-v11">
 </head>
 <body style="overflow: hidden;">
 
@@ -224,19 +224,6 @@
                     <div id="modalGenres" class="genres-container"></div>
                     <p id="modalTagline" style="color: #fff; font-style: italic; margin-bottom: 15px; font-size: 0.9em;"></p>
                     
-                    <div class="action-buttons">
-                        <button class="btn-netflix-play" onclick="darPlayNoVideo()"><i class="fa-solid fa-play"></i> Assistir</button>
-                        <button id="btnTrailer" class="btn-netflix-secondary" style="display: none;"><i class="fa-solid fa-film"></i> Trailer</button>
-                    </div>
-
-                    <p id="modalOverview" class="modal-overview">Buscando sinopse oficial...</p>
-                    
-                    <div class="cast-crew-container" style="margin-bottom: 25px;">
-                        <p class="cast-label">Elenco Principal:</p>
-                        <div id="modalCastGrid" class="cast-grid"></div>
-                        <p style="margin-top: 15px;"><span class="cast-label">Direção/Criação:</span> <span id="modalCreator">Carregando...</span></p>
-                    </div>
-
                     <div class="netflix-icon-row">
                         <div class="icon-action" id="btnMinhaListaIcon">
                             <i class="fa-solid fa-plus"></i>
@@ -254,7 +241,7 @@
                         </div>
                     </div>
 
-                    <div id="blocoAvaliacao" class="rating-inside" style="display: none; border-top: none; padding-top: 15px; padding-bottom: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div id="blocoAvaliacao" class="rating-inside" style="display: none; border-top: none; padding-top: 5px; padding-bottom: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.03); border-radius: 8px;">
                         <h3 id="ratingTitle" style="font-size: 0.9em; color: #ccc; text-align: center; margin-top: 5px;">De 1 a 5, como avalia este título?</h3> 
                         <div class="stars-wrapper">
                             <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
@@ -265,6 +252,19 @@
                         </div>
                         <div class="stars-numbers"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
                         <p id="ratingMsg" style="margin-top: 10px; font-weight: bold; text-align: center;"></p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-netflix-play" onclick="darPlayNoVideo()"><i class="fa-solid fa-play"></i> Assistir</button>
+                        <button id="btnTrailer" class="btn-netflix-secondary" style="display: none;"><i class="fa-solid fa-film"></i> Trailer</button>
+                    </div>
+
+                    <p id="modalOverview" class="modal-overview">Buscando sinopse oficial...</p>
+                    
+                    <div class="cast-crew-container" style="margin-bottom: 25px;">
+                        <p class="cast-label">Elenco Principal:</p>
+                        <div id="modalCastGrid" class="cast-grid"></div>
+                        <p style="margin-top: 15px;"><span class="cast-label">Direção/Criação:</span> <span id="modalCreator">Carregando...</span></p>
                     </div>
                     
                     <div id="similarSection" class="similar-section" style="border-top: 1px solid #222; padding-top: 20px;">
@@ -307,7 +307,7 @@
         const database = firebase.database();
     </script>
     
-    <script src="script.js?v=hk-master-v10"></script>
+    <script src="script.js?v=hk-master-v11"></script>
 
 </body>
 </html>
