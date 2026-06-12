@@ -275,11 +275,7 @@ function registrarView(id, tipoTracking) {
 }
 
 function abrirPlayerGeral(id, tipoTMDB, tipoTracking) { 
-    if (!sessionStorage.getItem('smartlink_ativado')) {
-        window.open('https://www.effectivecpmnetwork.com/muz0st1n2?key=105a98422d08d7807160fc905884cf7e', '_blank');
-        sessionStorage.setItem('smartlink_ativado', 'true');
-    }
-
+    // O Smart Link da Adsterra foi completamente removido daqui
     window.filmeAbertoID = id; 
     window.tipoAberto = tipoTMDB; 
     window.tipoTrackingGlobal = tipoTracking;
@@ -296,7 +292,7 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
 
     // Limpa o vídeo de fundo anterior imediatamente
     const videoBackground = document.getElementById('modalVideoBackground');
-    videoBackground.innerHTML = '';
+    if (videoBackground) videoBackground.innerHTML = '';
     document.getElementById('modalBackdrop').style.backgroundImage = 'none';
 
     const extraData = tipo === 'movie' ? 'release_dates,credits,images,videos,recommendations' : 'content_ratings,credits,images,videos,recommendations';
@@ -318,7 +314,7 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
             if (videoFundo) break;
         }
 
-        if (videoFundo) {
+        if (videoFundo && videoBackground) {
             // TEM VÍDEO: coloca iframe mudo e em loop no fundo
             document.getElementById('modalBackdrop').style.backgroundImage = 'none';
             videoBackground.innerHTML = `
@@ -331,7 +327,7 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         } else {
             // SEM VÍDEO: usa a imagem estática normalmente
             document.getElementById('modalBackdrop').style.backgroundImage = backdrop ? `url('${backdrop}')` : 'none';
-            videoBackground.innerHTML = '';
+            if (videoBackground) videoBackground.innerHTML = '';
         }
         // =====================================================
 
