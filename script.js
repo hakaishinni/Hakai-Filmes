@@ -275,7 +275,6 @@ function registrarView(id, tipoTracking) {
 }
 
 function abrirPlayerGeral(id, tipoTMDB, tipoTracking) { 
-    // O Smart Link da Adsterra foi completamente removido daqui
     window.filmeAbertoID = id; 
     window.tipoAberto = tipoTMDB; 
     window.tipoTrackingGlobal = tipoTracking;
@@ -290,10 +289,12 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
     document.getElementById('trailerContainer').innerHTML = ''; 
     document.getElementById('playerModal').classList.add('active');
 
-    // Limpa o vídeo de fundo anterior imediatamente
+    // Limpa o vídeo de fundo anterior e esconde o botão de som
     const videoBackground = document.getElementById('modalVideoBackground');
     if (videoBackground) videoBackground.innerHTML = '';
     document.getElementById('modalBackdrop').style.backgroundImage = 'none';
+    const btnMute = document.getElementById('btnMuteBackdrop');
+    if (btnMute) btnMute.style.display = 'none';
 
     const extraData = tipo === 'movie' ? 'release_dates,credits,images,videos,recommendations' : 'content_ratings,credits,images,videos,recommendations';
     const url = `https://api.themoviedb.org/3/${tipo}/${id}?api_key=${TMDB_API_KEY}&language=pt-BR&append_to_response=${extraData}`;
@@ -304,8 +305,7 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         const ano = (dados.release_date || dados.first_air_date || '----').split('-')[0];
 
         // =====================================================
-        // LÓGICA DO VÍDEO DE FUNDO (estilo Netflix)
-        // Busca na ordem: Teaser > Clip > Trailer
+        // LÓGICA DO VÍDEO DE FUNDO (estilo Netflix) com botão Mudo
         // =====================================================
         const prioridade = ['Teaser', 'Clip', 'Trailer'];
         let videoFundo = null;
@@ -315,17 +315,25 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         }
 
         if (videoFundo && videoBackground) {
-            // TEM VÍDEO: coloca iframe mudo e em loop no fundo
+            // TEM VÍDEO: Injeta o iframe com 'enablejsapi=1' e id 'yt-backdrop-iframe'
             document.getElementById('modalBackdrop').style.backgroundImage = 'none';
             videoBackground.innerHTML = `
                 <iframe
+                    id="yt-backdrop-iframe"
                     class="backdrop-video-iframe"
-                    src="https://www.youtube-nocookie.com/embed/${videoFundo.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoFundo.key}&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&start=5"
+                    src="https://www.youtube-nocookie.com/embed/${videoFundo.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoFundo.key}&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&start=5&enablejsapi=1"
                     allow="autoplay; encrypted-media"
                     allowfullscreen>
                 </iframe>`;
+            
+            // Exibe o botão de mudo no estado silencioso
+            window.isBackdropMuted = true;
+            if(btnMute) {
+                btnMute.style.display = 'flex';
+                btnMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            }
         } else {
-            // SEM VÍDEO: usa a imagem estática normalmente
+            // SEM VÍDEO: usa a imagem estática e botão de som fica oculto
             document.getElementById('modalBackdrop').style.backgroundImage = backdrop ? `url('${backdrop}')` : 'none';
             if (videoBackground) videoBackground.innerHTML = '';
         }
@@ -367,7 +375,6 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
             castGrid.innerHTML += `<div class="cast-member"><img src="${foto}"><span>${ator.name.split(' ')[0]}</span></div>`;
         });
 
-        // Botão Trailer: busca um trailer separado do vídeo de fundo
         const btnTrailer = document.getElementById('btnTrailer');
         urlTrailerGlobal = null;
         const trailerBtn = dados.videos?.results?.find(v => v.site === "YouTube" && v.type === "Trailer");
@@ -418,9 +425,10 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
 function darPlayNoVideo() {
     if (!window.filmeAbertoID) return;
 
-    // Para o vídeo de fundo antes de abrir o player
     const videoBackground = document.getElementById('modalVideoBackground');
     if (videoBackground) videoBackground.innerHTML = '';
+    const btnMute = document.getElementById('btnMuteBackdrop');
+    if (btnMute) btnMute.style.display = 'none';
 
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('videoView').style.display = 'flex'; 
@@ -431,9 +439,10 @@ function darPlayNoVideo() {
 function abrirTrailer() {
     if(!urlTrailerGlobal) return;
 
-    // Para o vídeo de fundo antes de abrir o trailer
     const videoBackground = document.getElementById('modalVideoBackground');
     if (videoBackground) videoBackground.innerHTML = '';
+    const btnMute = document.getElementById('btnMuteBackdrop');
+    if (btnMute) btnMute.style.display = 'none';
 
     document.getElementById('detailsView').style.display = 'none';
     document.getElementById('trailerView').style.display = 'flex';
@@ -449,9 +458,10 @@ function voltarParaDetalhes() {
 }
 
 function fecharPlayer() {
-    // Para o vídeo de fundo ao fechar o modal
     const videoBackground = document.getElementById('modalVideoBackground');
     if (videoBackground) videoBackground.innerHTML = '';
+    const btnMute = document.getElementById('btnMuteBackdrop');
+    if (btnMute) btnMute.style.display = 'none';
     document.getElementById('playerModal').classList.remove('active');
 }
 
@@ -685,7 +695,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // =========================================
-// FUNÇÕES DA NOVA ABA DE GÊNEROS
+// FUNÇÕES DA NOVA ABA DE GÊNEROS E MUDO
 // =========================================
 function carregarListaGeneros() {
     const container = document.getElementById('filtros-generos');
@@ -736,4 +746,27 @@ function buscarPorGenero(idGenero, nomeGenero) {
             });
         })
         .catch(err => console.error("Erro ao buscar títulos:", err));
+}
+
+// O MOTOR DO BOTÃO DO YOUTUBE
+window.isBackdropMuted = true;
+
+function alternarMuteBackdrop() {
+    const iframe = document.getElementById('yt-backdrop-iframe');
+    const btnMute = document.getElementById('btnMuteBackdrop');
+    if (!iframe || !btnMute) return;
+
+    window.isBackdropMuted = !window.isBackdropMuted;
+
+    if (window.isBackdropMuted) {
+        // Mudar para mudo
+        iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+        btnMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+    } else {
+        // Ligar o som
+        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+        // Força o volume pro máximo (opcional mas recomendado)
+        iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
+        btnMute.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+    }
 }
