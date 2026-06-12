@@ -289,7 +289,6 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
     document.getElementById('trailerContainer').innerHTML = ''; 
     document.getElementById('playerModal').classList.add('active');
 
-    // Limpa o vídeo de fundo anterior e esconde o botão de som
     const videoBackground = document.getElementById('modalVideoBackground');
     if (videoBackground) videoBackground.innerHTML = '';
     document.getElementById('modalBackdrop').style.backgroundImage = 'none';
@@ -304,9 +303,7 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         const backdrop = dados.backdrop_path ? `https://image.tmdb.org/t/p/w780${dados.backdrop_path}` : '';
         const ano = (dados.release_date || dados.first_air_date || '----').split('-')[0];
 
-        // =====================================================
-        // LÓGICA DO VÍDEO DE FUNDO (estilo Netflix) com botão Mudo
-        // =====================================================
+        // LÓGICA DO VÍDEO DE FUNDO
         const prioridade = ['Teaser', 'Clip', 'Trailer'];
         let videoFundo = null;
         for (const tipoBusca of prioridade) {
@@ -315,7 +312,6 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         }
 
         if (videoFundo && videoBackground) {
-            // TEM VÍDEO: Injeta o iframe com 'enablejsapi=1' e id 'yt-backdrop-iframe'
             document.getElementById('modalBackdrop').style.backgroundImage = 'none';
             videoBackground.innerHTML = `
                 <iframe
@@ -326,18 +322,15 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
                     allowfullscreen>
                 </iframe>`;
             
-            // Exibe o botão de mudo no estado silencioso
             window.isBackdropMuted = true;
             if(btnMute) {
                 btnMute.style.display = 'flex';
                 btnMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
             }
         } else {
-            // SEM VÍDEO: usa a imagem estática e botão de som fica oculto
             document.getElementById('modalBackdrop').style.backgroundImage = backdrop ? `url('${backdrop}')` : 'none';
             if (videoBackground) videoBackground.innerHTML = '';
         }
-        // =====================================================
 
         const titleContainer = document.getElementById('modalTitleContainer');
         if (dados.images && dados.images.logos && dados.images.logos.length > 0) {
@@ -349,7 +342,17 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
         document.getElementById('modalOverview').innerText = dados.overview || "Sinopse não disponível.";
         document.getElementById('modalYear').innerText = ano;
         document.getElementById('modalTagline').innerText = dados.tagline ? `"${dados.tagline}"` : '';
-        document.getElementById('modalGenres').innerText = dados.genres?.map(g => g.name).join(' • ') || 'Gênero Desconhecido';
+        
+        // ETIQUETAS DOS GÊNEROS (NOVO)
+        const containerGeneros = document.getElementById('modalGenres');
+        containerGeneros.innerHTML = ''; 
+        if (dados.genres && dados.genres.length > 0) {
+            dados.genres.forEach(g => {
+                containerGeneros.innerHTML += `<span class="genre-badge">${g.name}</span>`;
+            });
+        } else {
+            containerGeneros.innerHTML = `<span class="genre-badge">Desconhecido</span>`;
+        }
         
         if (tipo === 'tv') {
             document.getElementById('modalDuration').innerText = `${dados.number_of_seasons || '1'} Temp.`;
@@ -386,26 +389,27 @@ function exibirTelaDetalhes(id, tipo, tipoTracking) {
             btnTrailer.style.display = 'none';
         }
 
+        // MOTOR DO ÍCONE "MINHA LISTA"
         const user = auth.currentUser;
-        const btnLista = document.getElementById('btnMinhaLista');
-        if (user && btnLista) {
+        const btnListaIcon = document.getElementById('btnMinhaListaIcon');
+        if (user && btnListaIcon) {
             database.ref('usuarios/' + user.uid + '/minhaLista/' + id).on('value', snap => {
                 if (snap.exists()) {
-                    btnLista.innerHTML = `<i class="fa-solid fa-check" style="color: #2ecc71;"></i> Remover da Lista`;
-                    btnLista.onclick = () => {
+                    btnListaIcon.innerHTML = `<i class="fa-solid fa-check" style="color: #fff;"></i><span style="color: #fff;">Minha Lista</span>`;
+                    btnListaIcon.onclick = () => {
                         database.ref('usuarios/' + user.uid + '/minhaLista/' + id).remove().then(() => {
                             const sLista = document.getElementById('sessaoMinhaLista');
                             if(sLista && sLista.style.display === 'block') mostrarMinhaLista();
                         });
                     };
                 } else {
-                    btnLista.innerHTML = `<i class="fa-solid fa-plus"></i> Minha Lista`;
-                    btnLista.onclick = () => database.ref('usuarios/' + user.uid + '/minhaLista/' + id).set({ tipo: tipo, tracking: tipoTracking });
+                    btnListaIcon.innerHTML = `<i class="fa-solid fa-plus"></i><span>Minha Lista</span>`;
+                    btnListaIcon.onclick = () => database.ref('usuarios/' + user.uid + '/minhaLista/' + id).set({ tipo: tipo, tracking: tipoTracking });
                 }
             });
-        } else if (btnLista) {
-            btnLista.innerHTML = `<i class="fa-solid fa-plus"></i> Minha Lista`;
-            btnLista.onclick = () => { fecharPlayer(); abrirTelaLogin(); };
+        } else if (btnListaIcon) {
+            btnListaIcon.innerHTML = `<i class="fa-solid fa-plus"></i><span>Minha Lista</span>`;
+            btnListaIcon.onclick = () => { fecharPlayer(); abrirTelaLogin(); };
         }
 
         const similarGrid = document.getElementById('modalSimilarGrid');
@@ -465,7 +469,15 @@ function fecharPlayer() {
     document.getElementById('playerModal').classList.remove('active');
 }
 
-function resetarEstrelas() { document.getElementById('ratingMsg').innerText = ""; document.querySelectorAll('input[name="rating"]').forEach(s => { s.checked = false; s.disabled = false; }); }
+function resetarEstrelas() { 
+    document.getElementById('ratingMsg').innerText = ""; 
+    document.querySelectorAll('input[name="rating"]').forEach(s => { 
+        s.checked = false; 
+        s.disabled = false; 
+    }); 
+    const bloco = document.getElementById('blocoAvaliacao');
+    if (bloco) bloco.style.display = 'none';
+}
 
 async function carregarCatalogoDinamicamente() {
     const paginasParaCarregar = 2; 
@@ -685,6 +697,40 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // === NOVO: ATIVANDO O CLIQUE NAS ESTRELAS PARA SALVAR A NOTA ===
+    document.querySelectorAll('input[name="rating"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if(!window.filmeAbertoID) return;
+            const nota = parseInt(e.target.value);
+            const user = auth.currentUser;
+            const msg = document.getElementById('ratingMsg');
+            
+            if(!user) {
+                msg.style.color = '#e50914';
+                msg.innerText = "Faça login VIP para avaliar!";
+                e.target.checked = false;
+                setTimeout(() => { fecharPlayer(); abrirTelaLogin(); }, 1500);
+                return;
+            }
+            
+            msg.style.color = '#aaa';
+            msg.innerText = "Salvando...";
+            
+            database.ref('ratings/' + window.filmeAbertoID + '/' + user.uid).set(nota)
+                .then(() => {
+                    msg.style.color = '#2ecc71';
+                    msg.innerText = "Avaliação salva com sucesso!";
+                    setTimeout(() => { 
+                        const bloco = document.getElementById('blocoAvaliacao');
+                        if(bloco) bloco.style.display = 'none'; 
+                    }, 2000);
+                }).catch(err => {
+                    msg.style.color = '#e50914';
+                    msg.innerText = "Erro ao salvar.";
+                });
+        });
+    });
+
     document.getElementById('searchInput')?.addEventListener('input', filtrarCatalogo);
     carregarCatalogoDinamicamente();
     carregarTop10Assistidos(); 
@@ -759,14 +805,28 @@ function alternarMuteBackdrop() {
     window.isBackdropMuted = !window.isBackdropMuted;
 
     if (window.isBackdropMuted) {
-        // Mudar para mudo
         iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
         btnMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
     } else {
-        // Ligar o som
         iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-        // Força o volume pro máximo (opcional mas recomendado)
         iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
         btnMute.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+    }
+}
+
+// === FUNÇÃO DE COMPARTILHAMENTO ===
+function compartilharTitulo() {
+    const titulo = document.getElementById('modalTitle').innerText;
+    const urlSite = window.location.origin; 
+    
+    if (navigator.share) {
+        navigator.share({
+            title: titulo,
+            text: `Assista "${titulo}" com qualidade máxima no HK Filmes!`,
+            url: urlSite
+        }).catch(err => console.log('Erro ao compartilhar:', err));
+    } else {
+        navigator.clipboard.writeText(urlSite);
+        alert("Link do site copiado! Recomende este filme aos seus amigos.");
     }
 }
